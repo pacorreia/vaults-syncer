@@ -19,7 +19,7 @@ COPY . .
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./bin/sync-daemon .
 
 # Final stage
-FROM alpine:3.19
+FROM alpine:3.23
 
 WORKDIR /app
 
