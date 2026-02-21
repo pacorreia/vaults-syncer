@@ -1,22 +1,24 @@
-name: Go Dependencies Check
+name: Go CI
 
 on:
   push:
     branches:
       - main
     paths:
+      - '**.go'
       - 'go.mod'
       - 'go.sum'
-      - '.github/workflows/go-deps.yml'
+      - '.github/workflows/go-ci.yml'
   pull_request:
     branches:
       - main
     paths:
+      - '**.go'
       - 'go.mod'
       - 'go.sum'
 
 jobs:
-  check-deps:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
