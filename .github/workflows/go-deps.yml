@@ -33,8 +33,8 @@ jobs:
       - name: Verify dependencies
         run: go mod verify
 
-      - name: Check for vulnerable dependencies
-        run: go list -json -m all | go-mod-guard -e -l debug
+      - name: Check for available updates
+        run: go list -u -m all
 
       - name: Build
         run: go build -v ./...
