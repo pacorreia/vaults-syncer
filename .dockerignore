@@ -1,0 +1,14 @@
+*.md
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+config.yaml
+sync.db
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store

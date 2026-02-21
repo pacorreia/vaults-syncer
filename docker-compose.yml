@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  sync-daemon:
+    build: .
+    container_name: secrets-sync-daemon
+    ports:
+      - "8080:8080"     # Main API
+      - "9090:9090"     # Metrics
+    environment:
+      - AZURE_ACCESS_TOKEN=${AZURE_ACCESS_TOKEN}
+      - VAULTWARDEN_TOKEN=${VAULTWARDEN_TOKEN}
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      - API_KEY=${API_KEY}
+    volumes:
+      - ./config.yaml:/etc/sync/config.yaml:ro
+      - sync-data:/app/data
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  sync-data:
+    driver: local

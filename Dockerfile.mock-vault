@@ -1,0 +1,36 @@
+# Build stage for mock vault
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache git make
+
+# Copy go mod files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY cmd/mock-vault ./cmd/mock-vault
+
+# Build the mock vault
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/mock-vault ./cmd/mock-vault/main.go
+
+# Runtime stage
+FROM alpine:3.19
+
+WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy binary from builder
+COPY --from=builder /app/bin/mock-vault .
+
+# Expose ports
+EXPOSE 8000 8001
+
+# Run the mock vault
+ENTRYPOINT ["/app/mock-vault"]

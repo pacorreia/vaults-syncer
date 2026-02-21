@@ -1,0 +1,75 @@
+# Binaries
+bin/
+sync-daemon
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go build cache
+.go/
+*.o
+*.a
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Configuration files with secrets
+config.yaml
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Logs
+*.log
+
+# Test outputs
+coverage.out
+*.test
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+virtualenv/
+.virtualenv/
+venv.bak/
+env.bak/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg

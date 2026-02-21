@@ -1,0 +1,70 @@
+# Real-world test configuration - syncing from production Vaultwarden to mock vault
+# This demonstrates syncing from your real Vaultwarden instance
+
+vaults:
+  # Production Vaultwarden (Source)
+  - id: production_vaultwarden
+    name: "Production Vaultwarden"
+    endpoint: "https://vault.pfmchome.cc/api/ciphers"
+    method: POST
+    auth_method: oauth2
+    auth_headers:
+      client_id: "user.682f58c6-e2fe-4774-a6f3-be010a061224"
+      client_secret: "bcUnuYv78gzg5NFxh51vlgMbfQYVyi"
+      scope: "api"
+    field_names:
+      name_field: "name"
+      value_field: "login"
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+    timeout: 30
+    skip_ssl_verify: false
+
+  # Mock Vault (Target)
+  - id: mock_target
+    name: "Mock Target Vault"
+    endpoint: "http://mock-vaults:8001/api/ciphers"
+    method: POST
+    auth_method: bearer
+    auth_headers:
+      token: "target_admin_token_12345"
+    field_names:
+      name_field: "name"
+      value_field: "login"
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+    timeout: 30
+    skip_ssl_verify: true
+
+# Sync from production to mock (read-only test)
+syncs:
+  - id: prod_to_mock_sync
+    source: production_vaultwarden
+    targets:
+      - mock_target
+    sync_type: unidirectional
+    enabled: true
+    schedule: "*/5 * * * *"  # Every 5 minutes
+    filter:
+      patterns:
+        - "*"  # Sync all secrets
+      exclude: []
+    retry_policy:
+      max_retries: 3
+      initial_backoff: 1000
+      max_backoff: 30000
+      multiplier: 2.0
+
+# Server configuration
+server:
+  port: 8080
+  address: 0.0.0.0
+  metrics_port: 9090
+  metrics_address: 0.0.0.0
+
+# Logging configuration
+logging:
+  level: info
+  format: json

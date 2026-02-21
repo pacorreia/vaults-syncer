@@ -1,0 +1,2140 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Multi-vault secret synchronization daemon with OAuth 2.0 support">
+      
+      
+        <meta name="author" content="Paulo Correia">
+      
+      
+        <link rel="canonical" href="https://github.com/pacorreia/akv-vaultwarden-sync/configuration/syncs/">
+      
+      
+        <link rel="prev" href="../authentication/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Syncs - AKV Vaultwarden Sync</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","UA-XXXXXXXXX-X"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","UA-XXXXXXXXX-X",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXXXXXX-X",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuring-syncs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AKV Vaultwarden Sync" class="md-header__button md-logo" aria-label="AKV Vaultwarden Sync" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AKV Vaultwarden Sync
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Syncs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pacorreia/akv-vaultwarden-sync" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pacorreia/akv-vaultwarden-sync
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Configuration
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AKV Vaultwarden Sync" class="md-nav__button md-logo" aria-label="AKV Vaultwarden Sync" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AKV Vaultwarden Sync
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pacorreia/akv-vaultwarden-sync" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pacorreia/akv-vaultwarden-sync
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vaults/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vaults
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Syncs
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Syncs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sync-basics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Basics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sync-configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Configuration Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sync Configuration Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#essential-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Essential Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schedule-cron-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schedule (Cron Expressions)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schedule (Cron Expressions)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cron-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cron Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-schedules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Schedules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cron-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cron Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sync-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sync Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-way-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One-Way Sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bidirectional-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bidirectional Sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#includeexclude-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Include/Exclude Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filter Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#placeholders-in-target-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholders in Target Names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sync-only-production-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync only production secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-include-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple include patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclude-sensitive-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exclude sensitive data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transformations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Transformations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Name Transformations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#value-transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value Transformations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-script-transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Script Transformations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transformation-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transformation Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Transformation Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-folder-structure-to-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add folder structure to names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalize-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalize naming convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metadata Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-sync-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Sync Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Sync Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-simple-one-way-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Simple One-Way Sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-filtered-production-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Filtered Production Sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-bidirectional-sync-with-transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Bidirectional Sync with Transformations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-multi-environment-cascade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Multi-Environment Cascade
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-selective-backup-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 5: Selective Backup Sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-syncs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Syncs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Syncs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-sync-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Sync Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-sync-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Sync History
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manually-trigger-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manually Trigger Sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheduling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transformations_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transformations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sync-not-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Not Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secrets-not-syncing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets Not Syncing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-takes-too-long" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Takes Too Long
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="configuring-syncs">Configuring Syncs<a class="headerlink" href="#configuring-syncs" title="Permanent link">&para;</a></h1>
+<p>Syncs define how and when secrets are synchronized between vaults.</p>
+<h2 id="sync-basics">Sync Basics<a class="headerlink" href="#sync-basics" title="Permanent link">&para;</a></h2>
+<p>A sync configuration specifies:</p>
+<ul>
+<li><strong>Source vault</strong>: Where to get secrets from</li>
+<li><strong>Target vault</strong>: Where to send secrets to</li>
+<li><strong>Schedule</strong>: When to perform the sync</li>
+<li><strong>Mode</strong>: One-way or bidirectional</li>
+<li><strong>Filters</strong>: Which secrets to sync</li>
+<li><strong>Transformations</strong>: How to modify secrets during sync</li>
+</ul>
+<h2 id="basic-configuration">Basic Configuration<a class="headerlink" href="#basic-configuration" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-0-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-first-sync</span>
+</span><span id="__span-0-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;My</span><span class="nv"> </span><span class="s">First</span><span class="nv"> </span><span class="s">Sync&quot;</span>
+</span><span id="__span-0-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-1</span>
+</span><span id="__span-0-5"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-2</span>
+</span><span id="__span-0-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">        </span><span class="c1"># Every hour</span>
+</span><span id="__span-0-7"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way</span><span class="w">                  </span><span class="c1"># or bidirectional</span>
+</span></code></pre></div>
+<h2 id="sync-configuration-reference">Sync Configuration Reference<a class="headerlink" href="#sync-configuration-reference" title="Permanent link">&para;</a></h2>
+<h3 id="essential-options">Essential Options<a class="headerlink" href="#essential-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Unique sync identifier</td>
+<td><code>sync-prod-to-staging</code></td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>No</td>
+<td>Human-readable name</td>
+<td><code>Prod to Staging Sync</code></td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Source vault ID</td>
+<td><code>azure-prod</code></td>
+</tr>
+<tr>
+<td><code>target</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Target vault ID</td>
+<td><code>bitwarden-prod</code></td>
+</tr>
+<tr>
+<td><code>schedule</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Cron expression</td>
+<td><code>0 * * * *</code></td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>string</td>
+<td>No</td>
+<td><code>one-way</code> or <code>bidirectional</code></td>
+<td><code>one-way</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="optional-options">Optional Options<a class="headerlink" href="#optional-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable/disable this sync</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>integer</td>
+<td><code>300</code></td>
+<td>Sync timeout in seconds</td>
+</tr>
+<tr>
+<td><code>max_retries</code></td>
+<td>integer</td>
+<td><code>3</code></td>
+<td>Maximum retry attempts</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Sync description</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Labels for organization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="schedule-cron-expressions">Schedule (Cron Expressions)<a class="headerlink" href="#schedule-cron-expressions" title="Permanent link">&para;</a></h2>
+<p>Syncs are scheduled using standard cron format: <code>minute hour day month weekday</code></p>
+<h3 id="cron-format">Cron Format<a class="headerlink" href="#cron-format" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1">┌───────────── minute (0 - 59)
+</span><span id="__span-1-2">│ ┌───────────── hour (0 - 23)
+</span><span id="__span-1-3">│ │ ┌───────────── day of month (1 - 31)
+</span><span id="__span-1-4">│ │ │ ┌───────────── month (1 - 12)
+</span><span id="__span-1-5">│ │ │ │ ┌───────────── day of week (0 - 6) (0 is Sunday)
+</span><span id="__span-1-6">│ │ │ │ │
+</span><span id="__span-1-7">│ │ │ │ │
+</span><span id="__span-1-8">* * * * *
+</span></code></pre></div>
+<h3 id="common-schedules">Common Schedules<a class="headerlink" href="#common-schedules" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="c1"># Every hour</span>
+</span><span id="__span-2-2"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-2-3">
+</span><span id="__span-2-4"><span class="c1"># Every 4 hours</span>
+</span><span id="__span-2-5"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-2-6">
+</span><span id="__span-2-7"><span class="c1"># Daily at 2 AM</span>
+</span><span id="__span-2-8"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-2-9">
+</span><span id="__span-2-10"><span class="c1"># Every Monday at 3 AM</span>
+</span><span id="__span-2-11"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">3</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">1&quot;</span>
+</span><span id="__span-2-12">
+</span><span id="__span-2-13"><span class="c1"># Every weekday at noon</span>
+</span><span id="__span-2-14"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">12</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">1-5&quot;</span>
+</span><span id="__span-2-15">
+</span><span id="__span-2-16"><span class="c1"># Every 30 minutes</span>
+</span><span id="__span-2-17"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*/30</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-2-18">
+</span><span id="__span-2-19"><span class="c1"># First day of month at midnight</span>
+</span><span id="__span-2-20"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">1</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span></code></pre></div>
+<h3 id="cron-reference">Cron Reference<a class="headerlink" href="#cron-reference" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>*</code> - Any value</li>
+<li><code>,</code> - Value list separator</li>
+<li><code>-</code> - Range of values</li>
+<li><code>/</code> - Step values</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="c1"># Examples:</span>
+</span><span id="__span-3-2"><span class="s">&quot;0</span><span class="nv"> </span><span class="s">9-17</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">1-5&quot;</span><span class="w">    </span><span class="c1"># 9 AM to 5 PM, weekdays only</span>
+</span><span id="__span-3-3"><span class="s">&quot;0,30</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">       </span><span class="c1"># Every 30 minutes</span>
+</span><span id="__span-3-4"><span class="s">&quot;15</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">         </span><span class="c1"># 2:15 AM daily</span>
+</span></code></pre></div>
+<h2 id="sync-modes">Sync Modes<a class="headerlink" href="#sync-modes" title="Permanent link">&para;</a></h2>
+<h3 id="one-way-sync">One-Way Sync<a class="headerlink" href="#one-way-sync" title="Permanent link">&para;</a></h3>
+<p>Secrets flow only from source to target. Target changes are not synced back.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-4-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way-sync</span>
+</span><span id="__span-4-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
+</span><span id="__span-4-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target-vault</span>
+</span><span id="__span-4-5"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way</span>
+</span></code></pre></div>
+<p><strong>Use cases</strong>:
+- Production → Staging/Dev
+- Archive → Active (one-way replication)
+- Migrate to new system</p>
+<h3 id="bidirectional-sync">Bidirectional Sync<a class="headerlink" href="#bidirectional-sync" title="Permanent link">&para;</a></h3>
+<p>Secrets synchronize in both directions. Changes in either vault are replicated.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-5-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bi-sync</span>
+</span><span id="__span-5-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-1</span>
+</span><span id="__span-5-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-2</span>
+</span><span id="__span-5-5"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
+</span><span id="__span-5-6"><span class="w">    </span><span class="nt">conflict_resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-wins</span>
+</span></code></pre></div>
+<p><strong>Conflict Resolution Strategies</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source-wins</code></td>
+<td>Source takes precedence on conflict</td>
+</tr>
+<tr>
+<td><code>target-wins</code></td>
+<td>Target takes precedence on conflict</td>
+</tr>
+<tr>
+<td><code>manual</code></td>
+<td>Conflicts require manual intervention</td>
+</tr>
+<tr>
+<td><code>newest</code></td>
+<td>Latest modified secret wins</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use cases</strong>:
+- Multi-region synchronization
+- Cross-team access to shared credentials
+- Disaster recovery with failover</p>
+<h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">&para;</a></h2>
+<p>Control which secrets are included in a sync.</p>
+<h3 id="includeexclude-patterns">Include/Exclude Patterns<a class="headerlink" href="#includeexclude-patterns" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-6-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filtered-sync</span>
+</span><span id="__span-6-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
+</span><span id="__span-6-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target-vault</span>
+</span><span id="__span-6-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-6-6">
+</span><span id="__span-6-7"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-6-8"><span class="w">      </span><span class="c1"># Sync only production secrets</span>
+</span><span id="__span-6-9"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^prod-&quot;</span>
+</span><span id="__span-6-10"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-6-11">
+</span><span id="__span-6-12"><span class="w">      </span><span class="c1"># Exclude database passwords</span>
+</span><span id="__span-6-13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-db-password&quot;</span>
+</span><span id="__span-6-14"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span><span id="__span-6-15">
+</span><span id="__span-6-16"><span class="w">      </span><span class="c1"># Exclude temporary secrets</span>
+</span><span id="__span-6-17"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^temp-&quot;</span>
+</span><span id="__span-6-18"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span></code></pre></div>
+<h3 id="filter-options">Filter Options<a class="headerlink" href="#filter-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_regex</code></td>
+<td>string</td>
+<td>Regex pattern for source secret name</td>
+</tr>
+<tr>
+<td><code>source_tags</code></td>
+<td>array</td>
+<td>Match secrets with specific tags</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td>string</td>
+<td><code>include</code> or <code>exclude</code></td>
+</tr>
+<tr>
+<td><code>target_name</code></td>
+<td>string</td>
+<td>Transform secret name (uses placeholders)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="placeholders-in-target-names">Placeholders in Target Names<a class="headerlink" href="#placeholders-in-target-names" title="Permanent link">&para;</a></h3>
+<p>When specifying <code>target_name</code>, use placeholders:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-7-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^app-&quot;</span>
+</span><span id="__span-7-3"><span class="w">    </span><span class="nt">target_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;imported/{source_name}&quot;</span>
+</span><span id="__span-7-4"><span class="w">    </span><span class="c1"># Input: &quot;app-api-key&quot; → Output: &quot;imported/app-api-key&quot;</span>
+</span><span id="__span-7-5">
+</span><span id="__span-7-6"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^db-prod-(.*)&quot;</span>
+</span><span id="__span-7-7"><span class="w">    </span><span class="nt">target_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;database/{1}/{source_name}&quot;</span>
+</span><span id="__span-7-8"><span class="w">    </span><span class="c1"># Input: &quot;db-prod-main-password&quot; → Output: &quot;database/main/db-prod-main-password&quot;</span>
+</span></code></pre></div>
+<p><strong>Available placeholders</strong>:
+- <code>{source_name}</code> - Original secret name
+- <code>{1}</code>, <code>{2}</code>, etc. - Regex capture groups
+- <code>{timestamp}</code> - Current timestamp
+- <code>{env}</code> - Environment name (if configured)</p>
+<h3 id="filtering-examples">Filtering Examples<a class="headerlink" href="#filtering-examples" title="Permanent link">&para;</a></h3>
+<h4 id="sync-only-production-secrets">Sync only production secrets<a class="headerlink" href="#sync-only-production-secrets" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-8-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-only</span>
+</span><span id="__span-8-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all-vaults</span>
+</span><span id="__span-8-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-target</span>
+</span><span id="__span-8-5"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-8-6"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^prod-&quot;</span>
+</span><span id="__span-8-7"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-8-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span>
+</span><span id="__span-8-9"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span></code></pre></div>
+<h4 id="multiple-include-patterns">Multiple include patterns<a class="headerlink" href="#multiple-include-patterns" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-9-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^app-&quot;</span>
+</span><span id="__span-9-3"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-9-4"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^db-&quot;</span>
+</span><span id="__span-9-5"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-9-6"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span>
+</span><span id="__span-9-7"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span></code></pre></div>
+<h4 id="exclude-sensitive-data">Exclude sensitive data<a class="headerlink" href="#exclude-sensitive-data" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-10-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-master-key$&quot;</span>
+</span><span id="__span-10-3"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span><span id="__span-10-4"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-admin-password$&quot;</span>
+</span><span id="__span-10-5"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span></code></pre></div>
+<h2 id="transformations">Transformations<a class="headerlink" href="#transformations" title="Permanent link">&para;</a></h2>
+<p>Modify secret names and values during synchronization.</p>
+<h3 id="name-transformations">Name Transformations<a class="headerlink" href="#name-transformations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-11-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transform-sync</span>
+</span><span id="__span-11-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
+</span><span id="__span-11-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target-vault</span>
+</span><span id="__span-11-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-11-6">
+</span><span id="__span-11-7"><span class="w">    </span><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-11-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^old-prefix-&quot;</span>
+</span><span id="__span-11-9"><span class="w">        </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;new-prefix-&quot;</span>
+</span><span id="__span-11-10">
+</span><span id="__span-11-11"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^(.+)-(prod)$&quot;</span>
+</span><span id="__span-11-12"><span class="w">        </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;production/{1}&quot;</span>
+</span></code></pre></div>
+<h3 id="value-transformations">Value Transformations<a class="headerlink" href="#value-transformations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-12-1"><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-12-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64-encode</span>
+</span><span id="__span-12-3"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*api-key&quot;</span>
+</span><span id="__span-12-4">
+</span><span id="__span-12-5"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64-decode</span>
+</span><span id="__span-12-6"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*base64.*&quot;</span>
+</span><span id="__span-12-7">
+</span><span id="__span-12-8"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uppercase</span>
+</span><span id="__span-12-9"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*code&quot;</span>
+</span><span id="__span-12-10">
+</span><span id="__span-12-11"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lowercase</span>
+</span><span id="__span-12-12"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*email&quot;</span>
+</span><span id="__span-12-13">
+</span><span id="__span-12-14"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shell-escape</span>
+</span><span id="__span-12-15"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*password&quot;</span>
+</span></code></pre></div>
+<h3 id="custom-script-transformations">Custom Script Transformations<a class="headerlink" href="#custom-script-transformations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-13-1"><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-13-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">script</span>
+</span><span id="__span-13-3"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*connection.*&quot;</span>
+</span><span id="__span-13-4"><span class="w">    </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-13-5"><span class="w">      </span><span class="no">#!/bin/bash</span>
+</span><span id="__span-13-6"><span class="w">      </span><span class="no"># Input passed as $1</span>
+</span><span id="__span-13-7"><span class="w">      </span><span class="no"># Transform connection string</span>
+</span><span id="__span-13-8"><span class="w">      </span><span class="no">echo &quot;$1&quot; | sed &#39;s/;/\\n/g&#39;</span>
+</span></code></pre></div>
+<h3 id="transformation-examples">Transformation Examples<a class="headerlink" href="#transformation-examples" title="Permanent link">&para;</a></h3>
+<h4 id="add-folder-structure-to-names">Add folder structure to names<a class="headerlink" href="#add-folder-structure-to-names" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span id="__span-14-1"><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-14-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^(app|db|api)-&quot;</span>
+</span><span id="__span-14-3"><span class="w">    </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{1}/{source_name}&quot;</span>
+</span><span id="__span-14-4"><span class="w">    </span><span class="c1"># app-api-key → app/app-api-key</span>
+</span></code></pre></div>
+<h4 id="normalize-naming-convention">Normalize naming convention<a class="headerlink" href="#normalize-naming-convention" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-15-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span>
+</span><span id="__span-15-3"><span class="w">    </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sync-{timestamp}-{source_name}&quot;</span>
+</span><span id="__span-15-4"><span class="w">    </span><span class="c1"># Convert to: sync-2024-01-15T10:30:00Z-original-name</span>
+</span></code></pre></div>
+<h2 id="advanced-options">Advanced Options<a class="headerlink" href="#advanced-options" title="Permanent link">&para;</a></h2>
+<h3 id="metadata-handling">Metadata Handling<a class="headerlink" href="#metadata-handling" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-16-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">with-metadata</span>
+</span><span id="__span-16-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
+</span><span id="__span-16-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target-vault</span>
+</span><span id="__span-16-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-16-6">
+</span><span id="__span-16-7"><span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-16-8"><span class="w">      </span><span class="c1"># Preserve metadata</span>
+</span><span id="__span-16-9"><span class="w">      </span><span class="nt">preserve_tags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-16-10"><span class="w">      </span><span class="nt">preserve_labels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-16-11"><span class="w">      </span><span class="nt">preserve_metadata</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-16-12">
+</span><span id="__span-16-13"><span class="w">      </span><span class="c1"># Handle secret types</span>
+</span><span id="__span-16-14"><span class="w">      </span><span class="nt">secret_types</span><span class="p">:</span>
+</span><span id="__span-16-15"><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;generic&quot;</span><span class="w">        </span><span class="c1"># Map password to generic</span>
+</span><span id="__span-16-16"><span class="w">        </span><span class="nt">api-key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;authentication&quot;</span>
+</span><span id="__span-16-17"><span class="w">        </span><span class="nt">connection-string</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;text&quot;</span>
+</span></code></pre></div>
+<h3 id="batch-operations">Batch Operations<a class="headerlink" href="#batch-operations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-17-2"><span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">          </span><span class="c1"># Sync 50 secrets at a time</span>
+</span><span id="__span-17-3"><span class="w">  </span><span class="nt">batch_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w">        </span><span class="c1"># Delay 100ms between batches (in milliseconds)</span>
+</span><span id="__span-17-4"><span class="w">  </span><span class="nt">disable_parallel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># Enable parallel processing</span>
+</span></code></pre></div>
+<h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-18-1"><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-18-2"><span class="w">  </span><span class="nt">on_error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">continue</span><span class="w">      </span><span class="c1"># continue, retry, or abort</span>
+</span><span id="__span-18-3"><span class="w">  </span><span class="nt">stop_on_first_error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-18-4"><span class="w">  </span><span class="nt">retryable_errors</span><span class="p">:</span>
+</span><span id="__span-18-5"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">timeout</span>
+</span><span id="__span-18-6"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rate-limit</span>
+</span><span id="__span-18-7"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">temporary-failure</span>
+</span></code></pre></div>
+<h2 id="complete-sync-examples">Complete Sync Examples<a class="headerlink" href="#complete-sync-examples" title="Permanent link">&para;</a></h2>
+<h3 id="example-1-simple-one-way-sync">Example 1: Simple One-Way Sync<a class="headerlink" href="#example-1-simple-one-way-sync" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-19-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-sync</span>
+</span><span id="__span-19-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Azure</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">Bitwarden&quot;</span>
+</span><span id="__span-19-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-prod</span>
+</span><span id="__span-19-5"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden</span>
+</span><span id="__span-19-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-19-7"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way</span>
+</span></code></pre></div>
+<h3 id="example-2-filtered-production-sync">Example 2: Filtered Production Sync<a class="headerlink" href="#example-2-filtered-production-sync" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-20-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-20-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-sync</span>
+</span><span id="__span-20-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-prod</span>
+</span><span id="__span-20-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden-prod</span>
+</span><span id="__span-20-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
+</span><span id="__span-20-6">
+</span><span id="__span-20-7"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-20-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^prod-&quot;</span>
+</span><span id="__span-20-9"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-20-10"><span class="w">        </span><span class="nt">target_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prod/{source_name}&quot;</span>
+</span></code></pre></div>
+<h3 id="example-3-bidirectional-sync-with-transformations">Example 3: Bidirectional Sync with Transformations<a class="headerlink" href="#example-3-bidirectional-sync-with-transformations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-21-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bi-sync</span>
+</span><span id="__span-21-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary-vault</span>
+</span><span id="__span-21-4"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secondary-vault</span>
+</span><span id="__span-21-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*/30</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">   </span><span class="c1"># Every 30 minutes</span>
+</span><span id="__span-21-6"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
+</span><span id="__span-21-7"><span class="w">    </span><span class="nt">conflict_resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-wins</span>
+</span><span id="__span-21-8">
+</span><span id="__span-21-9"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-21-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^shared-&quot;</span>
+</span><span id="__span-21-11"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-21-12">
+</span><span id="__span-21-13"><span class="w">    </span><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-21-14"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^shared-&quot;</span>
+</span><span id="__span-21-15"><span class="w">        </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;synced/{source_name}&quot;</span>
+</span><span id="__span-21-16">
+</span><span id="__span-21-17"><span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-21-18"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
+</span><span id="__span-21-19"><span class="w">      </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+</span></code></pre></div>
+<h3 id="example-4-multi-environment-cascade">Example 4: Multi-Environment Cascade<a class="headerlink" href="#example-4-multi-environment-cascade" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-22-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-22-2"><span class="w">  </span><span class="c1"># Dev → Staging</span>
+</span><span id="__span-22-3"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-to-staging</span>
+</span><span id="__span-22-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-dev</span>
+</span><span id="__span-22-5"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-staging</span>
+</span><span id="__span-22-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">6</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 6 AM daily</span>
+</span><span id="__span-22-7"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way</span>
+</span><span id="__span-22-8">
+</span><span id="__span-22-9"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-22-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^(app|db|api)-&quot;</span>
+</span><span id="__span-22-11"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-22-12">
+</span><span id="__span-22-13"><span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-22-14"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+</span><span id="__span-22-15"><span class="w">      </span><span class="nt">on_error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">continue</span>
+</span><span id="__span-22-16">
+</span><span id="__span-22-17"><span class="w">  </span><span class="c1"># Staging → Production</span>
+</span><span id="__span-22-18"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging-to-prod</span>
+</span><span id="__span-22-19"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-staging</span>
+</span><span id="__span-22-20"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-prod</span>
+</span><span id="__span-22-21"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">8</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">0&quot;</span><span class="w">      </span><span class="c1"># 8 AM Sundays</span>
+</span><span id="__span-22-22"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way</span>
+</span><span id="__span-22-23">
+</span><span id="__span-22-24"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-22-25"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^(app|db|api)-&quot;</span>
+</span><span id="__span-22-26"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">include</span>
+</span><span id="__span-22-27">
+</span><span id="__span-22-28"><span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-22-29"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
+</span><span id="__span-22-30"><span class="w">      </span><span class="nt">stop_on_first_error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span></code></pre></div>
+<h3 id="example-5-selective-backup-sync">Example 5: Selective Backup Sync<a class="headerlink" href="#example-5-selective-backup-sync" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-23-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-23-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-sync</span>
+</span><span id="__span-23-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Production</span><span class="nv"> </span><span class="s">Backup&quot;</span>
+</span><span id="__span-23-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-prod</span>
+</span><span id="__span-23-5"><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-backup</span>
+</span><span id="__span-23-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">1</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 1 AM daily</span>
+</span><span id="__span-23-7"><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one-way</span>
+</span><span id="__span-23-8">
+</span><span id="__span-23-9"><span class="w">    </span><span class="nt">filters</span><span class="p">:</span>
+</span><span id="__span-23-10"><span class="w">      </span><span class="c1"># Exclude test and temporary secrets</span>
+</span><span id="__span-23-11"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^test-&quot;</span>
+</span><span id="__span-23-12"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span><span id="__span-23-13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^temp-&quot;</span>
+</span><span id="__span-23-14"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span><span id="__span-23-15"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^debug-&quot;</span>
+</span><span id="__span-23-16"><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span><span id="__span-23-17">
+</span><span id="__span-23-18"><span class="w">    </span><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-23-19"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span>
+</span><span id="__span-23-20"><span class="w">        </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;backup-{timestamp}/{source_name}&quot;</span>
+</span><span id="__span-23-21">
+</span><span id="__span-23-22"><span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+</span><span id="__span-23-23"><span class="w">      </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+</span><span id="__span-23-24"><span class="w">      </span><span class="nt">on_error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">continue</span>
+</span></code></pre></div>
+<h2 id="monitoring-syncs">Monitoring Syncs<a class="headerlink" href="#monitoring-syncs" title="Permanent link">&para;</a></h2>
+<h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-24-1">curl<span class="w"> </span>http://localhost:8080/syncs/my-sync
+</span></code></pre></div>
+<p>Response:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-25-1"><span class="p">{</span>
+</span><span id="__span-25-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-sync&quot;</span><span class="p">,</span>
+</span><span id="__span-25-3"><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Sync&quot;</span><span class="p">,</span>
+</span><span id="__span-25-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-25-5"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vault-1&quot;</span><span class="p">,</span>
+</span><span id="__span-25-6"><span class="w">  </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vault-2&quot;</span><span class="p">,</span>
+</span><span id="__span-25-7"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 * * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-25-8"><span class="w">  </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;one-way&quot;</span><span class="p">,</span>
+</span><span id="__span-25-9"><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idle&quot;</span><span class="p">,</span>
+</span><span id="__span-25-10"><span class="w">  </span><span class="nt">&quot;last_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-25-11"><span class="w">  </span><span class="nt">&quot;last_run_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
+</span><span id="__span-25-12"><span class="w">  </span><span class="nt">&quot;last_run_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.345</span><span class="p">,</span>
+</span><span id="__span-25-13"><span class="w">  </span><span class="nt">&quot;next_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T11:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-25-14"><span class="w">  </span><span class="nt">&quot;stats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-25-15"><span class="w">    </span><span class="nt">&quot;total_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+</span><span id="__span-25-16"><span class="w">    </span><span class="nt">&quot;synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span id="__span-25-17"><span class="w">    </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-25-18"><span class="w">    </span><span class="nt">&quot;skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+</span><span id="__span-25-19"><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-25-20"><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="view-sync-history">View Sync History<a class="headerlink" href="#view-sync-history" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-26-1">curl<span class="w"> </span>http://localhost:8080/syncs/my-sync/history
+</span></code></pre></div>
+<h3 id="manually-trigger-sync">Manually Trigger Sync<a class="headerlink" href="#manually-trigger-sync" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-27-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/my-sync/run
+</span></code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Do</strong>:
+- Start with less frequent syncs (hourly or less)
+- Use staggered schedules for multiple syncs
+- Schedule backups during low-activity times
+- Test schedules in staging first</p>
+<p>❌ <strong>Don't</strong>:
+- Sync too frequently (every minute)
+- Overlap sync windows for same vaults
+- Schedule during peak usage times
+- Make schedule too complex</p>
+<h3 id="filtering_1">Filtering<a class="headerlink" href="#filtering_1" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Do</strong>:
+- Use include/exclude patterns for clarity
+- Start restrictive, then broaden
+- Document filter logic
+- Test filters before production</p>
+<p>❌ <strong>Don't</strong>:
+- Use overly complex regex patterns
+- Accidentally exclude important secrets
+- Forget to test filter impact
+- Change filters without testing</p>
+<h3 id="transformations_1">Transformations<a class="headerlink" href="#transformations_1" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Do</strong>:
+- Keep transformations simple
+- Use placeholders for consistency
+- Test transformations thoroughly
+- Document transformation logic</p>
+<p>❌ <strong>Don't</strong>:
+- Use complex custom scripts
+- Modify critical secret values
+- Make irreversible transformations
+- Skip testing transformations</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="sync-not-running">Sync Not Running<a class="headerlink" href="#sync-not-running" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Check if sync is enabled: <code>enabled: true</code></li>
+<li>Verify schedule syntax (cron format)</li>
+<li>Check if vaults are healthy</li>
+<li>Review logs for errors</li>
+</ol>
+<h3 id="secrets-not-syncing">Secrets Not Syncing<a class="headerlink" href="#secrets-not-syncing" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Check filters are correct</li>
+<li>Verify source vault has secrets matching filter</li>
+<li>Review transformation logic</li>
+<li>Check vault permissions</li>
+</ol>
+<h3 id="sync-takes-too-long">Sync Takes Too Long<a class="headerlink" href="#sync-takes-too-long" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Reduce <code>batch_size</code></li>
+<li>Check network connectivity</li>
+<li>Review vault API latency</li>
+<li>Consider splitting into multiple syncs</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../">Go back to Configuration</a></li>
+<li><a href="../authentication/">Authentication Guide</a></li>
+<li><a href="../vaults/">Vaults Configuration</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/pacorreia/akv-vaultwarden-sync" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

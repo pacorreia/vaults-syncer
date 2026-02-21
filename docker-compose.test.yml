@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Mock Vault Servers for testing
+  mock-vaults:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-vault
+    container_name: mock-vaults
+    networks:
+      - sync-network
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      - SOURCE_TOKEN=source_admin_token_12345
+      - TARGET_TOKEN=target_admin_token_12345
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/alive"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # Secrets Sync Daemon
+  sync-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secrets-sync-daemon
+    networks:
+      - sync-network
+    environment:
+      - CONFIG_PATH=/etc/sync/config.yaml
+      - DATABASE_PATH=/app/data/sync.db
+      - VAULTWARDEN_SOURCE_TOKEN=source_admin_token_12345
+      - VAULTWARDEN_TARGET_TOKEN=target_admin_token_12345
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    volumes:
+      - ./config.test.yaml:/etc/sync/config.yaml:ro
+      - sync_daemon_data:/app/data
+    depends_on:
+      mock-vaults:
+        condition: service_healthy
+    command:
+      - "-config"
+      - "/etc/sync/config.yaml"
+      - "-db"
+      - "/app/data/sync.db"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  sync_daemon_data:
+    driver: local
+networks:
+  sync-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
