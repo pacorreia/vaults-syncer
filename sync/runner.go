@@ -13,7 +13,7 @@ import (
 
 // Runner manages scheduled and manual sync execution
 type Runner struct {
-	engine    *Engine
+	engine    EngineRunner
 	cron      *cron.Cron
 	syncMap   map[string]cron.EntryID
 	mu        sync.RWMutex
@@ -21,8 +21,13 @@ type Runner struct {
 	running   bool
 }
 
+// EngineRunner defines the engine behavior required by the runner.
+type EngineRunner interface {
+	ExecuteSync(syncCfg *config.SyncConfig) error
+}
+
 // NewRunner creates a new sync runner
-func NewRunner(engine *Engine, logger *slog.Logger) *Runner {
+func NewRunner(engine EngineRunner, logger *slog.Logger) *Runner {
 	return &Runner{
 		engine:  engine,
 		cron:    cron.New(),

@@ -9,11 +9,11 @@ import (
 
 func TestJsonPathParser_ParseList(t *testing.T) {
 	tests := []struct {
-		name       string
-		parser     *JsonPathParser
-		body       string
-		want       []string
-		wantErr    bool
+		name    string
+		parser  *JsonPathParser
+		body    string
+		want    []string
+		wantErr bool
 	}{
 		{
 			name: "simple list with data key",
@@ -144,11 +144,11 @@ func TestJsonPathParser_ParseList(t *testing.T) {
 
 func TestJsonPathParser_ParseGetValue(t *testing.T) {
 	tests := []struct {
-		name       string
-		parser     *JsonPathParser
-		body       string
-		want       string
-		wantErr    bool
+		name    string
+		parser  *JsonPathParser
+		body    string
+		want    string
+		wantErr bool
 	}{
 		{
 			name: "simple value field",
@@ -349,53 +349,53 @@ func TestGetValueAtPath(t *testing.T) {
 
 func TestGetParserForVaultType(t *testing.T) {
 	tests := []struct {
-		name           string
-		vaultType      string
-		wantListPath   string
-		wantNameField  string
-		wantValuePath  string
+		name          string
+		vaultType     string
+		wantListPath  string
+		wantNameField string
+		wantValuePath string
 	}{
 		{
-			name:           "vaultwarden",
-			vaultType:      "vaultwarden",
-			wantListPath:   "data",
-			wantNameField:  "name",
-			wantValuePath:  "data",
+			name:          "vaultwarden",
+			vaultType:     "vaultwarden",
+			wantListPath:  "data",
+			wantNameField: "name",
+			wantValuePath: "data",
 		},
 		{
-			name:           "vault",
-			vaultType:      "vault",
-			wantListPath:   "data.keys",
-			wantNameField:  "key",
-			wantValuePath:  "data.data",
+			name:          "vault",
+			vaultType:     "vault",
+			wantListPath:  "data.keys",
+			wantNameField: "key",
+			wantValuePath: "data.data",
 		},
 		{
-			name:           "azure",
-			vaultType:      "azure",
-			wantListPath:   "value",
-			wantNameField:  "name",
-			wantValuePath:  "value",
+			name:          "azure",
+			vaultType:     "azure",
+			wantListPath:  "value",
+			wantNameField: "name",
+			wantValuePath: "value",
 		},
 		{
-			name:           "aws",
-			vaultType:      "aws",
-			wantListPath:   "SecretList",
-			wantNameField:  "Name",
-			wantValuePath:  "SecretString",
+			name:          "aws",
+			vaultType:     "aws",
+			wantListPath:  "SecretList",
+			wantNameField: "Name",
+			wantValuePath: "SecretString",
 		},
 		{
-			name:           "generic default",
-			vaultType:      "generic",
-			wantListPath:   "data",
-			wantNameField:  "name",
-			wantValuePath:  "value",
+			name:          "generic default",
+			vaultType:     "generic",
+			wantListPath:  "data",
+			wantNameField: "name",
+			wantValuePath: "value",
 		},
 		{
-			name:           "unknown defaults to generic",
-			vaultType:      "unknown",
-			wantListPath:   "data",
-			wantNameField:  "name",
-			wantValuePath:  "value",
+			name:          "unknown defaults to generic",
+			vaultType:     "unknown",
+			wantListPath:  "data",
+			wantNameField: "name",
+			wantValuePath: "value",
 		},
 	}
 
@@ -427,11 +427,11 @@ func TestGetParserForVaultType(t *testing.T) {
 
 func TestNewParserFromConfig(t *testing.T) {
 	tests := []struct {
-		name           string
-		config         *config.ResponseParserConfig
-		wantListPath   string
-		wantNameField  string
-		wantValuePath  string
+		name          string
+		config        *config.ResponseParserConfig
+		wantListPath  string
+		wantNameField string
+		wantValuePath string
 	}{
 		{
 			name: "custom parser config",
@@ -440,16 +440,16 @@ func TestNewParserFromConfig(t *testing.T) {
 				NameField: "customName",
 				ValuePath: "custom.value",
 			},
-			wantListPath:   "custom.path",
-			wantNameField:  "customName",
-			wantValuePath:  "custom.value",
+			wantListPath:  "custom.path",
+			wantNameField: "customName",
+			wantValuePath: "custom.value",
 		},
 		{
-			name:           "nil config uses generic defaults",
-			config:         nil,
-			wantListPath:   "data",
-			wantNameField:  "name",
-			wantValuePath:  "value",
+			name:          "nil config uses generic defaults",
+			config:        nil,
+			wantListPath:  "data",
+			wantNameField: "name",
+			wantValuePath: "value",
 		},
 	}
 
@@ -487,7 +487,7 @@ func TestParseListWithStringItems(t *testing.T) {
 
 	// Test when items are strings directly instead of objects
 	body := []byte(`{"data": ["secret1", "secret2", "secret3"]}`)
-	
+
 	names, err := parser.ParseList(body)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -531,7 +531,7 @@ func TestParseListWithDefaultPaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			parser := &JsonPathParser{} // Empty parser uses defaults
-			
+
 			names, err := parser.ParseList([]byte(tt.body))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -559,5 +559,24 @@ func TestValueToStringArray(t *testing.T) {
 
 	if !strings.Contains(result, "item1") || !strings.Contains(result, "item2") {
 		t.Errorf("expected JSON array string, got %s", result)
+	}
+}
+
+func TestValueToStringNil(t *testing.T) {
+	parser := &JsonPathParser{}
+
+	result := parser.valueToString(nil)
+	if result != "<nil>" {
+		t.Errorf("expected <nil> for nil, got %s", result)
+	}
+}
+
+func TestValueToStringMarshalError(t *testing.T) {
+	parser := &JsonPathParser{}
+
+	value := map[string]interface{}{"bad": make(chan int)}
+	result := parser.valueToString(value)
+	if !strings.Contains(result, "bad") {
+		t.Errorf("expected fallback string to contain key, got %s", result)
 	}
 }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -161,30 +162,30 @@ func TestGetSyncObject(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		syncID         string
-		sourceVaultID  string
-		targetVaultID  string
-		secretName     string
-		wantNil        bool
-		expectedName   string
+		name          string
+		syncID        string
+		sourceVaultID string
+		targetVaultID string
+		secretName    string
+		wantNil       bool
+		expectedName  string
 	}{
 		{
-			name:           "existing object",
-			syncID:         "sync1",
-			sourceVaultID:  "source",
-			targetVaultID:  "target",
-			secretName:     "secret1",
-			wantNil:        false,
-			expectedName:   "secret1",
+			name:          "existing object",
+			syncID:        "sync1",
+			sourceVaultID: "source",
+			targetVaultID: "target",
+			secretName:    "secret1",
+			wantNil:       false,
+			expectedName:  "secret1",
 		},
 		{
-			name:           "non-existent object",
-			syncID:         "sync1",
-			sourceVaultID:  "source",
-			targetVaultID:  "target",
-			secretName:     "nonexistent",
-			wantNil:        true,
+			name:          "non-existent object",
+			syncID:        "sync1",
+			sourceVaultID: "source",
+			targetVaultID: "target",
+			secretName:    "nonexistent",
+			wantNil:       true,
 		},
 	}
 
@@ -269,6 +270,65 @@ func TestGetSyncRuns(t *testing.T) {
 	}
 	if runs[0].Status != "success" {
 		t.Errorf("expected status 'success', got '%s'", runs[0].Status)
+	}
+}
+
+func TestGetSyncRuns_DefaultLimit(t *testing.T) {
+	store, err := NewStore(":memory:")
+	if err != nil {
+		t.Fatalf("failed to create store: %v", err)
+	}
+	defer store.Close()
+
+	for i := 0; i < 2; i++ {
+		if err := store.RecordSyncRun("sync1", "success", 1, 0, 100, ""); err != nil {
+			t.Fatalf("failed to insert sync run: %v", err)
+		}
+	}
+
+	runs, err := store.GetSyncRuns("sync1", 0)
+	if err != nil {
+		t.Fatalf("failed to get sync runs: %v", err)
+	}
+	if len(runs) != 2 {
+		t.Fatalf("expected 2 runs, got %d", len(runs))
+	}
+}
+
+func TestGetSyncRuns_ClosedDB(t *testing.T) {
+	store, err := NewStore(":memory:")
+	if err != nil {
+		t.Fatalf("failed to create store: %v", err)
+	}
+	store.Close()
+
+	if _, err := store.GetSyncRuns("sync1", 1); err == nil {
+		t.Fatal("expected error after closing DB")
+	}
+}
+
+func TestGetSyncObjectsBySync_ClosedDB(t *testing.T) {
+	store, err := NewStore(":memory:")
+	if err != nil {
+		t.Fatalf("failed to create store: %v", err)
+	}
+	store.Close()
+
+	if _, err := store.GetSyncObjectsBySync("sync1"); err == nil {
+		t.Fatal("expected error after closing DB")
+	}
+}
+
+func TestNewStore_MigrationError(t *testing.T) {
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "readonly.db")
+	if err := os.WriteFile(dbPath, []byte(""), 0644); err != nil {
+		t.Fatalf("failed to create db file: %v", err)
+	}
+
+	readonlyDSN := fmt.Sprintf("file:%s?mode=ro", dbPath)
+	if _, err := NewStore(readonlyDSN); err == nil {
+		t.Fatal("expected migration error for read-only database")
 	}
 }
 

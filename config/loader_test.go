@@ -10,11 +10,11 @@ import (
 
 func TestLoadConfig(t *testing.T) {
 	tests := []struct {
-		name        string
-		content     string
-		envVars     map[string]string
-		wantErr     bool
-		validateFn  func(*testing.T, *Config)
+		name       string
+		content    string
+		envVars    map[string]string
+		wantErr    bool
+		validateFn func(*testing.T, *Config)
 	}{
 		{
 			name: "valid basic config",
@@ -288,10 +288,198 @@ func TestConfigValidate(t *testing.T) {
 	}
 }
 
+func TestConfigValidateExtendedErrors(t *testing.T) {
+	baseVault := VaultConfig{
+		ID:       "vault1",
+		Name:     "Vault",
+		Type:     "generic",
+		Endpoint: "https://example.com",
+		Method:   "PUT",
+		Auth: &AuthConfig{
+			Method: "bearer",
+		},
+		FieldNames: FieldNamesConfig{NameField: "name", ValueField: "value"},
+	}
+
+	tests := []struct {
+		name   string
+		cfg    *Config
+		errMsg string
+	}{
+		{
+			name: "missing auth",
+			cfg: &Config{
+				Vaults: []VaultConfig{{
+					ID:         "vault1",
+					Endpoint:   "https://example.com",
+					FieldNames: FieldNamesConfig{NameField: "name", ValueField: "value"},
+				}},
+				Syncs: []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"vault1"}}},
+			},
+			errMsg: "auth",
+		},
+		{
+			name:   "missing vaults",
+			cfg:    &Config{Vaults: []VaultConfig{}, Syncs: []SyncConfig{}},
+			errMsg: "no vaults configured",
+		},
+		{
+			name: "missing vault id",
+			cfg: &Config{
+				Vaults: []VaultConfig{{
+					ID:         "",
+					Endpoint:   "https://example.com",
+					Auth:       &AuthConfig{Method: "bearer"},
+					FieldNames: FieldNamesConfig{NameField: "name", ValueField: "value"},
+				}},
+				Syncs: []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"vault1"}}},
+			},
+			errMsg: "vault must have an ID",
+		},
+		{
+			name: "missing field names",
+			cfg: &Config{
+				Vaults: []VaultConfig{{
+					ID:       "vault1",
+					Endpoint: "https://example.com",
+					Auth:     &AuthConfig{Method: "bearer"},
+				}},
+				Syncs: []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"vault1"}}},
+			},
+			errMsg: "field_names.name_field",
+		},
+		{
+			name: "invalid auth method",
+			cfg: &Config{
+				Vaults: []VaultConfig{{
+					ID:         "vault1",
+					Endpoint:   "https://example.com",
+					Method:     "PUT",
+					Auth:       &AuthConfig{Method: "invalid"},
+					FieldNames: FieldNamesConfig{NameField: "name", ValueField: "value"},
+				}},
+				Syncs: []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"vault1"}}},
+			},
+			errMsg: "invalid auth method",
+		},
+		{
+			name: "invalid method",
+			cfg: &Config{
+				Vaults: []VaultConfig{{
+					ID:         "vault1",
+					Endpoint:   "https://example.com",
+					Method:     "PATCH",
+					Auth:       &AuthConfig{Method: "bearer"},
+					FieldNames: FieldNamesConfig{NameField: "name", ValueField: "value"},
+				}},
+				Syncs: []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"vault1"}}},
+			},
+			errMsg: "invalid method",
+		},
+		{
+			name: "unknown source vault",
+			cfg: &Config{
+				Vaults: []VaultConfig{baseVault},
+				Syncs:  []SyncConfig{{ID: "sync1", Source: "missing", Targets: []string{"vault1"}}},
+			},
+			errMsg: "unknown source vault",
+		},
+		{
+			name: "unknown target vault",
+			cfg: &Config{
+				Vaults: []VaultConfig{baseVault},
+				Syncs:  []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"missing"}}},
+			},
+			errMsg: "unknown target vault",
+		},
+		{
+			name: "invalid sync type",
+			cfg: &Config{
+				Vaults: []VaultConfig{baseVault},
+				Syncs:  []SyncConfig{{ID: "sync1", Source: "vault1", Targets: []string{"vault1"}, SyncType: "invalid"}},
+			},
+			errMsg: "invalid sync_type",
+		},
+		{
+			name: "bidirectional with multiple targets",
+			cfg: &Config{
+				Vaults: []VaultConfig{baseVault, {
+					ID:         "vault2",
+					Name:       "Vault 2",
+					Type:       "generic",
+					Endpoint:   "https://example.com",
+					Method:     "PUT",
+					Auth:       &AuthConfig{Method: "bearer"},
+					FieldNames: FieldNamesConfig{NameField: "name", ValueField: "value"},
+				}},
+				Syncs: []SyncConfig{{
+					ID:       "sync1",
+					Source:   "vault1",
+					Targets:  []string{"vault1", "vault2"},
+					SyncType: "bidirectional",
+				}},
+			},
+			errMsg: "bidirectional sync only allowed",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.cfg.Validate()
+			if err == nil {
+				t.Fatalf("expected error")
+			}
+			if !strings.Contains(err.Error(), tt.errMsg) {
+				t.Fatalf("expected error to contain %q, got %v", tt.errMsg, err)
+			}
+		})
+	}
+}
+
+func TestLoadConfigDefaultsForSyncs(t *testing.T) {
+	content := `
+vaults:
+  - id: test-vault
+    type: generic
+    endpoint: https://example.com
+    auth:
+      method: bearer
+    field_names:
+      name_field: name
+      value_field: value
+syncs:
+  - id: sync1
+    source: test-vault
+    targets:
+      - test-vault
+`
+
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	if err := os.WriteFile(configPath, []byte(content), 0644); err != nil {
+		t.Fatalf("failed to write config: %v", err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if cfg.Syncs[0].RetryPolicy.MaxRetries == 0 || cfg.Syncs[0].RetryPolicy.InitialBackoff == 0 {
+		t.Fatal("expected retry policy defaults to be set")
+	}
+	if cfg.Syncs[0].SyncType != "unidirectional" {
+		t.Fatalf("expected default sync_type to be unidirectional")
+	}
+	if !cfg.Syncs[0].Enabled {
+		t.Fatalf("expected sync to be enabled by default")
+	}
+}
+
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && 
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || 
-		 containsHelper(s, substr)))
+	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
+		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
+			containsHelper(s, substr)))
 }
 
 func containsHelper(s, substr string) bool {
@@ -426,10 +614,10 @@ func TestValidateLegacyAuth(t *testing.T) {
 	cfg := &Config{
 		Vaults: []VaultConfig{
 			{
-				ID:                 "vault1",
-				Endpoint:           "https://example.com",
-				LegacyAuthMethod:   "bearer",
-				LegacyAuthHeaders:  map[string]string{"key": "value"},
+				ID:                "vault1",
+				Endpoint:          "https://example.com",
+				LegacyAuthMethod:  "bearer",
+				LegacyAuthHeaders: map[string]string{"key": "value"},
 				FieldNames: FieldNamesConfig{
 					NameField:  "name",
 					ValueField: "value",
@@ -496,10 +684,10 @@ func TestValidateAuthMethod(t *testing.T) {
 
 func TestValidateSyncType(t *testing.T) {
 	tests := []struct {
-		name    string
+		name     string
 		syncType string
-		targets int
-		wantErr bool
+		targets  int
+		wantErr  bool
 	}{
 		{"unidirectional", "unidirectional", 2, false},
 		{"bidirectional 1:1", "bidirectional", 1, false},

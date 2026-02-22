@@ -8,19 +8,25 @@ import (
 
 	"github.com/pacorreia/vaults-syncer/config"
 	"github.com/pacorreia/vaults-syncer/storage"
-	"github.com/pacorreia/vaults-syncer/sync"
 )
 
 // Handler manages HTTP handlers
 type Handler struct {
-	runner *sync.Runner
+	runner Runner
 	store  *storage.Store
 	cfg    *config.Config
 	logger *slog.Logger
 }
 
+// Runner defines the runner behaviors required by the API handler.
+type Runner interface {
+	IsRunning() bool
+	GetSyncStatus(syncID string, store *storage.Store) (map[string]interface{}, error)
+	ExecuteSyncNow(syncID string, cfg *config.Config) error
+}
+
 // NewHandler creates a new handler
-func NewHandler(runner *sync.Runner, store *storage.Store, cfg *config.Config, logger *slog.Logger) *Handler {
+func NewHandler(runner Runner, store *storage.Store, cfg *config.Config, logger *slog.Logger) *Handler {
 	return &Handler{
 		runner: runner,
 		store:  store,

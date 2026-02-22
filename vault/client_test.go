@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/pacorreia/vaults-syncer/config"
 )
@@ -125,11 +126,11 @@ func TestClientListSecrets(t *testing.T) {
 
 func TestClientGetSecret(t *testing.T) {
 	tests := []struct {
-		name         string
-		secretName   string
-		response     string
-		wantValue    string
-		wantErr      bool
+		name       string
+		secretName string
+		response   string
+		wantValue  string
+		wantErr    bool
 	}{
 		{
 			name:       "successful get",
@@ -466,6 +467,26 @@ func TestAddAuthHeaders(t *testing.T) {
 			expectedHeader: "X-Custom-Auth",
 			expectedValue:  "custom-value",
 		},
+		{
+			name: "api key",
+			authConfig: &config.AuthConfig{
+				Method: "api_key",
+				Headers: map[string]string{
+					"api_key": "key-123",
+				},
+			},
+			expectedHeader: "X-API-Key",
+			expectedValue:  "key-123",
+		},
+		{
+			name: "bearer missing token",
+			authConfig: &config.AuthConfig{
+				Method:  "bearer",
+				Headers: map[string]string{},
+			},
+			expectedHeader: "Authorization",
+			expectedValue:  "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -560,7 +581,7 @@ func TestClientOAuth(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
-	
+
 	// Test that OAuth token is fetched and used
 	secrets, err := client.ListSecrets()
 	if err != nil {
@@ -720,6 +741,24 @@ func TestGetDefaultTokenEndpoint(t *testing.T) {
 			vaultType:    "vaultwarden",
 			wantEndpoint: "https://vault.example.com/identity/connect/token",
 		},
+		{
+			name:         "vaultwarden api endpoint",
+			endpoint:     "https://vault.example.com/api/ciphers",
+			vaultType:    "vaultwarden",
+			wantEndpoint: "https://vault.example.com/identity/connect/token",
+		},
+		{
+			name:         "vault type",
+			endpoint:     "https://vault.example.com/v1",
+			vaultType:    "vault",
+			wantEndpoint: "https://vault.example.com/v1/auth/oauth/token",
+		},
+		{
+			name:         "azure type",
+			endpoint:     "https://example.com",
+			vaultType:    "azure",
+			wantEndpoint: "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
+		},
 	}
 
 	for _, tt := range tests {
@@ -741,6 +780,19 @@ func TestGetDefaultTokenEndpoint(t *testing.T) {
 				t.Errorf("expected %s, got %s", tt.wantEndpoint, result)
 			}
 		})
+	}
+}
+
+func TestEncodeParams(t *testing.T) {
+	params := map[string]string{
+		"b":     "two",
+		"a":     "one",
+		"space": "a b",
+	}
+
+	result := encodeParams(params)
+	if result != "a=one&b=two&space=a+b" {
+		t.Fatalf("unexpected encoding: %s", result)
 	}
 }
 
@@ -943,7 +995,7 @@ func TestSetSecretWithVaultwardenType(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
-	err := client.SetSecret("test","value")
+	err := client.SetSecret("test", "value")
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -1016,7 +1068,7 @@ func TestOAuthCachedToken(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
-	
+
 	// First call should fetch token
 	client.ListSecrets()
 	firstCallCount := callCount
@@ -1076,6 +1128,642 @@ func TestOAuthWithExtraParams(t *testing.T) {
 	// Check if extra params were included
 	if !strings.Contains(receivedBody, "device_id") {
 		t.Error("expected device_id in OAuth request body")
+	}
+}
+
+func TestListSecrets_NonOK(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "boom"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.ListSecrets(); err == nil {
+		t.Fatal("expected error for non-200 list response")
+	}
+}
+
+func TestListSecrets_InvalidJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("not-json"))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.ListSecrets(); err == nil {
+		t.Fatal("expected error for invalid JSON response")
+	}
+}
+
+func TestGetSecret_ListSecretsError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "boom"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.GetSecret("secret1"); err == nil {
+		t.Fatal("expected error when list secrets fails")
+	}
+}
+
+func TestSetSecret_NonOK(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"error": "bad"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Method:   "PUT",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.SetSecret("secret1", "value"); err == nil {
+		t.Fatal("expected error for non-200 set response")
+	}
+}
+
+func TestDeleteSecret_NoContent(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.DeleteSecret("secret1"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestTestConnection_UnexpectedStatus(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+	}
+
+	client := NewClient(cfg)
+	if err := client.TestConnection(); err == nil {
+		t.Fatal("expected error for unexpected status")
+	}
+}
+
+func TestGetOAuthTokenMissingConfig(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err == nil {
+		t.Fatal("expected error for missing OAuth config")
+	}
+}
+
+func TestGetOAuthTokenMissingClientCreds(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth:  &config.OAuthConfig{},
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err == nil {
+		t.Fatal("expected error for missing client credentials")
+	}
+}
+
+func TestGetOAuthTokenBadStatus(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"error": "bad"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth: &config.OAuthConfig{
+				TokenEndpoint: server.URL,
+				ClientID:      "id",
+				ClientSecret:  "secret",
+			},
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err == nil {
+		t.Fatal("expected error for non-200 token response")
+	}
+}
+
+func TestGetOAuthTokenInvalidJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("not-json"))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth: &config.OAuthConfig{
+				TokenEndpoint: server.URL,
+				ClientID:      "id",
+				ClientSecret:  "secret",
+			},
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err == nil {
+		t.Fatal("expected error for invalid JSON")
+	}
+}
+
+func TestGetOAuthTokenMissingAccessToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"expires_in": 3600}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth: &config.OAuthConfig{
+				TokenEndpoint: server.URL,
+				ClientID:      "id",
+				ClientSecret:  "secret",
+			},
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err == nil {
+		t.Fatal("expected error for missing access_token")
+	}
+}
+
+func TestGetOAuthTokenDefaultExpiresIn(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"access_token": "token"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth: &config.OAuthConfig{
+				TokenEndpoint: server.URL,
+				ClientID:      "id",
+				ClientSecret:  "secret",
+			},
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if client.oauthExpires.Before(time.Now().Add(50 * time.Minute)) {
+		t.Fatal("expected default expires_in to be applied")
+	}
+}
+
+func TestListSecrets_AuthError(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Type:     "generic",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth:  &config.OAuthConfig{},
+		},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.ListSecrets(); err == nil {
+		t.Fatal("expected auth error for oauth2 without credentials")
+	}
+}
+
+func TestGetSecret_ParseError(t *testing.T) {
+	call := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		call++
+		w.WriteHeader(http.StatusOK)
+		if call == 1 {
+			w.Write([]byte(`{"data": [{"name": "secret1", "value": "v"}]}`))
+			return
+		}
+		w.Write([]byte("invalid-json"))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.GetSecret("secret1"); err == nil {
+		t.Fatal("expected parse error on second response")
+	}
+}
+
+func TestGetSecret_NoDataMatch(t *testing.T) {
+	call := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		call++
+		w.WriteHeader(http.StatusOK)
+		if call == 1 {
+			w.Write([]byte(`{"data": [{"name": "secret1", "value": "v"}]}`))
+			return
+		}
+		w.Write([]byte(`{"data": [{"name": "other", "value": "v"}]}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.GetSecret("secret1"); err == nil {
+		t.Fatal("expected error when secret data not found in response")
+	}
+}
+
+func TestTestConnection_AuthError(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Type:     "generic",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth:  &config.OAuthConfig{},
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.TestConnection(); err == nil {
+		t.Fatal("expected auth error for oauth2 without credentials")
+	}
+}
+
+func TestListSecrets_InvalidEndpoint(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "http://[::1",
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.ListSecrets(); err == nil {
+		t.Fatal("expected request creation error")
+	}
+}
+
+func TestTestConnection_InvalidEndpoint(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "http://[::1",
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+	}
+
+	client := NewClient(cfg)
+	if err := client.TestConnection(); err == nil {
+		t.Fatal("expected request creation error")
+	}
+}
+
+func TestDeleteSecret_InvalidEndpoint(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "http://[::1",
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.DeleteSecret("secret1"); err == nil {
+		t.Fatal("expected request creation error")
+	}
+}
+
+func TestGetSecret_SecondRequestNonOK(t *testing.T) {
+	call := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		call++
+		if call == 1 {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"data": [{"name": "secret1", "value": "v"}]}`))
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "boom"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.GetSecret("secret1"); err == nil {
+		t.Fatal("expected error for non-200 second request")
+	}
+}
+
+func TestGetSecret_DefaultFieldsAndMapValue(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"data": [{"name": "secret1", "value": {"nested": "val"}}]}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:         "test",
+		Endpoint:   server.URL,
+		Type:       "generic",
+		Auth:       &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{},
+	}
+
+	client := NewClient(cfg)
+	secret, err := client.GetSecret("secret1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(secret.Value, "nested") {
+		t.Fatalf("expected serialized map value, got %s", secret.Value)
+	}
+}
+
+func TestGetSecret_ValueArray(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"data": [{"name": "secret1", "value": ["a", "b"]}]}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:         "test",
+		Endpoint:   server.URL,
+		Type:       "generic",
+		Auth:       &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{},
+	}
+
+	client := NewClient(cfg)
+	secret, err := client.GetSecret("secret1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(secret.Value, "[") {
+		t.Fatalf("expected serialized array value, got %s", secret.Value)
+	}
+}
+
+func TestSetSecret_InvalidJSONValue(t *testing.T) {
+	var body string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data, _ := io.ReadAll(r.Body)
+		body = string(data)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status": "ok"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Method:   "PUT",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.SetSecret("secret1", "{bad-json"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(body, "{bad-json") {
+		t.Fatalf("expected raw string value in body, got %s", body)
+	}
+}
+
+func TestSetSecret_ValidJSONValue(t *testing.T) {
+	var body string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data, _ := io.ReadAll(r.Body)
+		body = string(data)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: server.URL,
+		Type:     "generic",
+		Method:   "PUT",
+		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{
+			NameField:  "name",
+			ValueField: "value",
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.SetSecret("secret1", `{"foo":"bar"}`); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(body, "\"foo\":\"bar\"") {
+		t.Fatalf("expected JSON object in body, got %s", body)
+	}
+}
+
+func TestSetSecret_AuthError(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Type:     "generic",
+		Method:   "PUT",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth:  &config.OAuthConfig{},
+		},
+		FieldNames: config.FieldNamesConfig{NameField: "name", ValueField: "value"},
+	}
+
+	client := NewClient(cfg)
+	if err := client.SetSecret("secret1", "value"); err == nil {
+		t.Fatal("expected auth error for oauth2 without credentials")
+	}
+}
+
+func TestSetSecret_InvalidEndpoint(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:         "test",
+		Endpoint:   "http://[::1",
+		Type:       "generic",
+		Method:     "PUT",
+		Auth:       &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
+		FieldNames: config.FieldNamesConfig{NameField: "name", ValueField: "value"},
+	}
+
+	client := NewClient(cfg)
+	if err := client.SetSecret("secret1", "value"); err == nil {
+		t.Fatal("expected request creation error")
+	}
+}
+
+func TestDeleteSecret_AuthError(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Type:     "generic",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth:  &config.OAuthConfig{},
+		},
+	}
+
+	client := NewClient(cfg)
+	if err := client.DeleteSecret("secret1"); err == nil {
+		t.Fatal("expected auth error for oauth2 without credentials")
+	}
+}
+
+func TestGetOAuthToken_InvalidTokenURL(t *testing.T) {
+	cfg := &config.VaultConfig{
+		ID:       "test",
+		Endpoint: "https://example.com",
+		Auth: &config.AuthConfig{
+			Method: "oauth2",
+			OAuth: &config.OAuthConfig{
+				TokenEndpoint: "http://[::1",
+				ClientID:      "id",
+				ClientSecret:  "secret",
+			},
+		},
+	}
+
+	client := NewClient(cfg)
+	if _, err := client.getOAuthToken(); err == nil {
+		t.Fatal("expected error for invalid token URL")
 	}
 }
 

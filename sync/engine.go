@@ -22,6 +22,15 @@ type Engine struct {
 
 // NewEngine creates a new sync engine
 func NewEngine(cfg *config.Config, store *storage.Store, logger *slog.Logger) (*Engine, error) {
+	return newEngineWithBackendFactory(cfg, store, logger, vault.NewBackend)
+}
+
+func newEngineWithBackendFactory(
+	cfg *config.Config,
+	store *storage.Store,
+	logger *slog.Logger,
+	factory func(*config.VaultConfig) (vault.Backend, error),
+) (*Engine, error) {
 	engine := &Engine{
 		cfg:      cfg,
 		store:    store,
@@ -31,7 +40,7 @@ func NewEngine(cfg *config.Config, store *storage.Store, logger *slog.Logger) (*
 
 	// Create backends for all vaults
 	for _, vaultCfg := range cfg.Vaults {
-		backend, err := vault.NewBackend(&vaultCfg)
+		backend, err := factory(&vaultCfg)
 		if err != nil {
 			engine.logger.Warn("failed to create vault backend",
 				slog.String("vault_id", vaultCfg.ID),
@@ -39,10 +48,10 @@ func NewEngine(cfg *config.Config, store *storage.Store, logger *slog.Logger) (*
 			)
 			continue
 		}
-		
+
 		// Test connection
 		if err := backend.TestConnection(); err != nil {
-			engine.logger.Warn("failed to connect to vault", 
+			engine.logger.Warn("failed to connect to vault",
 				slog.String("vault_id", vaultCfg.ID),
 				slog.String("error", err.Error()),
 			)
@@ -374,6 +383,9 @@ func matchPattern(pattern, name string) bool {
 		return name[len(name)-(len(pattern)-1):] == pattern[1:]
 	}
 	if len(pattern) > 0 && pattern[len(pattern)-1] == '*' {
+		if len(name) < len(pattern)-1 {
+			return false
+		}
 		return name[:len(pattern)-1] == pattern[:len(pattern)-1]
 	}
 	return false
