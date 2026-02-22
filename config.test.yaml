@@ -4,6 +4,7 @@ vaults:
   # Source Mock Vault
   - id: vaultwarden_source
     name: "Source Mock Vault"
+    type: vaultwarden
     endpoint: "http://mock-vaults:8000/api/ciphers"
     method: POST
     auth:
@@ -22,6 +23,7 @@ vaults:
   # Target Mock Vault
   - id: vaultwarden_target
     name: "Target Mock Vault"
+    type: vaultwarden
     endpoint: "http://mock-vaults:8001/api/ciphers"
     method: POST
     auth:

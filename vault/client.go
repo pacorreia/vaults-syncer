@@ -133,12 +133,27 @@ func applyDefaultOperations(cfg *config.VaultConfig) {
 		})
 
 	case "bitwarden", "vaultwarden":
+		// Vaultwarden/Bitwarden list endpoint (GET /api/ciphers)
 		mergeOperationDefaults(cfg, "list", &config.OperationConfig{
 			Method: http.MethodGet,
 			ResponseParser: &config.ResponseParserConfig{
 				ListPath:  "data",
 				NameField: "name",
 			},
+		})
+		// Vaultwarden/Bitwarden set endpoint (POST /api/ciphers - no {name} in path)
+		// The cipher object is created with the name field, not in the URL path
+		mergeOperationDefaults(cfg, "set", &config.OperationConfig{
+			Method:      http.MethodPost,
+			Endpoint:    strings.TrimSuffix(cfg.Endpoint, "/"),
+			StatusCodes: []int{http.StatusOK, http.StatusCreated},
+		})
+		// Vaultwarden/Bitwarden delete endpoint (DELETE /api/ciphers/{id})
+		// Note: Assumes secret name matches cipher ID for simplicity
+		mergeOperationDefaults(cfg, "delete", &config.OperationConfig{
+			Method:      http.MethodDelete,
+			Endpoint:    fmt.Sprintf("%s/{name}", strings.TrimSuffix(cfg.Endpoint, "/")),
+			StatusCodes: []int{http.StatusOK, http.StatusNoContent},
 		})
 
 	case "keeper":
