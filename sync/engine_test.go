@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 )
 
 type mockBackend struct {
+	mu          sync.RWMutex
 	secrets     map[string]string
 	listError   error
 	getError    error
@@ -26,6 +28,8 @@ func (m *mockBackend) ListSecrets() ([]string, error) {
 	if m.listError != nil {
 		return nil, m.listError
 	}
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	keys := make([]string, 0, len(m.secrets))
 	for k := range m.secrets {
 		keys = append(keys, k)
@@ -37,6 +41,8 @@ func (m *mockBackend) GetSecret(name string) (*vault.Secret, error) {
 	if m.getError != nil {
 		return nil, m.getError
 	}
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	if val, ok := m.secrets[name]; ok {
 		return &vault.Secret{Name: name, Value: val}, nil
 	}
@@ -47,6 +53,8 @@ func (m *mockBackend) SetSecret(name, value string) error {
 	if m.setError != nil {
 		return m.setError
 	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.secrets[name] = value
 	return nil
 }
@@ -55,6 +63,8 @@ func (m *mockBackend) DeleteSecret(name string) error {
 	if m.deleteError != nil {
 		return m.deleteError
 	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	delete(m.secrets, name)
 	return nil
 }
