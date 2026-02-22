@@ -53,6 +53,12 @@ nav:
     - Vaults: configuration/vaults.md
     - Authentication: configuration/authentication.md
     - Syncs: configuration/syncs.md
+  - Guides:
+    - Quick Reference: guides/quick-reference.md
+  - Development:
+    - Overview: development/index.md
+    - Testing: development/testing.md
+    - Quick Start: development/quickstart.md
 
 markdown_extensions:
   - admonition

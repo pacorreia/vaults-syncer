@@ -40,7 +40,12 @@ Thumbs.db
 
 # Test outputs
 coverage.out
+coverage.html
+badges/
 *.test
+
+# MkDocs build output
+site/
 
 # Python virtual environments
 venv/
