@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)
-[![Unit Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml/badge.svg?branch=main)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml?query=branch%3Amain)
+[![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
 [![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](LICENSE)
 
