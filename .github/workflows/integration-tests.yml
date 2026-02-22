@@ -1,0 +1,60 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'docker-compose.test.yml'
+      - 'Dockerfile'
+      - 'Dockerfile.mock-vault'
+      - 'config.test.yaml'
+      - 'test-integration.sh'
+      - '.github/workflows/integration-tests.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'docker-compose.test.yml'
+      - 'Dockerfile'
+      - 'Dockerfile.mock-vault'
+      - 'config.test.yaml'
+      - 'test-integration.sh'
+      - '.github/workflows/integration-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install integration test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run integration tests
+        run: |
+          chmod +x ./test-integration.sh
+          ./test-integration.sh
+
+      - name: Collect Docker logs
+        if: failure()
+        run: |
+          docker compose -f docker-compose.test.yml ps
+          docker compose -f docker-compose.test.yml logs --no-color
+
+      - name: Cleanup containers
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
