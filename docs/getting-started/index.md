@@ -1,10 +1,10 @@
 # Getting Started
 
-Welcome to AKV Vaultwarden Sync! This guide will help you get up and running in just a few minutes.
+Welcome to Secrets Vault Sync! This guide will help you get up and running in just a few minutes.
 
-## What is AKV Vaultwarden Sync?
+## What is Secrets Vault Sync?
 
-AKV Vaultwarden Sync is a daemon that synchronizes secrets between multiple vault backends:
+Secrets Vault Sync is a daemon that synchronizes secrets between multiple vault backends:
 
 - **Source**: Where secrets are read from (your primary vault)
 - **Target(s)**: Where secrets are written to (backup, other environments, different providers)

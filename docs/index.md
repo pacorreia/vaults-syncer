@@ -1,4 +1,4 @@
-# AKV Vaultwarden Sync
+# Secrets Vault Sync
 
 [![Build Status](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)

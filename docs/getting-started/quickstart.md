@@ -1,6 +1,6 @@
 # Quick Start
 
-Get AKV Vaultwarden Sync running in 5 minutes!
+Get Secrets Vault Sync running in 5 minutes!
 
 ## 1. Create Configuration
 

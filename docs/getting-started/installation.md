@@ -200,7 +200,7 @@ Create `/etc/systemd/system/akv-sync.service`:
 
 ```ini
 [Unit]
-Description=AKV Vaultwarden Sync Daemon
+Description=Secrets Vault Sync Daemon
 After=network-online.target
 Wants=network-online.target
 
