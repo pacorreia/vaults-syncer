@@ -35,7 +35,8 @@ type Secret struct {
 func NewClient(cfg *config.VaultConfig) *Client {
 	// Initialize optional fields with defaults
 	cfg.PopulateDefaults()
-	
+	applyDefaultOperations(cfg)
+
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: cfg.SkipSSLVerify,
 	}
@@ -49,7 +50,7 @@ func NewClient(cfg *config.VaultConfig) *Client {
 		Timeout:   time.Duration(cfg.Timeout) * time.Second,
 	}
 
-	// Initialize parser based on vault type  or config override
+	// Initialize parser based on vault type or config override
 	var parser ResponseParser
 	if cfg.OperationsOverride != nil && cfg.OperationsOverride["list"] != nil && cfg.OperationsOverride["list"].ResponseParser != nil {
 		parser = NewParserFromConfig(cfg.OperationsOverride["list"].ResponseParser)
@@ -64,15 +65,225 @@ func NewClient(cfg *config.VaultConfig) *Client {
 	}
 }
 
+func applyDefaultOperations(cfg *config.VaultConfig) {
+	if cfg.OperationsOverride == nil {
+		cfg.OperationsOverride = make(map[string]*config.OperationConfig)
+	}
+
+	switch strings.ToLower(cfg.GetVaultType()) {
+	case "azure":
+		base := strings.TrimSuffix(cfg.Endpoint, "/")
+		listEndpoint := fmt.Sprintf("%s?api-version=7.4", base)
+		secretEndpoint := fmt.Sprintf("%s/{name}?api-version=7.4", base)
+		mergeOperationDefaults(cfg, "list", &config.OperationConfig{
+			Method:   http.MethodGet,
+			Endpoint: listEndpoint,
+			ResponseParser: &config.ResponseParserConfig{
+				ListPath:  "value",
+				NameField: "name",
+			},
+		})
+		mergeOperationDefaults(cfg, "get", &config.OperationConfig{
+			Method:   http.MethodGet,
+			Endpoint: secretEndpoint,
+			ResponseParser: &config.ResponseParserConfig{
+				ValuePath: "value",
+			},
+		})
+		mergeOperationDefaults(cfg, "set", &config.OperationConfig{
+			Method:      http.MethodPut,
+			Endpoint:    secretEndpoint,
+			StatusCodes: []int{http.StatusOK, http.StatusCreated},
+		})
+		mergeOperationDefaults(cfg, "delete", &config.OperationConfig{
+			Method:      http.MethodDelete,
+			Endpoint:    secretEndpoint,
+			StatusCodes: []int{http.StatusOK, http.StatusNoContent},
+		})
+
+	case "vault":
+		base := strings.TrimSuffix(cfg.Endpoint, "/")
+		listEndpoint := hashiCorpListEndpoint(base)
+		dataEndpoint := fmt.Sprintf("%s/{name}", base)
+		deleteEndpoint := hashiCorpDeleteEndpoint(base)
+		mergeOperationDefaults(cfg, "list", &config.OperationConfig{
+			Method:   http.MethodGet,
+			Endpoint: listEndpoint,
+			ResponseParser: &config.ResponseParserConfig{
+				ListPath:  "data.keys",
+				NameField: "key",
+			},
+		})
+		mergeOperationDefaults(cfg, "get", &config.OperationConfig{
+			Method:   http.MethodGet,
+			Endpoint: dataEndpoint,
+			ResponseParser: &config.ResponseParserConfig{
+				ValuePath: "data.data",
+			},
+		})
+		mergeOperationDefaults(cfg, "set", &config.OperationConfig{
+			Method:      http.MethodPost,
+			Endpoint:    dataEndpoint,
+			StatusCodes: []int{http.StatusOK, http.StatusCreated, http.StatusNoContent},
+		})
+		mergeOperationDefaults(cfg, "delete", &config.OperationConfig{
+			Method:      http.MethodDelete,
+			Endpoint:    deleteEndpoint,
+			StatusCodes: []int{http.StatusOK, http.StatusNoContent},
+		})
+
+	case "bitwarden", "vaultwarden":
+		mergeOperationDefaults(cfg, "list", &config.OperationConfig{
+			Method: http.MethodGet,
+			ResponseParser: &config.ResponseParserConfig{
+				ListPath:  "data",
+				NameField: "name",
+			},
+		})
+
+	case "keeper":
+		mergeOperationDefaults(cfg, "list", &config.OperationConfig{
+			Method: http.MethodGet,
+			ResponseParser: &config.ResponseParserConfig{
+				ListPath:  "records",
+				NameField: "title",
+			},
+		})
+		mergeOperationDefaults(cfg, "get", &config.OperationConfig{
+			Method: http.MethodGet,
+			ResponseParser: &config.ResponseParserConfig{
+				ValuePath: "data",
+			},
+		})
+	}
+}
+
+func mergeOperationDefaults(cfg *config.VaultConfig, name string, defaults *config.OperationConfig) {
+	if defaults == nil {
+		return
+	}
+	current := cfg.OperationsOverride[name]
+	if current == nil {
+		cfg.OperationsOverride[name] = defaults
+		return
+	}
+	if current.Method == "" {
+		current.Method = defaults.Method
+	}
+	if current.Endpoint == "" {
+		current.Endpoint = defaults.Endpoint
+	}
+	if len(current.StatusCodes) == 0 && len(defaults.StatusCodes) > 0 {
+		current.StatusCodes = defaults.StatusCodes
+	}
+	if current.ResponseParser == nil && defaults.ResponseParser != nil {
+		current.ResponseParser = defaults.ResponseParser
+	}
+}
+
+func hashiCorpListEndpoint(base string) string {
+	listBase := base
+	if strings.Contains(listBase, "/data/") {
+		listBase = strings.Replace(listBase, "/data/", "/metadata/", 1)
+	} else if strings.HasSuffix(listBase, "/data") {
+		listBase = strings.TrimSuffix(listBase, "/data") + "/metadata"
+	}
+	listBase = strings.TrimSuffix(listBase, "/")
+	return fmt.Sprintf("%s?list=true", listBase)
+}
+
+func hashiCorpDeleteEndpoint(base string) string {
+	deleteBase := base
+	if strings.Contains(deleteBase, "/data/") {
+		deleteBase = strings.Replace(deleteBase, "/data/", "/metadata/", 1)
+	} else if strings.HasSuffix(deleteBase, "/data") {
+		deleteBase = strings.TrimSuffix(deleteBase, "/data") + "/metadata"
+	}
+	return fmt.Sprintf("%s/{name}", strings.TrimSuffix(deleteBase, "/"))
+}
+
+func (c *Client) operationConfig(op string) *config.OperationConfig {
+	if c.cfg.OperationsOverride == nil {
+		return nil
+	}
+	return c.cfg.OperationsOverride[op]
+}
+
+func (c *Client) operationEndpoint(op string, name string) string {
+	defaultEndpoint := strings.TrimSuffix(c.cfg.Endpoint, "/")
+	if op == "delete" || op == "get" || op == "set" {
+		defaultEndpoint = fmt.Sprintf("%s/%s", defaultEndpoint, url.PathEscape(name))
+	}
+
+	if opCfg := c.operationConfig(op); opCfg != nil && opCfg.Endpoint != "" {
+		endpoint := strings.ReplaceAll(opCfg.Endpoint, "{name}", url.PathEscape(name))
+		return endpoint
+	}
+
+	return defaultEndpoint
+}
+
+func (c *Client) operationMethod(op string) string {
+	if opCfg := c.operationConfig(op); opCfg != nil && opCfg.Method != "" {
+		return strings.ToUpper(opCfg.Method)
+	}
+	if op == "set" {
+		return strings.ToUpper(c.cfg.Method)
+	}
+	if op == "delete" {
+		return http.MethodDelete
+	}
+	return http.MethodGet
+}
+
+func (c *Client) operationStatusCodes(op string) []int {
+	if opCfg := c.operationConfig(op); opCfg != nil && len(opCfg.StatusCodes) > 0 {
+		return opCfg.StatusCodes
+	}
+	if op == "set" {
+		return []int{http.StatusOK, http.StatusCreated, http.StatusNoContent}
+	}
+	if op == "delete" {
+		return []int{http.StatusOK, http.StatusNoContent}
+	}
+	return []int{http.StatusOK}
+}
+
+func (c *Client) operationParser(op string) ResponseParser {
+	if opCfg := c.operationConfig(op); opCfg != nil && opCfg.ResponseParser != nil {
+		return NewParserFromConfig(opCfg.ResponseParser)
+	}
+	if op == "list" {
+		return c.parser
+	}
+	return GetParserForVaultType(c.cfg.GetVaultType())
+}
+
+func isSuccessStatus(status int, allowed []int) bool {
+	for _, code := range allowed {
+		if status == code {
+			return true
+		}
+	}
+	return false
+}
+
 // GetSecret retrieves a secret from the vault
 func (c *Client) GetSecret(name string) (*Secret, error) {
-	// For APIs that return lists with objects (like Vaultwarden), fetch the list and find the item
+	vaultType := strings.ToLower(c.cfg.GetVaultType())
+	if vaultType == "vaultwarden" || vaultType == "bitwarden" {
+		return c.getSecretFromList(name)
+	}
+
+	return c.getSecretByOperation(name)
+}
+
+func (c *Client) getSecretFromList(name string) (*Secret, error) {
 	secrets, err := c.ListSecrets()
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if the secret name exists in the list
 	found := false
 	for _, s := range secrets {
 		if s == name {
@@ -85,11 +296,8 @@ func (c *Client) GetSecret(name string) (*Secret, error) {
 		return nil, fmt.Errorf("secret not found: %s", name)
 	}
 
-	// Now fetch the full list again to get the actual data
-	// This is not optimal but works with list-based APIs
 	url := strings.TrimSuffix(c.cfg.Endpoint, "/")
-
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -120,7 +328,6 @@ func (c *Client) GetSecret(name string) (*Secret, error) {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	// Find the matching item by name
 	nameField := c.cfg.FieldNames.NameField
 	if nameField == "" {
 		nameField = "name"
@@ -130,7 +337,6 @@ func (c *Client) GetSecret(name string) (*Secret, error) {
 		for _, item := range items {
 			if itemMap, ok := item.(map[string]interface{}); ok {
 				if itemName, ok := itemMap[nameField].(string); ok && itemName == name {
-					// Found the matching secret
 					valueField := c.cfg.FieldNames.ValueField
 					if valueField == "" {
 						valueField = "value"
@@ -138,8 +344,6 @@ func (c *Client) GetSecret(name string) (*Secret, error) {
 
 					valueData := itemMap[valueField]
 					var valueStr string
-
-					// If the value is a complex object (map or slice), serialize it as JSON
 					switch v := valueData.(type) {
 					case map[string]interface{}, []interface{}:
 						if jsonBytes, err := json.Marshal(v); err == nil {
@@ -164,11 +368,48 @@ func (c *Client) GetSecret(name string) (*Secret, error) {
 	return nil, fmt.Errorf("could not extract secret data for: %s", name)
 }
 
+func (c *Client) getSecretByOperation(name string) (*Secret, error) {
+	endpoint := c.operationEndpoint("get", name)
+	method := c.operationMethod("get")
+	req, err := http.NewRequest(method, endpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if err := c.addAuthHeaders(req); err != nil {
+		return nil, fmt.Errorf("failed to add auth headers: %w", err)
+	}
+	c.addCustomHeaders(req)
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get secret: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if !isSuccessStatus(resp.StatusCode, c.operationStatusCodes("get")) {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("vault returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	value, err := c.operationParser("get").ParseGetValue(body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse get response: %w", err)
+	}
+
+	return &Secret{Name: name, Value: value}, nil
+}
+
 // ListSecrets lists all secrets in the vault
 func (c *Client) ListSecrets() ([]string, error) {
-	url := strings.TrimSuffix(c.cfg.Endpoint, "/")
-
-	req, err := http.NewRequest("GET", url, nil)
+	endpoint := c.operationEndpoint("list", "")
+	method := c.operationMethod("list")
+	req, err := http.NewRequest(method, endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -184,7 +425,7 @@ func (c *Client) ListSecrets() ([]string, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if !isSuccessStatus(resp.StatusCode, c.operationStatusCodes("list")) {
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("vault returned status %d: %s", resp.StatusCode, string(body))
 	}
@@ -195,7 +436,7 @@ func (c *Client) ListSecrets() ([]string, error) {
 	}
 
 	// Use the configured parser to extract secret names
-	names, err := c.parser.ParseList(body)
+	names, err := c.operationParser("list").ParseList(body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse list response: %w", err)
 	}
@@ -205,8 +446,7 @@ func (c *Client) ListSecrets() ([]string, error) {
 
 // SetSecret sets a secret in the vault
 func (c *Client) SetSecret(name, value string) error {
-	// For most APIs, POST/PUT goes to the base endpoint, not endpoint/name
-	url := strings.TrimSuffix(c.cfg.Endpoint, "/")
+	endpoint := c.operationEndpoint("set", name)
 
 	payload := map[string]interface{}{
 		c.cfg.FieldNames.NameField: name,
@@ -235,8 +475,8 @@ func (c *Client) SetSecret(name, value string) error {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	method := strings.ToUpper(c.cfg.Method)
-	req, err := http.NewRequest(method, url, bytes.NewReader(body))
+	method := c.operationMethod("set")
+	req, err := http.NewRequest(method, endpoint, bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -253,7 +493,7 @@ func (c *Client) SetSecret(name, value string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
+	if !isSuccessStatus(resp.StatusCode, c.operationStatusCodes("set")) {
 		respBody, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("vault returned status %d: %s", resp.StatusCode, string(respBody))
 	}
@@ -263,9 +503,9 @@ func (c *Client) SetSecret(name, value string) error {
 
 // DeleteSecret deletes a secret from the vault
 func (c *Client) DeleteSecret(name string) error {
-	url := fmt.Sprintf("%s/%s", strings.TrimSuffix(c.cfg.Endpoint, "/"), name)
-
-	req, err := http.NewRequest("DELETE", url, nil)
+	endpoint := c.operationEndpoint("delete", name)
+	method := c.operationMethod("delete")
+	req, err := http.NewRequest(method, endpoint, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -281,7 +521,7 @@ func (c *Client) DeleteSecret(name string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+	if !isSuccessStatus(resp.StatusCode, c.operationStatusCodes("delete")) {
 		respBody, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("vault returned status %d: %s", resp.StatusCode, string(respBody))
 	}
@@ -419,6 +659,17 @@ func (c *Client) getDefaultTokenEndpoint() string {
 		if baseURL == c.cfg.Endpoint {
 			// If endpoint doesn't end with /api/ciphers, assume it's the base URL
 			baseURL = strings.TrimSuffix(c.cfg.Endpoint, "/")
+		}
+		return fmt.Sprintf("%s/identity/connect/token", baseURL)
+
+	case "bitwarden":
+		endpoint := strings.TrimSuffix(c.cfg.Endpoint, "/")
+		if strings.Contains(endpoint, "api.bitwarden.com") {
+			return "https://identity.bitwarden.com/connect/token"
+		}
+		baseURL := strings.TrimSuffix(endpoint, "/api/ciphers")
+		if baseURL == endpoint {
+			baseURL = endpoint
 		}
 		return fmt.Sprintf("%s/identity/connect/token", baseURL)
 

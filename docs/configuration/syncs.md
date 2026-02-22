@@ -7,10 +7,10 @@ Syncs define how and when secrets are synchronized between vaults.
 A sync configuration specifies:
 
 - **Source vault**: Where to get secrets from
-- **Target vault**: Where to send secrets to
+- **Target vaults**: One or more destinations
 - **Schedule**: When to perform the sync
-- **Mode**: One-way or bidirectional
-- **Filters**: Which secrets to sync
+- **Sync type**: Unidirectional or bidirectional
+- **Filter**: Which secrets to sync
 - **Transformations**: How to modify secrets during sync
 
 ## Basic Configuration
@@ -20,9 +20,9 @@ syncs:
   - id: my-first-sync
     name: "My First Sync"
     source: vault-1
-    target: vault-2
+    targets: [vault-2]
     schedule: "0 * * * *"        # Every hour
-    mode: one-way                  # or bidirectional
+    sync_type: unidirectional       # or bidirectional
 ```
 
 ## Sync Configuration Reference
@@ -34,9 +34,9 @@ syncs:
 | `id` | string | Yes | Unique sync identifier | `sync-prod-to-staging` |
 | `name` | string | No | Human-readable name | `Prod to Staging Sync` |
 | `source` | string | Yes | Source vault ID | `azure-prod` |
-| `target` | string | Yes | Target vault ID | `bitwarden-prod` |
+| `targets` | array | Yes | Target vault IDs | `["bitwarden-prod"]` |
 | `schedule` | string | Yes | Cron expression | `0 * * * *` |
-| `mode` | string | No | `one-way` or `bidirectional` | `one-way` |
+| `sync_type` | string | No | `unidirectional` or `bidirectional` | `unidirectional` |
 
 ### Optional Options
 
@@ -114,8 +114,8 @@ Secrets flow only from source to target. Target changes are not synced back.
 syncs:
   - id: one-way-sync
     source: source-vault
-    target: target-vault
-    mode: one-way
+    targets: [target-vault]
+    sync_type: unidirectional
 ```
 
 **Use cases**:
@@ -131,9 +131,8 @@ Secrets synchronize in both directions. Changes in either vault are replicated.
 syncs:
   - id: bi-sync
     source: vault-1
-    target: vault-2
-    mode: bidirectional
-    conflict_resolution: source-wins
+    targets: [vault-2]
+    sync_type: bidirectional
 ```
 
 **Conflict Resolution Strategies**:
@@ -160,52 +159,17 @@ Control which secrets are included in a sync.
 syncs:
   - id: filtered-sync
     source: source-vault
-    target: target-vault
+    targets: [target-vault]
+    sync_type: unidirectional
     schedule: "0 * * * *"
     
-    filters:
-      # Sync only production secrets
-      - source_regex: "^prod-"
-        action: include
-      
-      # Exclude database passwords
-      - source_regex: ".*-db-password"
-        action: exclude
-      
-      # Exclude temporary secrets
-      - source_regex: "^temp-"
-        action: exclude
+    filter:
+      patterns:
+        - "prod-*"
+      exclude:
+        - "*-db-password"
+        - "temp-*"
 ```
-
-### Filter Options
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `source_regex` | string | Regex pattern for source secret name |
-| `source_tags` | array | Match secrets with specific tags |
-| `action` | string | `include` or `exclude` |
-| `target_name` | string | Transform secret name (uses placeholders) |
-
-### Placeholders in Target Names
-
-When specifying `target_name`, use placeholders:
-
-```yaml
-filters:
-  - source_regex: "^app-"
-    target_name: "imported/{source_name}"
-    # Input: "app-api-key" → Output: "imported/app-api-key"
-  
-  - source_regex: "^db-prod-(.*)"
-    target_name: "database/{1}/{source_name}"
-    # Input: "db-prod-main-password" → Output: "database/main/db-prod-main-password"
-```
-
-**Available placeholders**:
-- `{source_name}` - Original secret name
-- `{1}`, `{2}`, etc. - Regex capture groups
-- `{timestamp}` - Current timestamp
-- `{env}` - Environment name (if configured)
 
 ### Filtering Examples
 
@@ -215,30 +179,30 @@ filters:
 syncs:
   - id: prod-only
     source: all-vaults
-    target: prod-target
-    filters:
-      - source_regex: "^prod-"
-        action: include
-      - source_regex: ".*"
-        action: exclude
+    targets: [prod-target]
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "prod-*"
 ```
 
 #### Multiple include patterns
 
 ```yaml
-filters:
-  - source_regex: "^app-"
-    action: include
-  - source_regex: "^db-"
-    action: include
-  - source_regex: ".*"
-    action: exclude
+filter:
+  patterns:
+    - "app-*"
+    - "db-*"
 ```
 
 #### Exclude sensitive data
 
 ```yaml
-filters:
+filter:
+  patterns:
+    - "*"
+  exclude:
+    - "secret-*"
   - source_regex: ".*-master-key$"
     action: exclude
   - source_regex: ".*-admin-password$"
@@ -249,44 +213,30 @@ filters:
 
 Modify secret names and values during synchronization.
 
-### Name Transformations
+### Value Transformations
 
 ```yaml
 syncs:
   - id: transform-sync
     source: source-vault
-    target: target-vault
+    targets: [target-vault]
+    sync_type: unidirectional
     schedule: "0 * * * *"
-    
     transforms:
-      - match: "^old-prefix-"
-        replace: "new-prefix-"
-        
-      - match: "^(.+)-(prod)$"
-        replace: "production/{1}"
+      - field: value
+        type: base64_encode
 ```
-
-### Value Transformations
-
-```yaml
-transforms:
-  - type: base64-encode
-    match: ".*api-key"
-  
-  - type: base64-decode
-    match: ".*base64.*"
-  
-  - type: uppercase
-    match: ".*code"
-  
-  - type: lowercase
-    match: ".*email"
-  
-  - type: shell-escape
-    match: ".*password"
-```
-
-### Custom Script Transformations
+    syncs:
+      - id: transform-sync
+        source: source-vault
+        targets: [target-vault]
+        sync_type: unidirectional
+        schedule: "0 * * * *"
+        transforms:
+          - field: value
+            type: base64_encode
+          - field: value
+            type: base64_decode
 
 ```yaml
 transforms:
@@ -301,67 +251,39 @@ transforms:
 
 ### Transformation Examples
 
-#### Add folder structure to names
+#### Base64 encode values
 
 ```yaml
 transforms:
-  - match: "^(app|db|api)-"
-    replace: "{1}/{source_name}"
-    # app-api-key → app/app-api-key
+  - field: value
+    type: base64_encode
 ```
 
-#### Normalize naming convention
+#### Base64 decode values
 
 ```yaml
 transforms:
-  - match: ".*"
-    replace: "sync-{timestamp}-{source_name}"
-    # Convert to: sync-2024-01-15T10:30:00Z-original-name
+  - field: value
+    type: base64_decode
 ```
 
 ## Advanced Options
 
-### Metadata Handling
+### Retry Policy and Concurrency
 
 ```yaml
 syncs:
-  - id: with-metadata
+  - id: tuned-sync
     source: source-vault
-    target: target-vault
+    targets: [target-vault]
+    sync_type: unidirectional
     schedule: "0 * * * *"
-    
-    options:
-      # Preserve metadata
-      preserve_tags: true
-      preserve_labels: true
-      preserve_metadata: true
-      
-      # Handle secret types
-      secret_types:
-        password: "generic"        # Map password to generic
-        api-key: "authentication"
-        connection-string: "text"
-```
-
-### Batch Operations
-
-```yaml
-options:
-  batch_size: 50          # Sync 50 secrets at a time
-  batch_delay: 100        # Delay 100ms between batches (in milliseconds)
-  disable_parallel: false # Enable parallel processing
-```
-
-### Error Handling
-
-```yaml
-options:
-  on_error: continue      # continue, retry, or abort
-  stop_on_first_error: false
-  retryable_errors:
-    - timeout
-    - rate-limit
-    - temporary-failure
+    concurrent_workers: 5
+    retry_policy:
+      max_retries: 3
+      initial_backoff: 1000
+      max_backoff: 60000
+      multiplier: 2.0
 ```
 
 ## Complete Sync Examples
@@ -373,9 +295,9 @@ syncs:
   - id: simple-sync
     name: "Azure to Bitwarden"
     source: azure-prod
-    target: bitwarden
+    targets: [bitwarden]
     schedule: "0 * * * *"
-    mode: one-way
+    sync_type: unidirectional
 ```
 
 ### Example 2: Filtered Production Sync
@@ -384,13 +306,12 @@ syncs:
 syncs:
   - id: prod-sync
     source: azure-prod
-    target: bitwarden-prod
+    targets: [bitwarden-prod]
     schedule: "0 */4 * * *"  # Every 4 hours
-    
-    filters:
-      - source_regex: "^prod-"
-        action: include
-        target_name: "prod/{source_name}"
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "prod-*"
 ```
 
 ### Example 3: Bidirectional Sync with Transformations
@@ -399,14 +320,12 @@ syncs:
 syncs:
   - id: bi-sync
     source: primary-vault
-    target: secondary-vault
+    targets: [secondary-vault]
     schedule: "*/30 * * * *"   # Every 30 minutes
-    mode: bidirectional
-    conflict_resolution: source-wins
-    
-    filters:
-      - source_regex: "^shared-"
-        action: include
+    sync_type: bidirectional
+    filter:
+      patterns:
+        - "shared-*"
     
     transforms:
       - match: "^shared-"
@@ -424,32 +343,26 @@ syncs:
   # Dev → Staging
   - id: dev-to-staging
     source: vault-dev
-    target: vault-staging
+    targets: [vault-staging]
     schedule: "0 6 * * *"      # 6 AM daily
-    mode: one-way
-    
-    filters:
-      - source_regex: "^(app|db|api)-"
-        action: include
-    
-    options:
-      timeout: 300
-      on_error: continue
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "app-*"
+        - "db-*"
+        - "api-*"
   
   # Staging → Production
   - id: staging-to-prod
     source: vault-staging
-    target: vault-prod
+    targets: [vault-prod]
     schedule: "0 8 * * 0"      # 8 AM Sundays
-    mode: one-way
-    
-    filters:
-      - source_regex: "^(app|db|api)-"
-        action: include
-    
-    options:
-      timeout: 600
-      stop_on_first_error: true
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "app-*"
+        - "db-*"
+        - "api-*"
 ```
 
 ### Example 5: Selective Backup Sync
@@ -459,26 +372,23 @@ syncs:
   - id: backup-sync
     name: "Production Backup"
     source: vault-prod
-    target: vault-backup
+    targets: [vault-backup]
     schedule: "0 1 * * *"      # 1 AM daily
-    mode: one-way
+    sync_type: unidirectional
     
-    filters:
-      # Exclude test and temporary secrets
-      - source_regex: "^test-"
-        action: exclude
-      - source_regex: "^temp-"
-        action: exclude
-      - source_regex: "^debug-"
-        action: exclude
+    filter:
+      patterns:
+        - "*"
+      exclude:
+        - "test-*"
+        - "temp-*"
+        - "debug-*"
     
-    transforms:
-      - match: ".*"
-        replace: "backup-{timestamp}/{source_name}"
-    
-    options:
-      batch_size: 50
-      on_error: continue
+    retry_policy:
+      max_retries: 3
+      initial_backoff: 1000
+      max_backoff: 60000
+      multiplier: 2.0
 ```
 
 ## Monitoring Syncs
@@ -497,9 +407,9 @@ Response:
   "name": "My Sync",
   "enabled": true,
   "source": "vault-1",
-  "target": "vault-2",
+  "targets": ["vault-2"],
   "schedule": "0 * * * *",
-  "mode": "one-way",
+  "sync_type": "unidirectional",
   "status": "idle",
   "last_run": "2024-01-15T10:00:00Z",
   "last_run_status": "success",

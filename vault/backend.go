@@ -110,7 +110,7 @@ func NewBackend(cfg *config.VaultConfig) (Backend, error) {
 	// - AWSSecretsManagerBackend for AWS SDK
 	vaultType := cfg.GetVaultType()
 	switch vaultType {
-	case "vaultwarden", "vault", "azure", "aws", "generic":
+	case "vaultwarden", "bitwarden", "keeper", "vault", "azure", "aws", "generic":
 		return NewGenericBackend(client), nil
 	default:
 		// Unknown types still get GenericBackend (best effort)

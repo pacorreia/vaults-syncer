@@ -28,28 +28,36 @@ docker compose up -d
 ## ⚙️ Basic Configuration
 
 ```yaml
-sync:
-  interval: 3600
-
 vaults:
   - id: source
-    type: azure-keyvault
-    endpoint: https://myvault.vault.azure.net/
+    type: azure
+    endpoint: https://myvault.vault.azure.net/secrets
     auth:
-      method: managed-identity
+      method: bearer
+      headers:
+        token: ${AZURE_ACCESS_TOKEN}
+    field_names:
+      name_field: name
+      value_field: value
   
   - id: target
     type: bitwarden
-    endpoint: https://vault.example.com
+    endpoint: https://vault.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${CLIENT_ID}
-      client_secret: ${CLIENT_SECRET}
+      oauth:
+        client_id: ${CLIENT_ID}
+        client_secret: ${CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 
 syncs:
   - id: my-sync
     source: source
-    target: target
+    targets: [target]
+    sync_type: unidirectional
     schedule: "0 * * * *"
 ```
 
@@ -57,10 +65,10 @@ syncs:
 
 | Vault | Recommended Auth | Setup Complexity |
 |-------|------------------|------------------|
-| Azure Key Vault | Managed Identity | Easy (if on Azure) |
+| Azure Key Vault | Bearer Token (Azure AD) | Medium |
 | Bitwarden | OAuth2 | Medium |
-| HashiCorp Vault | Kubernetes/AppRole | Medium-Hard |
-| AWS Secrets Manager | IAM Role | Easy (if on AWS) |
+| HashiCorp Vault | X-Vault-Token header | Medium |
+| AWS Secrets Manager | Bearer Token / Custom | Medium |
 
 ## 📅 Common Schedules
 
@@ -199,9 +207,8 @@ docker logs akv-sync
 syncs:
   - id: bi-sync
     source: vault1
-    target: vault2
-    mode: bidirectional
-    conflict_resolution: source-wins
+    targets: [vault2]
+    sync_type: bidirectional
 ```
 
 ### Filter secrets
@@ -209,12 +216,13 @@ syncs:
 syncs:
   - id: filtered
     source: source
-    target: target
-    filters:
-      - source_regex: "^prod-"
-        action: include
-      - source_regex: ".*"
-        action: exclude
+    targets: [target]
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "prod-*"
+      exclude:
+        - "*"
 ```
 
 ### Transform names
@@ -222,10 +230,11 @@ syncs:
 syncs:
   - id: transform
     source: source
-    target: target
-    filters:
-      - source_regex: "^app-"
-        target_name: "imported/{source_name}"
+    targets: [target]
+    sync_type: unidirectional
+    transforms:
+      - field: value
+        type: base64_encode
 ```
 
 ## 📞 Get Help

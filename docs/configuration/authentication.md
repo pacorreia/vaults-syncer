@@ -2,18 +2,20 @@
 
 Configure secure authentication for your vaults.
 
+> Note: The generic HTTP adapter only supports `bearer`, `basic`, `oauth2`, `api_key`, and `custom` auth methods. If you use managed identity, AppRole, Kubernetes auth, IAM, or other provider-specific flows, obtain a token externally and pass it via headers or OAuth2 configuration.
+
 ## Authentication Overview
 
-Authentication is how vaults-syncer proves its identity to each vault. Different vault types support different authentication methods.
+vaults-syncer uses a generic HTTP adapter. Supported auth methods are: `bearer`, `basic`, `oauth2`, `api_key`, and `custom`. Obtain provider-specific tokens (Azure AD, Vault, etc.) externally and pass them via headers or OAuth2.
 
 ## Quick Reference
 
 | Vault Type | Recommended Auth | Alternative Methods |
 |------------|------------------|---------------------|
-| Azure Key Vault | Managed Identity | Service Principal, Certificate, User |
+| Azure Key Vault | Bearer Token (Azure AD) | OAuth2 (client credentials) |
 | Bitwarden | OAuth2 | API Key |
-| HashiCorp Vault | Kubernetes / AppRole | Token, LDAP |
-| AWS Secrets Manager | IAM Role | IAM User Keys |
+| HashiCorp Vault | Custom header (X-Vault-Token) | Bearer token |
+| AWS Secrets Manager | Custom header / Proxy | Bearer token |
 | Generic REST | Bearer Token | Basic Auth, API Key, OAuth2 |
 
 ## Azure Key Vault Authentication
@@ -33,12 +35,15 @@ Authentication is how vaults-syncer proves its identity to each vault. Different
 ```yaml
 vaults:
   - id: akv-prod
-    type: azure-keyvault
-    endpoint: "https://myvault.vault.azure.net/"
+    type: azure
+    endpoint: "https://myvault.vault.azure.net/secrets"
     auth:
-      method: managed-identity
-      # Optional: for user-assigned identity
-      client_id: "00000000-0000-0000-0000-000000000000"
+      method: bearer
+      headers:
+        token: "${AZURE_ACCESS_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 **Setup for different Azure resources**:
@@ -119,13 +124,18 @@ az container create \
 ```yaml
 vaults:
   - id: akv-sp
-    type: azure-keyvault
-    endpoint: "https://myvault.vault.azure.net/"
+    type: azure
+    endpoint: "https://myvault.vault.azure.net/secrets"
     auth:
-      method: service-principal
-      tenant_id: "${AZURE_TENANT_ID}"
-      client_id: "${AZURE_CLIENT_ID}"
-      client_secret: "${AZURE_CLIENT_SECRET}"
+      method: oauth2
+      oauth:
+        token_endpoint: "https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/token"
+        client_id: "${AZURE_CLIENT_ID}"
+        client_secret: "${AZURE_CLIENT_SECRET}"
+        scope: "https://vault.azure.net/.default"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 **Setup**:
@@ -197,14 +207,15 @@ Example custom role file:
 ```yaml
 vaults:
   - id: akv-cert
-    type: azure-keyvault
-    endpoint: "https://myvault.vault.azure.net/"
+    type: azure
+    endpoint: "https://myvault.vault.azure.net/secrets"
     auth:
-      method: client-certificate
-      tenant_id: "${AZURE_TENANT_ID}"
-      client_id: "${AZURE_CLIENT_ID}"
-      certificate_path: "/etc/certs/client.pem"
-      certificate_password: "${CERT_PASSWORD}"
+      method: bearer
+      headers:
+        token: "${AZURE_ACCESS_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 **Setup**:
@@ -231,10 +242,15 @@ az ad app credential reset \
 ```yaml
 vaults:
   - id: akv-user
-    type: azure-keyvault
-    endpoint: "https://myvault.vault.azure.net/"
+    type: azure
+    endpoint: "https://myvault.vault.azure.net/secrets"
     auth:
-      method: user-auth
+      method: bearer
+      headers:
+        token: "${AZURE_ACCESS_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 **Setup**:
@@ -257,11 +273,16 @@ az keyvault secret list --vault-name myvault
 vaults:
   - id: bitwarden
     type: bitwarden
-    endpoint: "https://vault.example.com"
+    endpoint: "https://vault.example.com/api/ciphers"
     auth:
       method: oauth2
-      client_id: "${BITWARDEN_CLIENT_ID}"
-      client_secret: "${BITWARDEN_CLIENT_SECRET}"
+      oauth:
+        client_id: "${BITWARDEN_CLIENT_ID}"
+        client_secret: "${BITWARDEN_CLIENT_SECRET}"
+        scope: "api"
+    field_names:
+      name_field: "name"
+      value_field: "login"
 ```
 
 **Setup**:
@@ -296,10 +317,14 @@ vaults:
 vaults:
   - id: bitwarden-api
     type: bitwarden
-    endpoint: "https://vault.example.com"
+    endpoint: "https://vault.example.com/api/ciphers"
     auth:
-      method: api-key
-      api_key: "${BITWARDEN_API_KEY}"
+      method: api_key
+      headers:
+        api_key: "${BITWARDEN_API_KEY}"
+    field_names:
+      name_field: "name"
+      value_field: "login"
 ```
 
 ## HashiCorp Vault Authentication
@@ -322,11 +347,14 @@ vaults:
 vaults:
   - id: vault-approle
     type: vault
-    endpoint: "https://vault.example.com:8200"
+    endpoint: "https://vault.example.com:8200/v1/secret/data"
     auth:
-      method: approle
-      role_id: "${VAULT_ROLE_ID}"
-      secret_id: "${VAULT_SECRET_ID}"
+      method: custom
+      headers:
+        X-Vault-Token: "${VAULT_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 **Setup**:
@@ -353,11 +381,14 @@ vault write -f auth/approle/role/sync-role/secret-id
 vaults:
   - id: vault-k8s
     type: vault
-    endpoint: "https://vault.example.com:8200"
+    endpoint: "https://vault.example.com:8200/v1/secret/data"
     auth:
-      method: kubernetes
-      role: "sync-role"
-      jwt_path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+      method: custom
+      headers:
+        X-Vault-Token: "${VAULT_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 ## AWS Secrets Manager Authentication
@@ -367,10 +398,15 @@ vaults:
 ```yaml
 vaults:
   - id: aws-sm
-    type: aws-sm
-    endpoint: "us-east-1"
+    type: aws
+    endpoint: "https://secretsmanager.us-east-1.amazonaws.com"
     auth:
-      method: iam-role
+      method: custom
+      headers:
+        X-Amz-Security-Token: "${AWS_SESSION_TOKEN}"
+    field_names:
+      name_field: "Name"
+      value_field: "SecretString"
 ```
 
 Works with:
@@ -383,12 +419,15 @@ Works with:
 ```yaml
 vaults:
   - id: aws-sm-keys
-    type: aws-sm
-    endpoint: "us-east-1"
+    type: aws
+    endpoint: "https://secretsmanager.us-east-1.amazonaws.com"
     auth:
-      method: iam-user
-      access_key_id: "${AWS_ACCESS_KEY_ID}"
-      secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+      method: custom
+      headers:
+        X-Amz-Security-Token: "${AWS_SESSION_TOKEN}"
+    field_names:
+      name_field: "Name"
+      value_field: "SecretString"
 ```
 
 ## Generic REST API Authentication
@@ -398,11 +437,15 @@ vaults:
 ```yaml
 vaults:
   - id: rest-bearer
-    type: generic-rest
+    type: generic
     endpoint: "https://api.example.com"
     auth:
-      method: bearer-token
-      token: "${API_TOKEN}"
+      method: bearer
+      headers:
+        token: "${API_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 ### Basic Authentication
@@ -410,12 +453,16 @@ vaults:
 ```yaml
 vaults:
   - id: rest-basic
-    type: generic-rest
+    type: generic
     endpoint: "https://api.example.com"
     auth:
       method: basic
-      username: "${API_USER}"
-      password: "${API_PASSWORD}"
+      headers:
+        username: "${API_USER}"
+        password: "${API_PASSWORD}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 ### API Key
@@ -423,12 +470,15 @@ vaults:
 ```yaml
 vaults:
   - id: rest-apikey
-    type: generic-rest
+    type: generic
     endpoint: "https://api.example.com"
     auth:
-      method: api-key
-      header_name: "X-API-Key"
-      api_key: "${API_KEY}"
+      method: api_key
+      headers:
+        api_key: "${API_KEY}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 ### OAuth2
@@ -436,13 +486,18 @@ vaults:
 ```yaml
 vaults:
   - id: rest-oauth2
-    type: generic-rest
+    type: generic
     endpoint: "https://api.example.com"
     auth:
       method: oauth2
-      token_url: "https://auth.example.com/oauth/token"
-      client_id: "${CLIENT_ID}"
-      client_secret: "${CLIENT_SECRET}"
+      oauth:
+        token_endpoint: "https://auth.example.com/oauth/token"
+        client_id: "${CLIENT_ID}"
+        client_secret: "${CLIENT_SECRET}"
+        scope: "api"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 ## Credential Management

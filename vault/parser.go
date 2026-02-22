@@ -156,6 +156,13 @@ func GetParserForVaultType(vaultType string) ResponseParser {
 			ValuePath: "data",
 		}
 
+	case "bitwarden":
+		return &JsonPathParser{
+			ListPath:  "data",
+			NameField: "name",
+			ValuePath: "data",
+		}
+
 	case "vault":
 		return &JsonPathParser{
 			ListPath:  "data.keys",
@@ -168,6 +175,13 @@ func GetParserForVaultType(vaultType string) ResponseParser {
 			ListPath:  "value",
 			NameField: "name",
 			ValuePath: "value",
+		}
+
+	case "keeper":
+		return &JsonPathParser{
+			ListPath:  "records",
+			NameField: "title",
+			ValuePath: "data",
 		}
 
 	case "aws":

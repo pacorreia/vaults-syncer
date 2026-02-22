@@ -2,14 +2,15 @@
 
 # Define the vaults to sync between
 vaults:
-  # Azure Key Vault
+  # Azure Key Vault (generic HTTP adapter)
   - id: azure_keyvault
     name: Azure Key Vault
+    type: azure
     endpoint: "https://my-keyvault.vault.azure.net/secrets"
-    method: PUT
-    auth_method: bearer
-    auth_headers:
-      token: "${AZURE_ACCESS_TOKEN}" # Can use env vars
+    auth:
+      method: bearer
+      headers:
+        token: "${AZURE_ACCESS_TOKEN}" # Provide an Azure AD access token
     field_names:
       name_field: "name"
       value_field: "value"
@@ -21,39 +22,61 @@ vaults:
   # Vaultwarden instance
   - id: vaultwarden
     name: Vaultwarden
+    type: vaultwarden
     endpoint: "https://vaultwarden.example.com/api/ciphers"
     method: POST
-    auth_method: bearer
-    auth_headers:
-      token: "${VAULTWARDEN_TOKEN}"
+    auth:
+      method: bearer
+      headers:
+        token: "${VAULTWARDEN_TOKEN}"
     field_names:
       name_field: "name"
-      value_field: "password"
+      value_field: "login"
     timeout: 30
     skip_ssl_verify: false
 
-  # HashiCorp Vault
+  # HashiCorp Vault (KV v2)
   - id: hashicorp_vault
     name: HashiCorp Vault
+    type: vault
     endpoint: "https://vault.example.com/v1/secret/data"
     method: POST
-    auth_method: bearer
-    auth_headers:
-      token: "${VAULT_TOKEN}"
+    auth:
+      method: custom
+      headers:
+        X-Vault-Token: "${VAULT_TOKEN}"
     field_names:
-      name_field: "secret_name"
-      value_field: "secret_value"
+      name_field: "name"
+      value_field: "value"
+    timeout: 30
+    skip_ssl_verify: false
+
+  # Keeper Secrets Manager (generic HTTP adapter)
+  - id: keeper
+    name: Keeper Secrets Manager
+    type: keeper
+    endpoint: "https://keeper.example.com/api/secrets"
+    method: POST
+    auth:
+      method: bearer
+      headers:
+        token: "${KEEPER_TOKEN}"
+    field_names:
+      name_field: "title"
+      value_field: "data"
     timeout: 30
     skip_ssl_verify: false
 
   # Custom API with API Key
   - id: custom_api
     name: Custom Secrets API
+    type: generic
     endpoint: "https://api.example.com/secrets"
     method: PUT
-    auth_method: api_key
-    auth_headers:
-      api_key: "${API_KEY}"
+    auth:
+      method: api_key
+      headers:
+        api_key: "${API_KEY}"
     field_names:
       name_field: "secret_name"
       value_field: "secret_value"

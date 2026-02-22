@@ -9,34 +9,40 @@ Get vaults-syncer up and running in 5 minutes.
 Create `config.yaml` in your working directory:
 
 ```yaml
-sync:
-  interval: 3600  # Sync every hour
-  timeout: 300    # 5 minute timeout
-
 vaults:
   - id: akv-prod
     name: Azure Key Vault (Production)
-    type: azure-keyvault
-    endpoint: https://myvault.vault.azure.net/
+    type: azure
+    endpoint: https://myvault.vault.azure.net/secrets
     auth:
-      method: managed-identity
+      method: bearer
+      headers:
+        token: ${AZURE_ACCESS_TOKEN}
+    field_names:
+      name_field: name
+      value_field: value
   
   - id: bitwarden-prod
     name: Bitwarden Production
     type: bitwarden
-    endpoint: https://vault.example.com
+    endpoint: https://vault.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: your-client-id
-      client_secret: your-client-secret
+      oauth:
+        client_id: your-client-id
+        client_secret: your-client-secret
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 
 syncs:
   - id: akv-to-bitwarden
     name: AKV to Bitwarden Sync
     source: akv-prod
-    target: bitwarden-prod
+    targets: [bitwarden-prod]
     schedule: "0 * * * *"  # Hourly
-    mode: one-way
+    sync_type: unidirectional
 ```
 
 ### Step 2: Run with Docker
@@ -68,10 +74,7 @@ You should see:
 ### Create Azure Key Vault Source
 
 1. In your `config.yaml`, ensure Azure Key Vault is configured
-2. Authenticate using one of these methods:
-   - **Managed Identity** (recommended for Azure VMs/AKS)
-   - **Service Principal** (for automated scenarios)
-   - **Client Certificate** (for applications)
+2. Obtain an Azure AD access token and provide it as a bearer token
 
 ### Create Bitwarden Target
 
@@ -83,11 +86,16 @@ You should see:
 vaults:
   - id: bitwarden
     type: bitwarden
-    endpoint: https://vault.example.com
+    endpoint: https://vault.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${BITWARDEN_CLIENT_ID}
-      client_secret: ${BITWARDEN_CLIENT_SECRET}
+      oauth:
+        client_id: ${BITWARDEN_CLIENT_ID}
+        client_secret: ${BITWARDEN_CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 ```
 
 ### Configure Sync Rule
@@ -98,12 +106,12 @@ Add a new sync configuration:
 syncs:
   - id: my-first-sync
     source: akv-prod
-    target: bitwarden
+    targets: [bitwarden]
     schedule: "0 */4 * * *"  # Every 4 hours
-    mode: one-way
-    filters:
-      - source_regex: "^app-.*"
-        target_name: "Auto-synced: {source_name}"
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "app-*"
 ```
 
 ## 3. Monitor Your Sync
@@ -177,11 +185,16 @@ Simply add additional vault configurations:
 vaults:
   - id: secondary-vault
     type: bitwarden
-    endpoint: https://vault2.example.com
+    endpoint: https://vault2.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${SECOND_CLIENT_ID}
-      client_secret: ${SECOND_CLIENT_SECRET}
+      oauth:
+        client_id: ${SECOND_CLIENT_ID}
+        client_secret: ${SECOND_CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 ```
 
 ### Enable Bidirectional Sync
@@ -191,8 +204,7 @@ Change sync mode:
 ```yaml
 syncs:
   - id: my-sync
-    mode: bidirectional
-    conflict_resolution: source-wins  # or target-wins
+    sync_type: bidirectional
 ```
 
 ### Add Filtering
@@ -202,9 +214,9 @@ Sync only specific items:
 ```yaml
 syncs:
   - id: filtered-sync
-    filters:
-      - source_regex: "^prod-"
-        target_regex: "^sync-"
+    filter:
+      patterns:
+        - "prod-*"
 ```
 
 ## 5. Best Practices

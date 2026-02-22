@@ -16,13 +16,13 @@ The application is configured through a YAML configuration file that defines:
 
 ### [Vaults](./vaults.md)
 
-Define and configure vault connections:
+Define and configure vault connections using the generic HTTP adapter:
 
-- **Azure Key Vault** - Microsoft's cloud secrets store
-- **Bitwarden** - Open-source password manager
-- **HashiCorp Vault** - Enterprise secrets management
-- **AWS Secrets Manager** - AWS managed secrets
-- **Custom REST APIs** - Any compatible vault
+- **Azure Key Vault** (type `azure`)
+- **Bitwarden / Vaultwarden** (types `bitwarden`, `vaultwarden`)
+- **HashiCorp Vault** (type `vault`)
+- **Keeper Secrets Manager** (type `keeper`)
+- **Custom REST APIs** (type `generic`)
 
 Learn how to:
 - Add vault endpoints
@@ -32,20 +32,13 @@ Learn how to:
 
 ### [Authentication](./authentication.md)
 
-Set up secure authentication for your vaults:
+Set up secure authentication for your vaults (generic HTTP adapter):
 
-- **Azure Authentication**:
-  - Managed Identity (recommended for Azure resources)
-  - Service Principal
-  - User Authentication
-  - Client Certificates
-
-- **OAuth2** (for Bitwarden, GitHub, etc.)
-- **API Keys** (for custom systems)
-- **Credentials Management**:
-  - Environment variables
-  - Secret stores
-  - Encrypted configuration
+- **Bearer** (OAuth tokens, Azure AD access tokens, etc.)
+- **OAuth2** (client credentials flow)
+- **Basic** (username/password)
+- **API Key**
+- **Custom** (arbitrary headers)
 
 ### [Syncs](./syncs.md)
 
@@ -94,52 +87,59 @@ Configure global behavior:
 ## Configuration File Structure
 
 ```yaml
-# Global settings
-sync:
-  interval: 3600              # Default sync interval in seconds
-  timeout: 300                # Default timeout for operations
-  max_retries: 3              # Maximum retry attempts
-  retry_delay: 60             # Delay between retries in seconds
-
 logging:
   level: info                 # Log level: debug, info, warn, error
   format: json                # Format: json, text
-  output: stdout              # Output: stdout, file, syslog
+
+server:
+  port: 8080
+  address: 0.0.0.0
+  metrics_port: 9090
+  metrics_address: 0.0.0.0
 
 # Define available vaults
 vaults:
   - id: vault-1
     name: "Primary Vault"
-    type: azure-keyvault      # or bitwarden, vault, aws-sm, etc.
-    endpoint: "https://vault.example.com"
+    type: azure
+    endpoint: "https://vault.example.com/secrets"
     auth:
-      method: managed-identity # or oauth2, api-key, etc.
+      method: bearer
+      headers:
+        token: ${AZURE_ACCESS_TOKEN}
+    field_names:
+      name_field: name
+      value_field: value
     
   - id: vault-2
     name: "Secondary Vault"
     type: bitwarden
-    endpoint: "https://vault2.example.com"
+    endpoint: "https://vault2.example.com/api/ciphers"
     auth:
       method: oauth2
-      client_id: ${CLIENT_ID}
-      client_secret: ${CLIENT_SECRET}
+      oauth:
+        client_id: ${CLIENT_ID}
+        client_secret: ${CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 
 # Define sync operations
 syncs:
   - id: sync-1
     name: "Primary Sync"
     source: vault-1
-    target: vault-2
+    targets: [vault-2]
     schedule: "0 * * * *"     # Every hour
-    mode: one-way             # or bidirectional
+    sync_type: unidirectional # or bidirectional
     
     # Optional: Filtering
-    filters:
-      - source_regex: "^prod-.*"
-        target_name: "sync-{source_name}"
-    
-    # Optional: Conflict resolution (for bidirectional)
-    conflict_resolution: source-wins  # or target-wins
+    filter:
+      patterns:
+        - "prod-*"
+      exclude:
+        - "*-dev"
 ```
 
 ## Quick Examples
@@ -149,24 +149,35 @@ syncs:
 ```yaml
 vaults:
   - id: akv
-    type: azure-keyvault
-    endpoint: https://myvault.vault.azure.net/
+    type: azure
+    endpoint: https://myvault.vault.azure.net/secrets
     auth:
-      method: managed-identity
+      method: bearer
+      headers:
+        token: ${AZURE_ACCESS_TOKEN}
+    field_names:
+      name_field: name
+      value_field: value
   
   - id: bitwarden
     type: bitwarden
-    endpoint: https://vault.example.com
+    endpoint: https://vault.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${BW_CLIENT_ID}
-      client_secret: ${BW_CLIENT_SECRET}
+      oauth:
+        client_id: ${BW_CLIENT_ID}
+        client_secret: ${BW_CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 
 syncs:
   - id: main-sync
     source: akv
-    target: bitwarden
+    targets: [bitwarden]
     schedule: "0 * * * *"
+    sync_type: unidirectional
 ```
 
 ### Example 2: Multi-Vault Setup
@@ -174,40 +185,54 @@ syncs:
 ```yaml
 vaults:
   - id: source-vault
-    type: azure-keyvault
-    endpoint: https://source.vault.azure.net/
+    type: azure
+    endpoint: https://source.vault.azure.net/secrets
     auth:
-      method: service-principal
-      tenant_id: ${AZURE_TENANT_ID}
-      client_id: ${AZURE_CLIENT_ID}
-      client_secret: ${AZURE_CLIENT_SECRET}
+      method: bearer
+      headers:
+        token: ${AZURE_ACCESS_TOKEN}
+    field_names:
+      name_field: name
+      value_field: value
   
   - id: target-primary
     type: bitwarden
-    endpoint: https://vault1.example.com
+    endpoint: https://vault1.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${BW_PRIMARY_CLIENT_ID}
-      client_secret: ${BW_PRIMARY_CLIENT_SECRET}
+      oauth:
+        client_id: ${BW_PRIMARY_CLIENT_ID}
+        client_secret: ${BW_PRIMARY_CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
   
   - id: target-secondary
     type: bitwarden
-    endpoint: https://vault2.example.com
+    endpoint: https://vault2.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${BW_SECONDARY_CLIENT_ID}
-      client_secret: ${BW_SECONDARY_CLIENT_SECRET}
+      oauth:
+        client_id: ${BW_SECONDARY_CLIENT_ID}
+        client_secret: ${BW_SECONDARY_CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 
 syncs:
   - id: sync-to-primary
     source: source-vault
-    target: target-primary
+    targets: [target-primary]
     schedule: "0 */4 * * *"  # Every 4 hours
+    sync_type: unidirectional
   
   - id: sync-to-secondary
     source: source-vault
-    target: target-secondary
+    targets: [target-secondary]
     schedule: "0 */6 * * *"  # Every 6 hours
+    sync_type: unidirectional
 ```
 
 ### Example 3: Filtered Sync
@@ -216,13 +241,13 @@ syncs:
 syncs:
   - id: prod-only-sync
     source: akv
-    target: bitwarden
+    targets: [bitwarden]
     schedule: "0 2 * * *"
-    filters:
-      - source_regex: "^prod-"
-        target_name: "production/{source_name}"
-      - source_regex: "^app-"
-        target_name: "applications/{source_name}"
+    sync_type: unidirectional
+    filter:
+      patterns:
+        - "prod-*"
+        - "app-*"
 ```
 
 ## Configuration File Locations
@@ -257,11 +282,16 @@ Use environment variables for sensitive values:
 vaults:
   - id: bitwarden
     type: bitwarden
-    endpoint: https://vault.example.com
+    endpoint: https://vault.example.com/api/ciphers
     auth:
       method: oauth2
-      client_id: ${BITWARDEN_CLIENT_ID}
-      client_secret: ${BITWARDEN_CLIENT_SECRET}
+      oauth:
+        client_id: ${BITWARDEN_CLIENT_ID}
+        client_secret: ${BITWARDEN_CLIENT_SECRET}
+        scope: api
+    field_names:
+      name_field: name
+      value_field: login
 ```
 
 Set environment variables:
@@ -296,7 +326,7 @@ docker run --rm -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `unknown vault type` | Invalid vault type | Check supported types: azure-keyvault, bitwarden, vault, aws-sm |
+| `unknown vault type` | Invalid vault type | Check supported types: azure, bitwarden, vaultwarden, vault, keeper, aws, generic |
 | `endpoint required` | Missing endpoint | Add endpoint URL for vault |
 | `invalid cron schedule` | Bad cron syntax | Use 5-field cron format: `minute hour day month weekday` |
 | `authentication failed` | Wrong credentials | Verify auth method and credentials |

@@ -141,7 +141,7 @@ func TestGenericBackendListSecrets(t *testing.T) {
 func TestGenericBackendGetSecret(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"data": [{"name": "my-secret", "value": "my-value"}]}`))
+		w.Write([]byte(`{"value": "my-value"}`))
 	}))
 	defer server.Close()
 

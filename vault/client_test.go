@@ -83,7 +83,7 @@ func TestClientListSecrets(t *testing.T) {
 			cfg := &config.VaultConfig{
 				ID:       "test",
 				Endpoint: server.URL,
-				Type:     "generic",
+				Type:     "vaultwarden",
 				Auth: &config.AuthConfig{
 					Method: "bearer",
 					Headers: map[string]string{
@@ -168,7 +168,7 @@ func TestClientGetSecret(t *testing.T) {
 			cfg := &config.VaultConfig{
 				ID:       "test",
 				Endpoint: server.URL,
-				Type:     "generic",
+				Type:     "vaultwarden",
 				Auth: &config.AuthConfig{
 					Method: "bearer",
 					Headers: map[string]string{
@@ -748,6 +748,18 @@ func TestGetDefaultTokenEndpoint(t *testing.T) {
 			wantEndpoint: "https://vault.example.com/identity/connect/token",
 		},
 		{
+			name:         "bitwarden cloud endpoint",
+			endpoint:     "https://api.bitwarden.com/ciphers",
+			vaultType:    "bitwarden",
+			wantEndpoint: "https://identity.bitwarden.com/connect/token",
+		},
+		{
+			name:         "bitwarden self-hosted endpoint",
+			endpoint:     "https://vault.example.com/api/ciphers",
+			vaultType:    "bitwarden",
+			wantEndpoint: "https://vault.example.com/identity/connect/token",
+		},
+		{
 			name:         "vault type",
 			endpoint:     "https://vault.example.com/v1",
 			vaultType:    "vault",
@@ -806,7 +818,7 @@ func TestDeleteSecretError(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth: &config.AuthConfig{
 			Method: "bearer",
 			Headers: map[string]string{
@@ -837,7 +849,7 @@ func TestGetSecretComplexValue(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth: &config.AuthConfig{
 			Method: "bearer",
 			Headers: map[string]string{
@@ -908,7 +920,7 @@ func TestListSecretsError(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth: &config.AuthConfig{
 			Method: "bearer",
 			Headers: map[string]string{
@@ -1012,7 +1024,7 @@ func TestGetSecretNotInList(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth: &config.AuthConfig{
 			Method: "bearer",
 			Headers: map[string]string{
@@ -1141,7 +1153,7 @@ func TestListSecrets_NonOK(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1165,7 +1177,7 @@ func TestListSecrets_InvalidJSON(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1189,7 +1201,7 @@ func TestGetSecret_ListSecretsError(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1237,7 +1249,7 @@ func TestDeleteSecret_NoContent(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1260,7 +1272,7 @@ func TestTestConnection_UnexpectedStatus(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 	}
 
@@ -1442,7 +1454,7 @@ func TestGetSecret_ParseError(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1472,7 +1484,7 @@ func TestGetSecret_NoDataMatch(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1570,7 +1582,7 @@ func TestGetSecret_SecondRequestNonOK(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
 			NameField:  "name",
@@ -1594,7 +1606,7 @@ func TestGetSecret_DefaultFieldsAndMapValue(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:         "test",
 		Endpoint:   server.URL,
-		Type:       "generic",
+		Type:       "vaultwarden",
 		Auth:       &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{},
 	}
@@ -1619,7 +1631,7 @@ func TestGetSecret_ValueArray(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:         "test",
 		Endpoint:   server.URL,
-		Type:       "generic",
+		Type:       "vaultwarden",
 		Auth:       &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{},
 	}
@@ -1647,7 +1659,7 @@ func TestSetSecret_InvalidJSONValue(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:       "test",
 		Endpoint: server.URL,
-		Type:     "generic",
+		Type:     "vaultwarden",
 		Method:   "PUT",
 		Auth:     &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{
@@ -1718,7 +1730,7 @@ func TestSetSecret_InvalidEndpoint(t *testing.T) {
 	cfg := &config.VaultConfig{
 		ID:         "test",
 		Endpoint:   "http://[::1",
-		Type:       "generic",
+		Type:       "vaultwarden",
 		Method:     "PUT",
 		Auth:       &config.AuthConfig{Method: "bearer", Headers: map[string]string{"token": "t"}},
 		FieldNames: config.FieldNamesConfig{NameField: "name", ValueField: "value"},
