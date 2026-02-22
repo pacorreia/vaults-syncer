@@ -1,4 +1,4 @@
-site_name: AKV Vaultwarden Sync
+site_name: Secrets Vault Sync
 site_description: Multi-vault secret synchronization daemon with OAuth 2.0 support
 site_author: Paulo Correia
 site_url: https://github.com/pacorreia/vaults-syncer
