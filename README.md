@@ -28,43 +28,48 @@ A containerized, highly customizable daemon for synchronizing secrets across mul
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│         Sync Daemon (Go Binary)                 │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  ┌──────────────┐        ┌──────────────┐     │
-│  │  HTTP API    │        │Sync Scheduler│     │
-│  │  - Health    │        │  - Cron Jobs │     │
-│  │  - Status    │        │  - Execution │     │
-│  │  - Execute   │        │  - Runner    │     │
-│  └──────────────┘        └──────────────┘     │
-│         │                       │               │
-│  ┌──────────────────────────────────────┐     │
-│  │     Sync Engine                      │     │
-│  │  - Unidirectional                    │     │
-│  │  - Bidirectional with conflict res   │     │
-│  │  - Retry with backoff                │     │
-│  └──────────────────────────────────────┘     │
-│         │                       │               │
-│         └──────────┬────────────┘               │
-│                    │                            │
-│  ┌─────────────────────────────────────┐      │
-│  │    Vault Clients                    │      │
-│  │  - Azure Key Vault                  │      │
-│  │  - Vaultwarden                      │      │
-│  │  - HashiCorp Vault                  │      │
-│  │  - Generic HTTP Vault               │      │
-│  └─────────────────────────────────────┘      │
-│                    │                            │
-└────────────────────┼────────────────────────────┘
-                     │
-         ┌───────────┼───────────┐
-         ↓           ↓           ↓
-    ┌────────┐  ┌────────┐  ┌────────┐
-    │SQLite  │  │Vault 1 │  │Vault 2 │
-    │Database│  │        │  │        │
-    └────────┘  └────────┘  └────────┘
+```mermaid
+graph TB
+    subgraph daemon["Sync Daemon (Go Binary)"]
+        direction TB
+        
+        subgraph api["HTTP API"]
+            health["Health"]
+            status["Status"]
+            execute["Execute"]
+        end
+        
+        subgraph scheduler["Sync Scheduler"]
+            cron["Cron Jobs"]
+            execution["Execution"]
+            runner["Runner"]
+        end
+        
+        subgraph engine["Sync Engine"]
+            unidirectional["Unidirectional"]
+            bidirectional["Bidirectional with conflict res"]
+            retry["Retry with backoff"]
+        end
+        
+        subgraph clients["Vault Clients"]
+            azure["Azure Key Vault"]
+            vaultwarden["Vaultwarden"]
+            hashicorp["HashiCorp Vault"]
+            generic["Generic HTTP Vault"]
+        end
+        
+        api --> engine
+        scheduler --> engine
+        engine --> clients
+    end
+    
+    clients --> db[(SQLite Database)]
+    clients --> vault1[("Vault 1")]
+    clients --> vault2[("Vault 2")]
+    
+    style daemon fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style engine fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style clients fill:#fff3e0,stroke:#e65100,stroke-width:2px
 ```
 
 ## Quick Start
