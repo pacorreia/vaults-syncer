@@ -128,11 +128,11 @@ graph TB
         api["REST API & Monitoring<br/>• Sync Control & Status<br/>• Prometheus Metrics<br/>• Health Checks"]
     end
     
-    style daemon fill:#f9f9f9,stroke:#666,stroke-width:2px
-    style engine fill:#fff,stroke:#0066cc,stroke-width:2px
-    style vaults fill:#fff,stroke:#ff6600,stroke-width:2px
-    style backends fill:#fff,stroke:#9933cc,stroke-width:2px
-    style api fill:#fff,stroke:#009900,stroke-width:2px
+    style daemon fill:none,stroke:#4a9eff,stroke-width:3px
+    style engine fill:none,stroke:#4a9eff,stroke-width:2px
+    style vaults fill:none,stroke:#ff6b35,stroke-width:2px
+    style backends fill:none,stroke:#a64dff,stroke-width:2px
+    style api fill:none,stroke:#00cc66,stroke-width:2px
 ```
 
 ## Getting Started
