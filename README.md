@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)
-[![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
+[![Coverage](https://img.shields.io/endpoint?url=https://pacorreia.github.io/vaults-syncer/badges/coverage.json)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](LICENSE)
 
@@ -28,43 +28,50 @@ A containerized, highly customizable daemon for synchronizing secrets across mul
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│         Sync Daemon (Go Binary)                 │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  ┌──────────────┐        ┌──────────────┐     │
-│  │  HTTP API    │        │Sync Scheduler│     │
-│  │  - Health    │        │  - Cron Jobs │     │
-│  │  - Status    │        │  - Execution │     │
-│  │  - Execute   │        │  - Runner    │     │
-│  └──────────────┘        └──────────────┘     │
-│         │                       │               │
-│  ┌──────────────────────────────────────┐     │
-│  │     Sync Engine                      │     │
-│  │  - Unidirectional                    │     │
-│  │  - Bidirectional with conflict res   │     │
-│  │  - Retry with backoff                │     │
-│  └──────────────────────────────────────┘     │
-│         │                       │               │
-│         └──────────┬────────────┘               │
-│                    │                            │
-│  ┌─────────────────────────────────────┐      │
-│  │    Vault Clients                    │      │
-│  │  - Azure Key Vault                  │      │
-│  │  - Vaultwarden                      │      │
-│  │  - HashiCorp Vault                  │      │
-│  │  - Generic HTTP Vault               │      │
-│  └─────────────────────────────────────┘      │
-│                    │                            │
-└────────────────────┼────────────────────────────┘
-                     │
-         ┌───────────┼───────────┐
-         ↓           ↓           ↓
-    ┌────────┐  ┌────────┐  ┌────────┐
-    │SQLite  │  │Vault 1 │  │Vault 2 │
-    │Database│  │        │  │        │
-    └────────┘  └────────┘  └────────┘
+```mermaid
+graph TB
+    subgraph daemon["Sync Daemon (Go Binary)"]
+        direction TB
+        
+        subgraph api["HTTP API"]
+            health["Health"]
+            status["Status"]
+            execute["Execute"]
+        end
+        
+        subgraph scheduler["Sync Scheduler"]
+            cron["Cron Jobs"]
+            execution["Execution"]
+            runner["Runner"]
+        end
+        
+        subgraph engine["Sync Engine"]
+            unidirectional["Unidirectional"]
+            bidirectional["Bidirectional with conflict res"]
+            retry["Retry with backoff"]
+        end
+        
+        subgraph clients["Vault Clients"]
+            azure["Azure Key Vault"]
+            vaultwarden["Vaultwarden"]
+            hashicorp["HashiCorp Vault"]
+            generic["Generic HTTP Vault"]
+        end
+        
+        api --> engine
+        scheduler --> engine
+        engine --> clients
+    end
+    
+    clients --> db[(SQLite Database)]
+    clients --> vault1[("Vault 1")]
+    clients --> vault2[("Vault 2")]
+    
+    style daemon fill:none,stroke:#4a9eff,stroke-width:3px
+    style engine fill:none,stroke:#4a9eff,stroke-width:2px
+    style clients fill:none,stroke:#ff6b35,stroke-width:2px
+    style api fill:none,stroke:#888,stroke-width:2px
+    style scheduler fill:none,stroke:#888,stroke-width:2px
 ```
 
 ## Quick Start
@@ -212,9 +219,6 @@ server:
 logging:
   level: info                      # debug, info, warn, error
   format: json                     # json or text
-```
-  level: info
-  format: json
 ```
 
 ### Vault Type Support
