@@ -1,3 +1,4 @@
+// Package main provides a daemon for synchronizing secrets across multiple vaults
 package main
 
 import (
