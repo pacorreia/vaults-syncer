@@ -1314,119 +1314,118 @@
 </span><span id="__span-2-10"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;shared-*&quot;</span>
 </span></code></pre></div>
 <h2 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1">┌─────────────────────────────────────────────────────────────┐
-</span><span id="__span-3-2">│                    AKV Sync Daemon                          │
-</span><span id="__span-3-3">├─────────────────────────────────────────────────────────────┤
-</span><span id="__span-3-4">│                                                              │
-</span><span id="__span-3-5">│  ┌──────────────┐         ┌──────────────┐                 │
-</span><span id="__span-3-6">│  │   Vaults     │ OAuth2  │   Backends   │                 │
-</span><span id="__span-3-7">│  │              │────────▶│              │                 │
-</span><span id="__span-3-8">│  │ Vaultwarden  │         │ Generic HTTP │                 │
-</span><span id="__span-3-9">│  │ Azure KV     │         │ Vault        │                 │
-</span><span id="__span-3-10">│  │ AWS SM       │         │ AWS          │                 │
-</span><span id="__span-3-11">│  │ HashiCorp    │         │ Azure        │                 │
-</span><span id="__span-3-12">│  └──────────────┘         └──────────────┘                 │
-</span><span id="__span-3-13">│         △                         △                         │
-</span><span id="__span-3-14">│         │                         │                         │
-</span><span id="__span-3-15">│         └────────┬────────────────┘                         │
-</span><span id="__span-3-16">│                  │                                          │
-</span><span id="__span-3-17">│         ┌────────▼────────┐                                │
-</span><span id="__span-3-18">│         │   Sync Engine   │                                │
-</span><span id="__span-3-19">│         │                 │                                │
-</span><span id="__span-3-20">│         │ • Scheduling    │                                │
-</span><span id="__span-3-21">│         │ • Filtering     │                                │
-</span><span id="__span-3-22">│         │ • Retries       │                                │
-</span><span id="__span-3-23">│         └────────┬────────┘                                │
-</span><span id="__span-3-24">│                  │                                          │
-</span><span id="__span-3-25">│         ┌────────▼────────┐                                │
-</span><span id="__span-3-26">│         │  State Database │                                │
-</span><span id="__span-3-27">│         │   (SQLite)      │                                │
-</span><span id="__span-3-28">│         └─────────────────┘                                │
-</span><span id="__span-3-29">│                                                              │
-</span><span id="__span-3-30">│  ┌─────────────────────────────────────────┐              │
-</span><span id="__span-3-31">│  │  REST API &amp; Monitoring                  │              │
-</span><span id="__span-3-32">│  │  • Sync Control &amp; Status                │              │
-</span><span id="__span-3-33">│  │  • Prometheus Metrics                   │              │
-</span><span id="__span-3-34">│  │  • Health Checks                        │              │
-</span><span id="__span-3-35">│  └─────────────────────────────────────────┘              │
-</span><span id="__span-3-36">└─────────────────────────────────────────────────────────────┘
-</span></code></pre></div>
+<div class="mermaid">graph TB
+    subgraph daemon["AKV Sync Daemon"]
+        direction TB
+
+        subgraph vaults["Vaults"]
+            vw["Vaultwarden"]
+            akv["Azure KV"]
+            aws["AWS SM"]
+            hc["HashiCorp"]
+        end
+
+        subgraph backends["Backends"]
+            http["Generic HTTP"]
+            vault["Vault"]
+            awsb["AWS"]
+            azure["Azure"]
+        end
+
+        vaults --&gt;|OAuth2| backends
+
+        engine["Sync Engine&lt;br/&gt;• Scheduling&lt;br/&gt;• Filtering&lt;br/&gt;• Retries"]
+
+        vaults --&gt; engine
+        backends --&gt; engine
+
+        db[("State Database&lt;br/&gt;(SQLite)")]
+        engine --&gt; db
+
+        api["REST API &amp; Monitoring&lt;br/&gt;• Sync Control &amp; Status&lt;br/&gt;• Prometheus Metrics&lt;br/&gt;• Health Checks"]
+    end
+
+    style daemon fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style engine fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style vaults fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style backends fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style api fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px</div>
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Binary</label><label for="__tabbed_1_3">Source</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-4-1">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-2"><span class="w">  </span>--name<span class="w"> </span>akv-sync<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/config.yaml:/etc/sync/config.yaml:ro<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-4"><span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/data:/app/data<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-5"><span class="w">  </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-6"><span class="w">  </span>-p<span class="w"> </span><span class="m">9090</span>:9090<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-7"><span class="w">  </span>ghcr.io/pacorreia/vaults-syncer:latest
+<div class="highlight"><pre><span></span><code><span id="__span-3-1">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><span class="w">  </span>--name<span class="w"> </span>akv-sync<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/config.yaml:/etc/sync/config.yaml:ro<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/data:/app/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-5"><span class="w">  </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-6"><span class="w">  </span>-p<span class="w"> </span><span class="m">9090</span>:9090<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-7"><span class="w">  </span>ghcr.io/pacorreia/vaults-syncer:latest
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Download latest release</span>
-</span><span id="__span-5-2">wget<span class="w"> </span>https://github.com/pacorreia/vaults-syncer/releases/download/v1.0.0/sync-daemon-linux-amd64
-</span><span id="__span-5-3">chmod<span class="w"> </span>+x<span class="w"> </span>sync-daemon-linux-amd64
-</span><span id="__span-5-4">
-</span><span id="__span-5-5"><span class="c1"># Run</span>
-</span><span id="__span-5-6">./sync-daemon-linux-amd64<span class="w"> </span>-config<span class="w"> </span>config.yaml
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><span class="c1"># Download latest release</span>
+</span><span id="__span-4-2">wget<span class="w"> </span>https://github.com/pacorreia/vaults-syncer/releases/download/v1.0.0/sync-daemon-linux-amd64
+</span><span id="__span-4-3">chmod<span class="w"> </span>+x<span class="w"> </span>sync-daemon-linux-amd64
+</span><span id="__span-4-4">
+</span><span id="__span-4-5"><span class="c1"># Run</span>
+</span><span id="__span-4-6">./sync-daemon-linux-amd64<span class="w"> </span>-config<span class="w"> </span>config.yaml
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-6-1">git<span class="w"> </span>clone<span class="w"> </span>https://github.com/pacorreia/vaults-syncer
-</span><span id="__span-6-2"><span class="nb">cd</span><span class="w"> </span>vaults-syncer
-</span><span id="__span-6-3">go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>sync-daemon<span class="w"> </span>.
-</span><span id="__span-6-4">./sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml
+<div class="highlight"><pre><span></span><code><span id="__span-5-1">git<span class="w"> </span>clone<span class="w"> </span>https://github.com/pacorreia/vaults-syncer
+</span><span id="__span-5-2"><span class="nb">cd</span><span class="w"> </span>vaults-syncer
+</span><span id="__span-5-3">go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>sync-daemon<span class="w"> </span>.
+</span><span id="__span-5-4">./sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml
 </span></code></pre></div>
 </div>
 </div>
 </div>
 <h3 id="minimal-configuration">Minimal Configuration<a class="headerlink" href="#minimal-configuration" title="Permanent link">&para;</a></h3>
 <p>Create <code>config.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="nt">vaults</span><span class="p">:</span>
-</span><span id="__span-7-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source</span>
-</span><span id="__span-7-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Source Vault</span>
-</span><span id="__span-7-4"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaultwarden</span>
-</span><span id="__span-7-5"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://vault.example.com/api/ciphers</span>
-</span><span id="__span-7-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-7-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
-</span><span id="__span-7-8"><span class="w">      </span><span class="nt">oauth</span><span class="p">:</span>
-</span><span id="__span-7-9"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://vault.example.com/identity/connect/token</span>
-</span><span id="__span-7-10"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-client-id</span>
-</span><span id="__span-7-11"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-client-secret</span>
-</span><span id="__span-7-12"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api</span>
-</span><span id="__span-7-13">
-</span><span id="__span-7-14"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target</span>
-</span><span id="__span-7-15"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Target Vault</span>
-</span><span id="__span-7-16"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaultwarden</span>
-</span><span id="__span-7-17"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://backup.example.com/api/ciphers</span>
-</span><span id="__span-7-18"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-7-19"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
-</span><span id="__span-7-20"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-7-21"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-bearer-token</span>
-</span><span id="__span-7-22">
-</span><span id="__span-7-23"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-7-24"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-sync</span>
-</span><span id="__span-7-25"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source</span>
-</span><span id="__span-7-26"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-7-27"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target</span>
-</span><span id="__span-7-28"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-7-29"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
-</span><span id="__span-7-30">
-</span><span id="__span-7-31"><span class="nt">server</span><span class="p">:</span>
-</span><span id="__span-7-32"><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
-</span><span id="__span-7-33">
-</span><span id="__span-7-34"><span class="nt">logging</span><span class="p">:</span>
-</span><span id="__span-7-35"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span>
-</span><span id="__span-7-36"><span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="nt">vaults</span><span class="p">:</span>
+</span><span id="__span-6-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source</span>
+</span><span id="__span-6-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Source Vault</span>
+</span><span id="__span-6-4"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaultwarden</span>
+</span><span id="__span-6-5"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://vault.example.com/api/ciphers</span>
+</span><span id="__span-6-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
+</span><span id="__span-6-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
+</span><span id="__span-6-8"><span class="w">      </span><span class="nt">oauth</span><span class="p">:</span>
+</span><span id="__span-6-9"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://vault.example.com/identity/connect/token</span>
+</span><span id="__span-6-10"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-client-id</span>
+</span><span id="__span-6-11"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-client-secret</span>
+</span><span id="__span-6-12"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api</span>
+</span><span id="__span-6-13">
+</span><span id="__span-6-14"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target</span>
+</span><span id="__span-6-15"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Target Vault</span>
+</span><span id="__span-6-16"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaultwarden</span>
+</span><span id="__span-6-17"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://backup.example.com/api/ciphers</span>
+</span><span id="__span-6-18"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
+</span><span id="__span-6-19"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
+</span><span id="__span-6-20"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
+</span><span id="__span-6-21"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-bearer-token</span>
+</span><span id="__span-6-22">
+</span><span id="__span-6-23"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-6-24"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-sync</span>
+</span><span id="__span-6-25"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source</span>
+</span><span id="__span-6-26"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
+</span><span id="__span-6-27"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target</span>
+</span><span id="__span-6-28"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+</span><span id="__span-6-29"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
+</span><span id="__span-6-30">
+</span><span id="__span-6-31"><span class="nt">server</span><span class="p">:</span>
+</span><span id="__span-6-32"><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</span><span id="__span-6-33">
+</span><span id="__span-6-34"><span class="nt">logging</span><span class="p">:</span>
+</span><span id="__span-6-35"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span>
+</span><span id="__span-6-36"><span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 </span></code></pre></div>
 <p>Then run:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-8-1">./sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml
+<div class="highlight"><pre><span></span><code><span id="__span-7-1">./sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml
 </span></code></pre></div>
 <p>Check status:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1">curl<span class="w"> </span>http://localhost:8080/health
+<div class="highlight"><pre><span></span><code><span id="__span-8-1">curl<span class="w"> </span>http://localhost:8080/health
 </span></code></pre></div>
 <h2 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h2>
 <p>This project is written in <strong>Go 1.22</strong> with a modular architecture:</p>
@@ -1437,14 +1436,14 @@
 <li><strong>Well-tested</strong> - unit tests, integration tests, and real vault testing</li>
 </ul>
 <h3 id="build">Build<a class="headerlink" href="#build" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-10-1">go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>sync-daemon<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><span id="__span-9-1">go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>sync-daemon<span class="w"> </span>.
 </span></code></pre></div>
 <h3 id="test">Test<a class="headerlink" href="#test" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="c1"># Unit tests</span>
-</span><span id="__span-11-2">go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./...
-</span><span id="__span-11-3">
-</span><span id="__span-11-4"><span class="c1"># Integration tests</span>
-</span><span id="__span-11-5">./test-integration.sh
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># Unit tests</span>
+</span><span id="__span-10-2">go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./...
+</span><span id="__span-10-3">
+</span><span id="__span-10-4"><span class="c1"># Integration tests</span>
+</span><span id="__span-10-5">./test-integration.sh
 </span></code></pre></div>
 <h2 id="support-us">Support Us<a class="headerlink" href="#support-us" title="Permanent link">&para;</a></h2>
 <p>If you find this project useful, please consider:</p>

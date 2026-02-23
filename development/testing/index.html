@@ -1603,33 +1603,30 @@
 - ✅ REST API endpoints (health, status, execute)
 - ✅ Database persistence and audit trail</p>
 <h2 id="test-architecture">Test Architecture<a class="headerlink" href="#test-architecture" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1">┌─────────────────────────────────────────────────────────┐
-</span><span id="__span-0-2">│                  Docker Compose Network                 │
-</span><span id="__span-0-3">├─────────────────────────────────────────────────────────┤
-</span><span id="__span-0-4">│                                                         │
-</span><span id="__span-0-5">│  ┌──────────────────┐        ┌──────────────────┐    │
-</span><span id="__span-0-6">│  │   PostgreSQL     │        │   Sync Daemon    │    │
-</span><span id="__span-0-7">│  │   (vaultwarden_  │        │   - Health: 8080 │    │
-</span><span id="__span-0-8">│  │    db)           │        │   - Metrics: 9090│    │
-</span><span id="__span-0-9">│  └──────────────────┘        └──────────────────┘    │
-</span><span id="__span-0-10">│         │                            │                │
-</span><span id="__span-0-11">│         └────────────┬───────────────┘                │
-</span><span id="__span-0-12">│                      │                                │
-</span><span id="__span-0-13">│      ┌──────────────────────────┐                    │
-</span><span id="__span-0-14">│      │                          │                    │
-</span><span id="__span-0-15">│  ┌───────────────┐      ┌──────────────┐           │
-</span><span id="__span-0-16">│  │  Vaultwarden  │      │ Vaultwarden  │           │
-</span><span id="__span-0-17">│  │   (Source)    │      │   (Target)   │           │
-</span><span id="__span-0-18">│  │  Port: 8000   │      │  Port: 8001  │           │
-</span><span id="__span-0-19">│  │  UI + API     │      │  UI + API    │           │
-</span><span id="__span-0-20">│  └───────────────┘      └──────────────┘           │
-</span><span id="__span-0-21">│         ↑                      ↑                    │
-</span><span id="__span-0-22">│         │ Secrets             │ Secrets            │
-</span><span id="__span-0-23">│         │ Synced To           │                    │
-</span><span id="__span-0-24">│         └──────────────────────┘                    │
-</span><span id="__span-0-25">│                                                    │
-</span><span id="__span-0-26">└─────────────────────────────────────────────────────┘
-</span></code></pre></div>
+<div class="mermaid">graph TB
+    subgraph network["Docker Compose Network"]
+        direction TB
+
+        postgres[("PostgreSQL&lt;br/&gt;(vaultwarden_db)")]
+
+        daemon["Sync Daemon&lt;br/&gt;- Health: 8080&lt;br/&gt;- Metrics: 9090"]
+
+        postgres -.-&gt; daemon
+
+        source["Vaultwarden&lt;br/&gt;(Source)&lt;br/&gt;Port: 8000&lt;br/&gt;UI + API"]
+        target["Vaultwarden&lt;br/&gt;(Target)&lt;br/&gt;Port: 8001&lt;br/&gt;UI + API"]
+
+        postgres --&gt; source
+        postgres --&gt; target
+
+        daemon --&gt;|Secrets Synced| source
+        daemon --&gt;|Secrets Synced| target
+    end
+
+    style network fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style daemon fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style source fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style target fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px</div>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Docker and Docker Compose installed</li>
@@ -1639,11 +1636,11 @@
 </ul>
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <h3 id="1-build-the-docker-image">1. Build the Docker Image<a class="headerlink" href="#1-build-the-docker-image" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>secrets-sync:latest<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><span id="__span-0-1">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>secrets-sync:latest<span class="w"> </span>.
 </span></code></pre></div>
 <p>This creates the sync daemon image used in the test.</p>
 <h3 id="2-run-the-integration-test">2. Run the Integration Test<a class="headerlink" href="#2-run-the-integration-test" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1">./test-integration.sh
+<div class="highlight"><pre><span></span><code><span id="__span-1-1">./test-integration.sh
 </span></code></pre></div>
 <p>The script will:
 1. Start all Docker services
@@ -1653,62 +1650,62 @@
 5. Verify secrets appeared in target Vaultwarden
 6. Show final status</p>
 <h3 id="3-example-output">3. Example Output<a class="headerlink" href="#3-example-output" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1">[INFO] ==========================================
-</span><span id="__span-3-2">[INFO] Secrets Vault Sync Daemon - Integration Test
-</span><span id="__span-3-3">[INFO] ==========================================
-</span><span id="__span-3-4">
-</span><span id="__span-3-5">[INFO] Starting Docker Compose services...
-</span><span id="__span-3-6">[INFO] Waiting for all services to be ready...
-</span><span id="__span-3-7">[INFO] Waiting for Source Vaultwarden to be healthy...
-</span><span id="__span-3-8">[SUCCESS] Source Vaultwarden is ready
-</span><span id="__span-3-9">
-</span><span id="__span-3-10">[INFO] Waiting for Target Vaultwarden to be healthy...
-</span><span id="__span-3-11">[SUCCESS] Target Vaultwarden is ready
-</span><span id="__span-3-12">
-</span><span id="__span-3-13">[INFO] Waiting for sync daemon to be healthy...
-</span><span id="__span-3-14">[SUCCESS] Sync daemon is ready
-</span><span id="__span-3-15">
-</span><span id="__span-3-16">[INFO] Initial state of vaults:
-</span><span id="__span-3-17">[INFO] Source vault: 0 items
-</span><span id="__span-3-18">[INFO] Target vault: 0 items
-</span><span id="__span-3-19">
-</span><span id="__span-3-20">[INFO] Injecting test secrets into source Vaultwarden...
-</span><span id="__span-3-21">[INFO] Creating secret: db-password
-</span><span id="__span-3-22">[SUCCESS] Created secret: db-password
-</span><span id="__span-3-23">[INFO] Creating secret: api-key
-</span><span id="__span-3-24">[SUCCESS] Created secret: api-key
-</span><span id="__span-3-25">[INFO] Creating secret: aws-access-key
-</span><span id="__span-3-26">[SUCCESS] Created secret: aws-access-key
-</span><span id="__span-3-27">
-</span><span id="__span-3-28">[INFO] Verifying secrets in source vault...
-</span><span id="__span-3-29">[INFO] Source vault after injection: 3 items
-</span><span id="__span-3-30">
-</span><span id="__span-3-31">[INFO] Triggering manual sync...
-</span><span id="__span-3-32">{
-</span><span id="__span-3-33">  &quot;sync_id&quot;: &quot;vaultwarden_sync&quot;,
-</span><span id="__span-3-34">  &quot;status&quot;: &quot;executing&quot;
-</span><span id="__span-3-35">}
-</span><span id="__span-3-36">
-</span><span id="__span-3-37">[INFO] Verifying secrets were synced to target vault...
-</span><span id="__span-3-38">[INFO] Checking target vault (attempt 1)...
-</span><span id="__span-3-39">[INFO] Source vault has 3 secrets, Target vault has 3 secrets
-</span><span id="__span-3-40">[SUCCESS] Secrets synced! Source: 3, Target: 3
-</span><span id="__span-3-41">
-</span><span id="__span-3-42">[SUCCESS] Integration test completed successfully!
+<div class="highlight"><pre><span></span><code><span id="__span-2-1">[INFO] ==========================================
+</span><span id="__span-2-2">[INFO] Secrets Vault Sync Daemon - Integration Test
+</span><span id="__span-2-3">[INFO] ==========================================
+</span><span id="__span-2-4">
+</span><span id="__span-2-5">[INFO] Starting Docker Compose services...
+</span><span id="__span-2-6">[INFO] Waiting for all services to be ready...
+</span><span id="__span-2-7">[INFO] Waiting for Source Vaultwarden to be healthy...
+</span><span id="__span-2-8">[SUCCESS] Source Vaultwarden is ready
+</span><span id="__span-2-9">
+</span><span id="__span-2-10">[INFO] Waiting for Target Vaultwarden to be healthy...
+</span><span id="__span-2-11">[SUCCESS] Target Vaultwarden is ready
+</span><span id="__span-2-12">
+</span><span id="__span-2-13">[INFO] Waiting for sync daemon to be healthy...
+</span><span id="__span-2-14">[SUCCESS] Sync daemon is ready
+</span><span id="__span-2-15">
+</span><span id="__span-2-16">[INFO] Initial state of vaults:
+</span><span id="__span-2-17">[INFO] Source vault: 0 items
+</span><span id="__span-2-18">[INFO] Target vault: 0 items
+</span><span id="__span-2-19">
+</span><span id="__span-2-20">[INFO] Injecting test secrets into source Vaultwarden...
+</span><span id="__span-2-21">[INFO] Creating secret: db-password
+</span><span id="__span-2-22">[SUCCESS] Created secret: db-password
+</span><span id="__span-2-23">[INFO] Creating secret: api-key
+</span><span id="__span-2-24">[SUCCESS] Created secret: api-key
+</span><span id="__span-2-25">[INFO] Creating secret: aws-access-key
+</span><span id="__span-2-26">[SUCCESS] Created secret: aws-access-key
+</span><span id="__span-2-27">
+</span><span id="__span-2-28">[INFO] Verifying secrets in source vault...
+</span><span id="__span-2-29">[INFO] Source vault after injection: 3 items
+</span><span id="__span-2-30">
+</span><span id="__span-2-31">[INFO] Triggering manual sync...
+</span><span id="__span-2-32">{
+</span><span id="__span-2-33">  &quot;sync_id&quot;: &quot;vaultwarden_sync&quot;,
+</span><span id="__span-2-34">  &quot;status&quot;: &quot;executing&quot;
+</span><span id="__span-2-35">}
+</span><span id="__span-2-36">
+</span><span id="__span-2-37">[INFO] Verifying secrets were synced to target vault...
+</span><span id="__span-2-38">[INFO] Checking target vault (attempt 1)...
+</span><span id="__span-2-39">[INFO] Source vault has 3 secrets, Target vault has 3 secrets
+</span><span id="__span-2-40">[SUCCESS] Secrets synced! Source: 3, Target: 3
+</span><span id="__span-2-41">
+</span><span id="__span-2-42">[SUCCESS] Integration test completed successfully!
 </span></code></pre></div>
 <h2 id="manual-testing">Manual Testing<a class="headerlink" href="#manual-testing" title="Permanent link">&para;</a></h2>
 <h3 id="start-services-without-test-script">Start Services Without Test Script<a class="headerlink" href="#start-services-without-test-script" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code><span id="__span-3-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div>
 <h3 id="wait-for-services-to-be-ready">Wait for Services to Be Ready<a class="headerlink" href="#wait-for-services-to-be-ready" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Check Vaultwarden Source</span>
-</span><span id="__span-5-2">curl<span class="w"> </span>http://localhost:8000/alive
-</span><span id="__span-5-3">
-</span><span id="__span-5-4"><span class="c1"># Check Vaultwarden Target</span>
-</span><span id="__span-5-5">curl<span class="w"> </span>http://localhost:8001/alive
-</span><span id="__span-5-6">
-</span><span id="__span-5-7"><span class="c1"># Check Sync Daemon</span>
-</span><span id="__span-5-8">curl<span class="w"> </span>http://localhost:8080/health
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><span class="c1"># Check Vaultwarden Source</span>
+</span><span id="__span-4-2">curl<span class="w"> </span>http://localhost:8000/alive
+</span><span id="__span-4-3">
+</span><span id="__span-4-4"><span class="c1"># Check Vaultwarden Target</span>
+</span><span id="__span-4-5">curl<span class="w"> </span>http://localhost:8001/alive
+</span><span id="__span-4-6">
+</span><span id="__span-4-7"><span class="c1"># Check Sync Daemon</span>
+</span><span id="__span-4-8">curl<span class="w"> </span>http://localhost:8080/health
 </span></code></pre></div>
 <h3 id="access-vaultwarden-web-uis">Access Vaultwarden Web UIs<a class="headerlink" href="#access-vaultwarden-web-uis" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1722,55 +1719,55 @@
 <li>Enter credentials as a test secret</li>
 </ol>
 <h3 id="manually-trigger-sync">Manually Trigger Sync<a class="headerlink" href="#manually-trigger-sync" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
+<div class="highlight"><pre><span></span><code><span id="__span-5-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
 </span></code></pre></div>
 <h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+<div class="highlight"><pre><span></span><code><span id="__span-6-1">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
 </span></code></pre></div>
 <p>Example response:
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><span class="p">{</span>
-</span><span id="__span-8-2"><span class="w">  </span><span class="nt">&quot;sync_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vaultwarden_sync&quot;</span><span class="p">,</span>
-</span><span id="__span-8-3"><span class="w">  </span><span class="nt">&quot;last_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-8-4"><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-8-5"><span class="w">    </span><span class="nt">&quot;sync_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vaultwarden_sync&quot;</span><span class="p">,</span>
-</span><span id="__span-8-6"><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
-</span><span id="__span-8-7"><span class="w">    </span><span class="nt">&quot;total_synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-8-8"><span class="w">    </span><span class="nt">&quot;total_failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-8-9"><span class="w">    </span><span class="nt">&quot;duration_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
-</span><span id="__span-8-10"><span class="w">    </span><span class="nt">&quot;error_message&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-</span><span id="__span-8-11"><span class="w">    </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1708444234</span>
-</span><span id="__span-8-12"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-8-13"><span class="w">  </span><span class="nt">&quot;total_objects&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-8-14"><span class="w">  </span><span class="nt">&quot;synced_objects&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-8-15"><span class="w">  </span><span class="nt">&quot;failed_objects&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-8-16"><span class="w">  </span><span class="nt">&quot;recent_runs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-8-17"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-8-18"><span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-8-19"><span class="w">      </span><span class="nt">&quot;sync_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vaultwarden_sync&quot;</span><span class="p">,</span>
-</span><span id="__span-8-20"><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
-</span><span id="__span-8-21"><span class="w">      </span><span class="nt">&quot;total_synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-8-22"><span class="w">      </span><span class="nt">&quot;total_failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-8-23"><span class="w">      </span><span class="nt">&quot;duration_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
-</span><span id="__span-8-24"><span class="w">      </span><span class="nt">&quot;error_message&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-</span><span id="__span-8-25"><span class="w">      </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1708444234</span>
-</span><span id="__span-8-26"><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-8-27"><span class="w">  </span><span class="p">]</span>
-</span><span id="__span-8-28"><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="p">{</span>
+</span><span id="__span-7-2"><span class="w">  </span><span class="nt">&quot;sync_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vaultwarden_sync&quot;</span><span class="p">,</span>
+</span><span id="__span-7-3"><span class="w">  </span><span class="nt">&quot;last_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-4"><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-7-5"><span class="w">    </span><span class="nt">&quot;sync_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vaultwarden_sync&quot;</span><span class="p">,</span>
+</span><span id="__span-7-6"><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
+</span><span id="__span-7-7"><span class="w">    </span><span class="nt">&quot;total_synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-7-8"><span class="w">    </span><span class="nt">&quot;total_failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-7-9"><span class="w">    </span><span class="nt">&quot;duration_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
+</span><span id="__span-7-10"><span class="w">    </span><span class="nt">&quot;error_message&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-7-11"><span class="w">    </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1708444234</span>
+</span><span id="__span-7-12"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-7-13"><span class="w">  </span><span class="nt">&quot;total_objects&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-7-14"><span class="w">  </span><span class="nt">&quot;synced_objects&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-7-15"><span class="w">  </span><span class="nt">&quot;failed_objects&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-7-16"><span class="w">  </span><span class="nt">&quot;recent_runs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-7-17"><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-7-18"><span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-7-19"><span class="w">      </span><span class="nt">&quot;sync_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vaultwarden_sync&quot;</span><span class="p">,</span>
+</span><span id="__span-7-20"><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
+</span><span id="__span-7-21"><span class="w">      </span><span class="nt">&quot;total_synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-7-22"><span class="w">      </span><span class="nt">&quot;total_failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-7-23"><span class="w">      </span><span class="nt">&quot;duration_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
+</span><span id="__span-7-24"><span class="w">      </span><span class="nt">&quot;error_message&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-7-25"><span class="w">      </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1708444234</span>
+</span><span id="__span-7-26"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-7-27"><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-7-28"><span class="p">}</span>
 </span></code></pre></div></p>
 <h3 id="view-metrics">View Metrics<a class="headerlink" href="#view-metrics" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1">curl<span class="w"> </span>http://localhost:9090/metrics
+<div class="highlight"><pre><span></span><code><span id="__span-8-1">curl<span class="w"> </span>http://localhost:9090/metrics
 </span></code></pre></div>
 <h3 id="view-daemon-logs">View Daemon Logs<a class="headerlink" href="#view-daemon-logs" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-10-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
+<div class="highlight"><pre><span></span><code><span id="__span-9-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
 </span></code></pre></div>
 <h3 id="access-sqlite-database">Access SQLite Database<a class="headerlink" href="#access-sqlite-database" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-11-1">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db
-</span><span id="__span-11-2">
-</span><span id="__span-11-3"><span class="c1"># View sync objects</span>
-</span><span id="__span-11-4">sqlite&gt;<span class="w"> </span>SELECT<span class="w"> </span>sync_id,<span class="w"> </span>secret_name,<span class="w"> </span>last_sync_status,<span class="w"> </span>direction_last<span class="w"> </span>FROM<span class="w"> </span>sync_objects<span class="p">;</span>
-</span><span id="__span-11-5">
-</span><span id="__span-11-6"><span class="c1"># View sync runs</span>
-</span><span id="__span-11-7">sqlite&gt;<span class="w"> </span>SELECT<span class="w"> </span>*<span class="w"> </span>FROM<span class="w"> </span>syncs_run<span class="w"> </span>ORDER<span class="w"> </span>BY<span class="w"> </span>created_at<span class="w"> </span>DESC<span class="w"> </span>LIMIT<span class="w"> </span><span class="m">5</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-10-1">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db
+</span><span id="__span-10-2">
+</span><span id="__span-10-3"><span class="c1"># View sync objects</span>
+</span><span id="__span-10-4">sqlite&gt;<span class="w"> </span>SELECT<span class="w"> </span>sync_id,<span class="w"> </span>secret_name,<span class="w"> </span>last_sync_status,<span class="w"> </span>direction_last<span class="w"> </span>FROM<span class="w"> </span>sync_objects<span class="p">;</span>
+</span><span id="__span-10-5">
+</span><span id="__span-10-6"><span class="c1"># View sync runs</span>
+</span><span id="__span-10-7">sqlite&gt;<span class="w"> </span>SELECT<span class="w"> </span>*<span class="w"> </span>FROM<span class="w"> </span>syncs_run<span class="w"> </span>ORDER<span class="w"> </span>BY<span class="w"> </span>created_at<span class="w"> </span>DESC<span class="w"> </span>LIMIT<span class="w"> </span><span class="m">5</span><span class="p">;</span>
 </span></code></pre></div>
 <h2 id="test-scenarios">Test Scenarios<a class="headerlink" href="#test-scenarios" title="Permanent link">&para;</a></h2>
 <h3 id="scenario-1-basic-one-way-sync">Scenario 1: Basic One-Way Sync<a class="headerlink" href="#scenario-1-basic-one-way-sync" title="Permanent link">&para;</a></h3>
@@ -1797,9 +1794,9 @@
 <p><strong>Expected Result</strong>: Sync retries and succeeds on second attempt</p>
 <h3 id="scenario-4-filtered-sync">Scenario 4: Filtered Sync<a class="headerlink" href="#scenario-4-filtered-sync" title="Permanent link">&para;</a></h3>
 <p><strong>Edit</strong> <code>config.test.yaml</code>:
-<div class="highlight"><pre><span></span><code><span id="__span-12-1"><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-12-2"><span class="w">  </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-12-3"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;db-*&quot;</span><span class="w">  </span><span class="c1"># Only sync secrets starting with db-</span>
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">filter</span><span class="p">:</span>
+</span><span id="__span-11-2"><span class="w">  </span><span class="nt">patterns</span><span class="p">:</span>
+</span><span id="__span-11-3"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;db-*&quot;</span><span class="w">  </span><span class="c1"># Only sync secrets starting with db-</span>
 </span></code></pre></div></p>
 <p><strong>Steps</strong>:
 1. Create secrets: db-password, api-key, aws-token
@@ -1807,60 +1804,60 @@
 <p><strong>Expected Result</strong>: Only db-password synced, others ignored</p>
 <h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">&para;</a></h2>
 <h3 id="stop-all-services">Stop All Services<a class="headerlink" href="#stop-all-services" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-13-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down
+<div class="highlight"><pre><span></span><code><span id="__span-12-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down
 </span></code></pre></div>
 <h3 id="remove-volumes-clean-slate">Remove Volumes (Clean Slate)<a class="headerlink" href="#remove-volumes-clean-slate" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-14-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
+<div class="highlight"><pre><span></span><code><span id="__span-13-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
 </span></code></pre></div>
 <h3 id="remove-all-docker-resources">Remove All Docker Resources<a class="headerlink" href="#remove-all-docker-resources" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-15-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
-</span><span id="__span-15-2">docker<span class="w"> </span>rmi<span class="w"> </span>secrets-sync:latest
+<div class="highlight"><pre><span></span><code><span id="__span-14-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
+</span><span id="__span-14-2">docker<span class="w"> </span>rmi<span class="w"> </span>secrets-sync:latest
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="services-wont-start">Services Won't Start<a class="headerlink" href="#services-wont-start" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="c1"># Check Docker Compose logs</span>
-</span><span id="__span-16-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>logs
-</span><span id="__span-16-3">
-</span><span id="__span-16-4"><span class="c1"># Verify ports are available</span>
-</span><span id="__span-16-5">netstat<span class="w"> </span>-tuln<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;:(5432|8000|8001|8080|9090)&quot;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="c1"># Check Docker Compose logs</span>
+</span><span id="__span-15-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>logs
+</span><span id="__span-15-3">
+</span><span id="__span-15-4"><span class="c1"># Verify ports are available</span>
+</span><span id="__span-15-5">netstat<span class="w"> </span>-tuln<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;:(5432|8000|8001|8080|9090)&quot;</span>
 </span></code></pre></div>
 <h3 id="vaultwarden-not-healthy">Vaultwarden Not Healthy<a class="headerlink" href="#vaultwarden-not-healthy" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="c1"># Check Vaultwarden logs</span>
-</span><span id="__span-17-2">docker<span class="w"> </span>logs<span class="w"> </span>vaultwarden-source
-</span><span id="__span-17-3">docker<span class="w"> </span>logs<span class="w"> </span>vaultwarden-target
-</span><span id="__span-17-4">
-</span><span id="__span-17-5"><span class="c1"># Verify database connection</span>
-</span><span id="__span-17-6">docker<span class="w"> </span>logs<span class="w"> </span>vaultwarden-postgres
+<div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="c1"># Check Vaultwarden logs</span>
+</span><span id="__span-16-2">docker<span class="w"> </span>logs<span class="w"> </span>vaultwarden-source
+</span><span id="__span-16-3">docker<span class="w"> </span>logs<span class="w"> </span>vaultwarden-target
+</span><span id="__span-16-4">
+</span><span id="__span-16-5"><span class="c1"># Verify database connection</span>
+</span><span id="__span-16-6">docker<span class="w"> </span>logs<span class="w"> </span>vaultwarden-postgres
 </span></code></pre></div>
 <h3 id="secrets-not-syncing">Secrets Not Syncing<a class="headerlink" href="#secrets-not-syncing" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-18-1"><span class="c1"># Check daemon logs</span>
-</span><span id="__span-18-2">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon
-</span><span id="__span-18-3">
-</span><span id="__span-18-4"><span class="c1"># Verify sync status</span>
-</span><span id="__span-18-5">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
-</span><span id="__span-18-6">
-</span><span id="__span-18-7"><span class="c1"># Check database</span>
-</span><span id="__span-18-8">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-18-9"><span class="w">  </span><span class="s2">&quot;SELECT * FROM syncs_run ORDER BY created_at DESC LIMIT 1;&quot;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="c1"># Check daemon logs</span>
+</span><span id="__span-17-2">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon
+</span><span id="__span-17-3">
+</span><span id="__span-17-4"><span class="c1"># Verify sync status</span>
+</span><span id="__span-17-5">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</span><span id="__span-17-6">
+</span><span id="__span-17-7"><span class="c1"># Check database</span>
+</span><span id="__span-17-8">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-17-9"><span class="w">  </span><span class="s2">&quot;SELECT * FROM syncs_run ORDER BY created_at DESC LIMIT 1;&quot;</span>
 </span></code></pre></div>
 <h3 id="high-memory-usage">High Memory Usage<a class="headerlink" href="#high-memory-usage" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="c1"># Reduce max concurrent operations in config</span>
-</span><span id="__span-19-2">retry_policy:
-</span><span id="__span-19-3"><span class="w">  </span>max_retries:<span class="w"> </span><span class="m">1</span>
-</span><span id="__span-19-4"><span class="w">  </span>initial_backoff:<span class="w"> </span><span class="m">500</span>
-</span><span id="__span-19-5"><span class="w">  </span>max_backoff:<span class="w"> </span><span class="m">10000</span>
-</span><span id="__span-19-6">
-</span><span id="__span-19-7"><span class="c1"># Or stop unnecessary services</span>
-</span><span id="__span-19-8">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>stop<span class="w"> </span>vaultwarden-target
+<div class="highlight"><pre><span></span><code><span id="__span-18-1"><span class="c1"># Reduce max concurrent operations in config</span>
+</span><span id="__span-18-2">retry_policy:
+</span><span id="__span-18-3"><span class="w">  </span>max_retries:<span class="w"> </span><span class="m">1</span>
+</span><span id="__span-18-4"><span class="w">  </span>initial_backoff:<span class="w"> </span><span class="m">500</span>
+</span><span id="__span-18-5"><span class="w">  </span>max_backoff:<span class="w"> </span><span class="m">10000</span>
+</span><span id="__span-18-6">
+</span><span id="__span-18-7"><span class="c1"># Or stop unnecessary services</span>
+</span><span id="__span-18-8">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>stop<span class="w"> </span>vaultwarden-target
 </span></code></pre></div>
 <h3 id="connection-refused-errors">"Connection refused" Errors<a class="headerlink" href="#connection-refused-errors" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-20-1"><span class="c1"># Ensure services have started</span>
-</span><span id="__span-20-2">sleep<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./test-integration.sh
-</span><span id="__span-20-3">
-</span><span id="__span-20-4"><span class="c1"># Or manually verify health</span>
-</span><span id="__span-20-5">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8000/alive
-</span><span id="__span-20-6">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8001/alive
-</span><span id="__span-20-7">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8080/health
+<div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="c1"># Ensure services have started</span>
+</span><span id="__span-19-2">sleep<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./test-integration.sh
+</span><span id="__span-19-3">
+</span><span id="__span-19-4"><span class="c1"># Or manually verify health</span>
+</span><span id="__span-19-5">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8000/alive
+</span><span id="__span-19-6">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8001/alive
+</span><span id="__span-19-7">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8080/health
 </span></code></pre></div>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
 <h3 id="vaultwarden-configuration">Vaultwarden Configuration<a class="headerlink" href="#vaultwarden-configuration" title="Permanent link">&para;</a></h3>
@@ -1877,55 +1874,55 @@
 <h2 id="advanced-testing">Advanced Testing<a class="headerlink" href="#advanced-testing" title="Permanent link">&para;</a></h2>
 <h3 id="performance-testing">Performance Testing<a class="headerlink" href="#performance-testing" title="Permanent link">&para;</a></h3>
 <p>Measure sync performance with large secret counts:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="c1"># Inject 100 secrets</span>
-</span><span id="__span-21-2"><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..100<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-</span><span id="__span-21-3"><span class="w">  </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/api/ciphers<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-21-4"><span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer source_admin_token_12345&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-21-5"><span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-21-6"><span class="w">    </span>-d<span class="w"> </span><span class="s2">&quot;{\&quot;type\&quot;:1,\&quot;name\&quot;:\&quot;secret-</span><span class="nv">$i</span><span class="s2">\&quot;,\&quot;login\&quot;:{\&quot;username\&quot;:\&quot;user\&quot;,\&quot;password\&quot;:\&quot;pass\&quot;}}&quot;</span>
-</span><span id="__span-21-7"><span class="k">done</span>
-</span><span id="__span-21-8">
-</span><span id="__span-21-9"><span class="c1"># Measure sync time</span>
-</span><span id="__span-21-10"><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
-</span><span id="__span-21-11">
-</span><span id="__span-21-12"><span class="c1"># Check status</span>
-</span><span id="__span-21-13">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.last_run.duration_ms&#39;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-20-1"><span class="c1"># Inject 100 secrets</span>
+</span><span id="__span-20-2"><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..100<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-20-3"><span class="w">  </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/api/ciphers<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-4"><span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer source_admin_token_12345&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-5"><span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-6"><span class="w">    </span>-d<span class="w"> </span><span class="s2">&quot;{\&quot;type\&quot;:1,\&quot;name\&quot;:\&quot;secret-</span><span class="nv">$i</span><span class="s2">\&quot;,\&quot;login\&quot;:{\&quot;username\&quot;:\&quot;user\&quot;,\&quot;password\&quot;:\&quot;pass\&quot;}}&quot;</span>
+</span><span id="__span-20-7"><span class="k">done</span>
+</span><span id="__span-20-8">
+</span><span id="__span-20-9"><span class="c1"># Measure sync time</span>
+</span><span id="__span-20-10"><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
+</span><span id="__span-20-11">
+</span><span id="__span-20-12"><span class="c1"># Check status</span>
+</span><span id="__span-20-13">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.last_run.duration_ms&#39;</span>
 </span></code></pre></div>
 <h3 id="network-failure-simulation">Network Failure Simulation<a class="headerlink" href="#network-failure-simulation" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-22-1"><span class="c1"># Simulate network issues with tc (traffic control)</span>
-</span><span id="__span-22-2">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>vaultwarden-target<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">10</span>%
-</span><span id="__span-22-3">
-</span><span id="__span-22-4"><span class="c1"># Run sync (will retry and eventually succeed)</span>
-</span><span id="__span-22-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
-</span><span id="__span-22-6">
-</span><span id="__span-22-7"><span class="c1"># Check retry behavior in logs</span>
-</span><span id="__span-22-8">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>retry
+<div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="c1"># Simulate network issues with tc (traffic control)</span>
+</span><span id="__span-21-2">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>vaultwarden-target<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">10</span>%
+</span><span id="__span-21-3">
+</span><span id="__span-21-4"><span class="c1"># Run sync (will retry and eventually succeed)</span>
+</span><span id="__span-21-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
+</span><span id="__span-21-6">
+</span><span id="__span-21-7"><span class="c1"># Check retry behavior in logs</span>
+</span><span id="__span-21-8">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>retry
 </span></code></pre></div>
 <h3 id="config-validation">Config Validation<a class="headerlink" href="#config-validation" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-23-1"><span class="c1"># Test config without running daemon</span>
-</span><span id="__span-23-2">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.test.yaml<span class="w"> </span>-dry-run
-</span><span id="__span-23-3">
-</span><span id="__span-23-4"><span class="c1"># Should output connection test results</span>
+<div class="highlight"><pre><span></span><code><span id="__span-22-1"><span class="c1"># Test config without running daemon</span>
+</span><span id="__span-22-2">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.test.yaml<span class="w"> </span>-dry-run
+</span><span id="__span-22-3">
+</span><span id="__span-22-4"><span class="c1"># Should output connection test results</span>
 </span></code></pre></div>
 <h2 id="cicd-integration">CI/CD Integration<a class="headerlink" href="#cicd-integration" title="Permanent link">&para;</a></h2>
 <p>Example GitHub Actions workflow:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-24-1"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Integration Tests</span>
-</span><span id="__span-24-2"><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
-</span><span id="__span-24-3"><span class="nt">jobs</span><span class="p">:</span>
-</span><span id="__span-24-4"><span class="w">  </span><span class="nt">test</span><span class="p">:</span>
-</span><span id="__span-24-5"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-</span><span id="__span-24-6"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
-</span><span id="__span-24-7"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v2</span>
-</span><span id="__span-24-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build image</span>
-</span><span id="__span-24-9"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build -t secrets-sync:test .</span>
-</span><span id="__span-24-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run integration tests</span>
-</span><span id="__span-24-11"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./test-integration.sh</span>
-</span><span id="__span-24-12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload logs on failure</span>
-</span><span id="__span-24-13"><span class="w">        </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure()</span>
-</span><span id="__span-24-14"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span>
-</span><span id="__span-24-15"><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
-</span><span id="__span-24-16"><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker-logs</span>
-</span><span id="__span-24-17"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/docker-logs</span>
+<div class="highlight"><pre><span></span><code><span id="__span-23-1"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Integration Tests</span>
+</span><span id="__span-23-2"><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+</span><span id="__span-23-3"><span class="nt">jobs</span><span class="p">:</span>
+</span><span id="__span-23-4"><span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+</span><span id="__span-23-5"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id="__span-23-6"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+</span><span id="__span-23-7"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v2</span>
+</span><span id="__span-23-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build image</span>
+</span><span id="__span-23-9"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build -t secrets-sync:test .</span>
+</span><span id="__span-23-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run integration tests</span>
+</span><span id="__span-23-11"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./test-integration.sh</span>
+</span><span id="__span-23-12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload logs on failure</span>
+</span><span id="__span-23-13"><span class="w">        </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure()</span>
+</span><span id="__span-23-14"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span>
+</span><span id="__span-23-15"><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+</span><span id="__span-23-16"><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker-logs</span>
+</span><span id="__span-23-17"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/docker-logs</span>
 </span></code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
