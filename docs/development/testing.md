@@ -36,10 +36,10 @@ graph TB
         daemon -->|Secrets Synced| target
     end
     
-    style network fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style daemon fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    style source fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style target fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    style network fill:#f9f9f9,stroke:#666,stroke-width:2px
+    style daemon fill:#fff,stroke:#0066cc,stroke-width:2px
+    style source fill:#fff,stroke:#ff6600,stroke-width:2px
+    style target fill:#fff,stroke:#009900,stroke-width:2px
 ```
 
 ## Prerequisites

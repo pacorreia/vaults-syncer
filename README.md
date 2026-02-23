@@ -67,9 +67,11 @@ graph TB
     clients --> vault1[("Vault 1")]
     clients --> vault2[("Vault 2")]
     
-    style daemon fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style engine fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    style clients fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style daemon fill:#f9f9f9,stroke:#666,stroke-width:2px
+    style engine fill:#fff,stroke:#0066cc,stroke-width:2px
+    style clients fill:#fff,stroke:#ff6600,stroke-width:2px
+    style api fill:#fff,stroke:#999,stroke-width:1px
+    style scheduler fill:#fff,stroke:#999,stroke-width:1px
 ```
 
 ## Quick Start
