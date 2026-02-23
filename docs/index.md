@@ -96,43 +96,43 @@ syncs:
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    AKV Sync Daemon                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐         ┌──────────────┐                 │
-│  │   Vaults     │ OAuth2  │   Backends   │                 │
-│  │              │────────▶│              │                 │
-│  │ Vaultwarden  │         │ Generic HTTP │                 │
-│  │ Azure KV     │         │ Vault        │                 │
-│  │ AWS SM       │         │ AWS          │                 │
-│  │ HashiCorp    │         │ Azure        │                 │
-│  └──────────────┘         └──────────────┘                 │
-│         △                         △                         │
-│         │                         │                         │
-│         └────────┬────────────────┘                         │
-│                  │                                          │
-│         ┌────────▼────────┐                                │
-│         │   Sync Engine   │                                │
-│         │                 │                                │
-│         │ • Scheduling    │                                │
-│         │ • Filtering     │                                │
-│         │ • Retries       │                                │
-│         └────────┬────────┘                                │
-│                  │                                          │
-│         ┌────────▼────────┐                                │
-│         │  State Database │                                │
-│         │   (SQLite)      │                                │
-│         └─────────────────┘                                │
-│                                                              │
-│  ┌─────────────────────────────────────────┐              │
-│  │  REST API & Monitoring                  │              │
-│  │  • Sync Control & Status                │              │
-│  │  • Prometheus Metrics                   │              │
-│  │  • Health Checks                        │              │
-│  └─────────────────────────────────────────┘              │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph daemon["AKV Sync Daemon"]
+        direction TB
+        
+        subgraph vaults["Vaults"]
+            vw["Vaultwarden"]
+            akv["Azure KV"]
+            aws["AWS SM"]
+            hc["HashiCorp"]
+        end
+        
+        subgraph backends["Backends"]
+            http["Generic HTTP"]
+            vault["Vault"]
+            awsb["AWS"]
+            azure["Azure"]
+        end
+        
+        vaults -->|OAuth2| backends
+        
+        engine["Sync Engine<br/>• Scheduling<br/>• Filtering<br/>• Retries"]
+        
+        vaults --> engine
+        backends --> engine
+        
+        db[("State Database<br/>(SQLite)")]
+        engine --> db
+        
+        api["REST API & Monitoring<br/>• Sync Control & Status<br/>• Prometheus Metrics<br/>• Health Checks"]
+    end
+    
+    style daemon fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style engine fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style vaults fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style backends fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style api fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
 ```
 
 ## Getting Started

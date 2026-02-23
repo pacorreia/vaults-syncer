@@ -15,33 +15,31 @@ The integration test verifies:
 
 ## Test Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  Docker Compose Network                 │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌──────────────────┐        ┌──────────────────┐    │
-│  │   PostgreSQL     │        │   Sync Daemon    │    │
-│  │   (vaultwarden_  │        │   - Health: 8080 │    │
-│  │    db)           │        │   - Metrics: 9090│    │
-│  └──────────────────┘        └──────────────────┘    │
-│         │                            │                │
-│         └────────────┬───────────────┘                │
-│                      │                                │
-│      ┌──────────────────────────┐                    │
-│      │                          │                    │
-│  ┌───────────────┐      ┌──────────────┐           │
-│  │  Vaultwarden  │      │ Vaultwarden  │           │
-│  │   (Source)    │      │   (Target)   │           │
-│  │  Port: 8000   │      │  Port: 8001  │           │
-│  │  UI + API     │      │  UI + API    │           │
-│  └───────────────┘      └──────────────┘           │
-│         ↑                      ↑                    │
-│         │ Secrets             │ Secrets            │
-│         │ Synced To           │                    │
-│         └──────────────────────┘                    │
-│                                                    │
-└─────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph network["Docker Compose Network"]
+        direction TB
+        
+        postgres[("PostgreSQL<br/>(vaultwarden_db)")]
+        
+        daemon["Sync Daemon<br/>- Health: 8080<br/>- Metrics: 9090"]
+        
+        postgres -.-> daemon
+        
+        source["Vaultwarden<br/>(Source)<br/>Port: 8000<br/>UI + API"]
+        target["Vaultwarden<br/>(Target)<br/>Port: 8001<br/>UI + API"]
+        
+        postgres --> source
+        postgres --> target
+        
+        daemon -->|Secrets Synced| source
+        daemon -->|Secrets Synced| target
+    end
+    
+    style network fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style daemon fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style source fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style target fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
 ```
 
 ## Prerequisites
