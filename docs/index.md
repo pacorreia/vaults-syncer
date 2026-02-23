@@ -238,7 +238,14 @@ This project is written in **Go 1.22** with a modular architecture:
 ### Build
 
 ```bash
+# Build with default version (dev)
 go build -o sync-daemon .
+
+# Build with specific version
+go build -ldflags "-X main.Version=1.0.0" -o sync-daemon .
+
+# Check version
+./sync-daemon --version
 ```
 
 ### Test

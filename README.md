@@ -489,6 +489,23 @@ CGO_ENABLED=1 go build -o bin/sync-daemon .
         Path to SQLite database file (default "sync.db")
   -dry-run
         Validate config and test connections without starting
+  -version
+        Print version information and exit
+```
+
+### Building with Version Information
+
+By default, the binary uses version "dev". To build with a specific version:
+
+```bash
+# Using git tag
+go build -ldflags "-X main.Version=$(git describe --tags --always)" -o vaults-syncer .
+
+# Using semantic version
+go build -ldflags "-X main.Version=1.2.3" -o vaults-syncer .
+
+# Check version
+./vaults-syncer -version
 ```
 
 ### Development

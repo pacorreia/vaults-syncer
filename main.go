@@ -19,6 +19,10 @@ import (
 	"github.com/pacorreia/vaults-syncer/sync"
 )
 
+// Version information. Set via ldflags at build time:
+// go build -ldflags "-X main.Version=1.0.0"
+var Version = "dev"
+
 type appRunner interface {
 	api.Runner
 	Start(cfg *config.Config) error
@@ -82,8 +86,16 @@ func run(args []string, deps appDeps) error {
 	configPath := fs.String("config", "config.yaml", "Path to configuration file")
 	dbPath := fs.String("db", "sync.db", "Path to SQLite database file")
 	dryRun := fs.Bool("dry-run", false, "Validate config and test connections without starting")
+	version := fs.Bool("version", false, "Print version information and exit")
+	
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("failed to parse args: %w", err)
+	}
+
+	// Handle version flag
+	if *version {
+		fmt.Printf("vaults-syncer version %s\n", Version)
+		return nil
 	}
 
 	// Setup logger

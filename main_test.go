@@ -370,6 +370,25 @@ syncs: []
 	_ = deps.waitForSignal()
 }
 
+func TestRun_Version(t *testing.T) {
+	// Version flag should exit successfully without loading config or starting services
+	deps := defaultDeps()
+	
+	// Ensure none of these are called when -version is used
+	deps.loadConfig = func(path string) (*config.Config, error) {
+		t.Fatal("loadConfig should not be called with -version flag")
+		return nil, nil
+	}
+	deps.newStore = func(path string) (*storage.Store, error) {
+		t.Fatal("newStore should not be called with -version flag")
+		return nil, nil
+	}
+
+	if err := run([]string{"-version"}, deps); err != nil {
+		t.Fatalf("unexpected error with -version flag: %v", err)
+	}
+}
+
 func slogLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 }

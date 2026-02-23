@@ -53,7 +53,11 @@ go mod download
 # Build binary
 CGO_ENABLED=1 go build -o bin/sync-daemon .
 
+# Build with version
+CGO_ENABLED=1 go build -ldflags "-X main.Version=1.0.0" -o bin/sync-daemon .
+
 # Verify binary
+./bin/sync-daemon --version
 ./bin/sync-daemon -h
 ```
 

@@ -95,6 +95,9 @@ schedule: "*/30 * * * *"
 ## 🔍 Useful Commands
 
 ```bash
+# Check version
+./sync-daemon --version
+
 # Check health
 curl http://localhost:8080/health
 
