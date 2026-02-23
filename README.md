@@ -220,9 +220,6 @@ logging:
   level: info                      # debug, info, warn, error
   format: json                     # json or text
 ```
-  level: info
-  format: json
-```
 
 ### Vault Type Support
 
