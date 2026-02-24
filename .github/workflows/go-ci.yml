@@ -130,8 +130,7 @@ jobs:
           minor_pattern: "(MINOR|feat:|feature:|\\[minor\\])"
           minor_regexp_flags: "gi"
           version_format: "${major}.${minor}.${patch}"
-          bump_each_commit: true
-          bump_each_commit_patch_pattern: ".*"
+          bump_each_commit: false
           search_commit_body: true
           change_path: "."
           enable_prerelease_mode: false
