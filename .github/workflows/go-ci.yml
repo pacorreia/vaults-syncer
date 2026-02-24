@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -43,7 +45,11 @@ jobs:
         run: go list -u -m all
 
       - name: Build
-        run: go build -v ./...
+        run: |
+          VERSION=$(git describe --tags --always --dirty)
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          GIT_COMMIT=$(git rev-parse HEAD)
+          go build -v -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" ./...
 
       - name: Run tests with coverage
         run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
@@ -112,3 +118,47 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
+
+      - name: Auto versioning
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR|BREAKING CHANGE|\\[major\\])"
+          major_regexp_flags: "gi"
+          minor_pattern: "(MINOR|feat:|feature:|\\[minor\\])"
+          minor_regexp_flags: "gi"
+          version_format: "${major}.${minor}.${patch}"
+          bump_each_commit: true
+          bump_each_commit_patch_pattern: ".*"
+          search_commit_body: true
+          change_path: "."
+          enable_prerelease_mode: false
+
+      - name: Create and push tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git tag -a "${VERSION}" -m "Release ${VERSION}"
+          git push origin "${VERSION}"
+          
+          echo "✅ Created and pushed tag: ${VERSION}"
+
+      - name: Create version bump summary
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          PREVIOUS="v${{ steps.version.outputs.previous_version }}"
+          
+          echo "## 🚀 Version Bump: ${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous version:** ${PREVIOUS}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New version:** ${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version increment:** ${{ steps.version.outputs.increment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflow will automatically build and publish this version." >> $GITHUB_STEP_SUMMARY

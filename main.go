@@ -19,6 +19,14 @@ import (
 	"github.com/pacorreia/vaults-syncer/sync"
 )
 
+// Version information. Set via ldflags at build time:
+// go build -ldflags "-X main.Version=1.0.0 -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=$(git rev-parse HEAD)"
+var (
+	Version   = "dev"
+	BuildDate = "unknown"
+	GitCommit = "unknown"
+)
+
 type appRunner interface {
 	api.Runner
 	Start(cfg *config.Config) error
@@ -82,8 +90,22 @@ func run(args []string, deps appDeps) error {
 	configPath := fs.String("config", "config.yaml", "Path to configuration file")
 	dbPath := fs.String("db", "sync.db", "Path to SQLite database file")
 	dryRun := fs.Bool("dry-run", false, "Validate config and test connections without starting")
+	version := fs.Bool("version", false, "Print version information and exit")
+	
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("failed to parse args: %w", err)
+	}
+
+	// Handle version flag
+	if *version {
+		fmt.Printf("vaults-syncer version %s\n", Version)
+		if BuildDate != "unknown" {
+			fmt.Printf("Build date: %s\n", BuildDate)
+		}
+		if GitCommit != "unknown" {
+			fmt.Printf("Git commit: %s\n", GitCommit)
+		}
+		return nil
 	}
 
 	// Setup logger

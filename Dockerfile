@@ -15,8 +15,16 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./bin/sync-daemon .
+# Build arguments for version
+ARG VERSION=dev
+ARG BUILD_DATE
+ARG GIT_COMMIT
+
+# Build the application with version information
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
+    -a -installsuffix cgo \
+    -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+    -o ./bin/sync-daemon .
 
 # Final stage
 FROM alpine:3.23
