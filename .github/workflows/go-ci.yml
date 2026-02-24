@@ -153,6 +153,15 @@ jobs:
           
           echo "✅ Created and pushed tag: ${VERSION}"
 
+      - name: Trigger release workflow
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          gh workflow run release.yml -f version="${VERSION}" --repo "${{ github.repository }}"
+          echo "✅ Triggered release workflow for ${VERSION}"
+
       - name: Create version bump summary
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
         run: |
