@@ -1264,7 +1264,7 @@
 
 <h1 id="quick-start-guide-integration-test">Quick Start Guide - Integration Test<a class="headerlink" href="#quick-start-guide-integration-test" title="Permanent link">&para;</a></h1>
 <h2 id="one-command-test">One Command Test<a class="headerlink" href="#one-command-test" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1">./test-integration.sh
+<div class="highlight"><pre><span></span><code><span id="__span-0-1">./e2e/test-integration.sh
 </span></code></pre></div>
 <p>That's it! This will:
 1. Build the Docker image (if needed)
@@ -1330,10 +1330,10 @@
 </span></code></pre></div>
 <h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="c1"># Stop services</span>
-</span><span id="__span-7-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down
+</span><span id="__span-7-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>down
 </span><span id="__span-7-3">
 </span><span id="__span-7-4"><span class="c1"># Complete cleanup (remove volumes)</span>
-</span><span id="__span-7-5">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
+</span><span id="__span-7-5">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="test-hangs">Test Hangs<a class="headerlink" href="#test-hangs" title="Permanent link">&para;</a></h3>
@@ -1347,10 +1347,10 @@
 </span></code></pre></div>
 <h3 id="build-fails">Build Fails<a class="headerlink" href="#build-fails" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># Force rebuild</span>
-</span><span id="__span-9-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>build<span class="w"> </span>--no-cache
+</span><span id="__span-9-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>build<span class="w"> </span>--no-cache
 </span><span id="__span-9-3">
 </span><span id="__span-9-4"><span class="c1"># Then run test</span>
-</span><span id="__span-9-5">./test-integration.sh
+</span><span id="__span-9-5">./e2e/test-integration.sh
 </span></code></pre></div>
 <h3 id="need-more-info">Need More Info<a class="headerlink" href="#need-more-info" title="Permanent link">&para;</a></h3>
 <p>See <a href="TESTING.md">TESTING.md</a> for detailed documentation.</p>
@@ -1364,15 +1364,15 @@
 </thead>
 <tbody>
 <tr>
-<td><code>docker-compose.test.yml</code></td>
+<td><code>e2e/docker-compose.test.yml</code></td>
 <td>Services definition</td>
 </tr>
 <tr>
-<td><code>config.test.yaml</code></td>
+<td><code>e2e/config.test.yaml</code></td>
 <td>Sync daemon configuration</td>
 </tr>
 <tr>
-<td><code>test-integration.sh</code></td>
+<td><code>e2e/test-integration.sh</code></td>
 <td>Test automation script</td>
 </tr>
 <tr>
@@ -1384,7 +1384,7 @@
 <hr />
 <p><strong>Pro Tip</strong>: Run test periodically to ensure everything still works:
 <div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># In a cron job</span>
-</span><span id="__span-10-2"><span class="m">0</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/path/to/repo<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./test-integration.sh<span class="w"> </span>&gt;<span class="w"> </span>/tmp/test.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span><span id="__span-10-2"><span class="m">0</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/path/to/repo<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./e2e/test-integration.sh<span class="w"> </span>&gt;<span class="w"> </span>/tmp/test.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
 </span></code></pre></div></p>
 
 

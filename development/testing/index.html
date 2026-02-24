@@ -931,7 +931,7 @@
 </span></code></pre></div>
 <p>This creates the sync daemon image used in the test.</p>
 <h3 id="2-run-the-integration-test">2. Run the Integration Test<a class="headerlink" href="#2-run-the-integration-test" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1">./test-integration.sh
+<div class="highlight"><pre><span></span><code><span id="__span-1-1">./e2e/test-integration.sh
 </span></code></pre></div>
 <p>The script will:
 1. Start all Docker services
@@ -986,7 +986,7 @@
 </span></code></pre></div>
 <h2 id="manual-testing">Manual Testing<a class="headerlink" href="#manual-testing" title="Permanent link">¶</a></h2>
 <h3 id="start-services-without-test-script">Start Services Without Test Script<a class="headerlink" href="#start-services-without-test-script" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code><span id="__span-3-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div>
 <h3 id="wait-for-services-to-be-ready">Wait for Services to Be Ready<a class="headerlink" href="#wait-for-services-to-be-ready" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-4-1"><span class="c1"># Check Vaultwarden Source</span>
@@ -1049,7 +1049,7 @@
 <div class="highlight"><pre><span></span><code><span id="__span-8-1">curl<span class="w"> </span>http://localhost:9090/metrics
 </span></code></pre></div>
 <h3 id="view-daemon-logs">View Daemon Logs<a class="headerlink" href="#view-daemon-logs" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
+<div class="highlight"><pre><span></span><code><span id="__span-9-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
 </span></code></pre></div>
 <h3 id="access-sqlite-database">Access SQLite Database<a class="headerlink" href="#access-sqlite-database" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-10-1">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db
@@ -1084,7 +1084,7 @@
 5. Run sync again</p>
 <p><strong>Expected Result</strong>: Sync retries and succeeds on second attempt</p>
 <h3 id="scenario-4-filtered-sync">Scenario 4: Filtered Sync<a class="headerlink" href="#scenario-4-filtered-sync" title="Permanent link">¶</a></h3>
-<p><strong>Edit</strong> <code>config.test.yaml</code>:
+<p><strong>Edit</strong> <code>e2e/config.test.yaml</code>:
 <div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">filter</span><span class="p">:</span>
 </span><span id="__span-11-2"><span class="w">  </span><span class="nt">patterns</span><span class="p">:</span>
 </span><span id="__span-11-3"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"db-*"</span><span class="w">  </span><span class="c1"># Only sync secrets starting with db-</span>
@@ -1095,19 +1095,19 @@
 <p><strong>Expected Result</strong>: Only db-password synced, others ignored</p>
 <h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">¶</a></h2>
 <h3 id="stop-all-services">Stop All Services<a class="headerlink" href="#stop-all-services" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-12-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down
+<div class="highlight"><pre><span></span><code><span id="__span-12-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>down
 </span></code></pre></div>
 <h3 id="remove-volumes-clean-slate">Remove Volumes (Clean Slate)<a class="headerlink" href="#remove-volumes-clean-slate" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-13-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
+<div class="highlight"><pre><span></span><code><span id="__span-13-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
 </span></code></pre></div>
 <h3 id="remove-all-docker-resources">Remove All Docker Resources<a class="headerlink" href="#remove-all-docker-resources" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-14-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
+<div class="highlight"><pre><span></span><code><span id="__span-14-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
 </span><span id="__span-14-2">docker<span class="w"> </span>rmi<span class="w"> </span>secrets-sync:latest
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
 <h3 id="services-wont-start">Services Won't Start<a class="headerlink" href="#services-wont-start" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="c1"># Check Docker Compose logs</span>
-</span><span id="__span-15-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>logs
+</span><span id="__span-15-2">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>logs
 </span><span id="__span-15-3">
 </span><span id="__span-15-4"><span class="c1"># Verify ports are available</span>
 </span><span id="__span-15-5">netstat<span class="w"> </span>-tuln<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">":(5432|8000|8001|8080|9090)"</span>
@@ -1139,11 +1139,11 @@
 </span><span id="__span-18-5"><span class="w">  </span>max_backoff:<span class="w"> </span><span class="m">10000</span>
 </span><span id="__span-18-6">
 </span><span id="__span-18-7"><span class="c1"># Or stop unnecessary services</span>
-</span><span id="__span-18-8">docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>stop<span class="w"> </span>vaultwarden-target
+</span><span id="__span-18-8">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>stop<span class="w"> </span>vaultwarden-target
 </span></code></pre></div>
 <h3 id="connection-refused-errors">"Connection refused" Errors<a class="headerlink" href="#connection-refused-errors" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="c1"># Ensure services have started</span>
-</span><span id="__span-19-2">sleep<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./test-integration.sh
+</span><span id="__span-19-2">sleep<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./e2e/test-integration.sh
 </span><span id="__span-19-3">
 </span><span id="__span-19-4"><span class="c1"># Or manually verify health</span>
 </span><span id="__span-19-5">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8000/alive
@@ -1152,7 +1152,7 @@
 </span></code></pre></div>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">¶</a></h2>
 <h3 id="vaultwarden-configuration">Vaultwarden Configuration<a class="headerlink" href="#vaultwarden-configuration" title="Permanent link">¶</a></h3>
-<p>Set in <code>docker-compose.test.yml</code>:
+<p>Set in <code>e2e/docker-compose.test.yml</code>:
 - <code>ADMIN_TOKEN</code>: Admin authentication token
 - <code>SIGNUPS_ALLOWED</code>: Allow user registration
 - <code>LOG_LEVEL</code>: vaultwarden log level</p>
@@ -1191,7 +1191,7 @@
 </span></code></pre></div>
 <h3 id="config-validation">Config Validation<a class="headerlink" href="#config-validation" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-22-1"><span class="c1"># Test config without running daemon</span>
-</span><span id="__span-22-2">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.test.yaml<span class="w"> </span>-dry-run
+</span><span id="__span-22-2">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>e2e/config.test.yaml<span class="w"> </span>-dry-run
 </span><span id="__span-22-3">
 </span><span id="__span-22-4"><span class="c1"># Should output connection test results</span>
 </span></code></pre></div>
@@ -1207,7 +1207,7 @@
 </span><span id="__span-23-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build image</span>
 </span><span id="__span-23-9"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build -t secrets-sync:test .</span>
 </span><span id="__span-23-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run integration tests</span>
-</span><span id="__span-23-11"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./test-integration.sh</span>
+</span><span id="__span-23-11"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./e2e/test-integration.sh</span>
 </span><span id="__span-23-12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload logs on failure</span>
 </span><span id="__span-23-13"><span class="w">        </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure()</span>
 </span><span id="__span-23-14"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span>
@@ -1219,16 +1219,16 @@
 <ul>
 <li>Test uses demo tokens (not production-safe)</li>
 <li>Vaultwarden instances share PostgreSQL database (consider separate instances for prod tests)</li>
-<li>Sync runs every 5 minutes by default (configurable in <code>config.test.yaml</code>)</li>
+<li>Sync runs every 5 minutes by default (configurable in <code>e2e/config.test.yaml</code>)</li>
 <li>Database persistence survives container restarts</li>
 <li>Integration test is non-destructive (can be run multiple times)</li>
 </ul>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
 <ul>
-<li>Adapt <code>config.test.yaml</code> to your vault backends</li>
-<li>Modify <code>test-integration.sh</code> for your testing scenarios</li>
+<li>Adapt <code>e2e/config.test.yaml</code> to your vault backends</li>
+<li>Modify <code>e2e/test-integration.sh</code> for your testing scenarios</li>
 <li>Create production Docker Compose with your actual vaults</li>
-<li>Set up CI/CD pipeline using <code>test-integration.sh</code></li>
+<li>Set up CI/CD pipeline using <code>e2e/test-integration.sh</code></li>
 <li>Monitor sync daemon with your observability stack</li>
 </ul>
 </article>
