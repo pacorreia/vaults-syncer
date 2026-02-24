@@ -10,6 +10,7 @@ Secrets Vault Sync is a daemon that synchronizes secrets between multiple vault 
 - **Target(s)**: Where secrets are written to (backup, other environments, different providers)
 
 It supports:
+
 - ✅ Vaultwarden
 - ✅ HashiCorp Vault
 - ✅ Azure Key Vault

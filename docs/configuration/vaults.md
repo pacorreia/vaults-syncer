@@ -83,9 +83,9 @@ vaults:
     field_names:
       name_field: "name"
       value_field: "login"
+```
 
 **Bitwarden Cloud**: use `https://api.bitwarden.com/ciphers` as the endpoint. The OAuth token endpoint defaults to `https://identity.bitwarden.com/connect/token` when the API host is detected.
-```
 
 ### Connection Options
 
@@ -161,6 +161,7 @@ vaults:
     field_names:
       name_field: "name"
       value_field: "login"
+```
 
 ### Bitwarden Cloud Example
 

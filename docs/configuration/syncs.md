@@ -226,17 +226,6 @@ syncs:
       - field: value
         type: base64_encode
 ```
-    syncs:
-      - id: transform-sync
-        source: source-vault
-        targets: [target-vault]
-        sync_type: unidirectional
-        schedule: "0 * * * *"
-        transforms:
-          - field: value
-            type: base64_encode
-          - field: value
-            type: base64_decode
 
 ```yaml
 transforms:
