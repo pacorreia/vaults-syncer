@@ -1819,10 +1819,12 @@
 </span><span id="__span-4-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">target-vault</span><span class="p p-Indicator">]</span>
 </span><span id="__span-4-5"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
 </span></code></pre></div>
-<p><strong>Use cases</strong>:
-- Production → Staging/Dev
-- Archive → Active (one-way replication)
-- Migrate to new system</p>
+<p><strong>Use cases</strong>:</p>
+<ul>
+<li>Production → Staging/Dev</li>
+<li>Archive → Active (one-way replication)</li>
+<li>Migrate to new system</li>
+</ul>
 <h3 id="bidirectional-sync">Bidirectional Sync<a class="headerlink" href="#bidirectional-sync" title="Permanent link">&para;</a></h3>
 <p>Secrets synchronize in both directions. Changes in either vault are replicated.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="nt">syncs</span><span class="p">:</span>
@@ -1858,10 +1860,12 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Use cases</strong>:
-- Multi-region synchronization
-- Cross-team access to shared credentials
-- Disaster recovery with failover</p>
+<p><strong>Use cases</strong>:</p>
+<ul>
+<li>Multi-region synchronization</li>
+<li>Cross-team access to shared credentials</li>
+<li>Disaster recovery with failover</li>
+</ul>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">&para;</a></h2>
 <p>Control which secrets are included in a sync.</p>
 <h3 id="includeexclude-patterns">Include/Exclude Patterns<a class="headerlink" href="#includeexclude-patterns" title="Permanent link">&para;</a></h3>
@@ -1910,7 +1914,7 @@
 <h2 id="transformations">Transformations<a class="headerlink" href="#transformations" title="Permanent link">&para;</a></h2>
 <p>Modify secret names and values during synchronization.</p>
 <h3 id="value-transformations">Value Transformations<a class="headerlink" href="#value-transformations" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="nt">syncs</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="nt">syncs</span><span class="p">:</span>
 </span><span id="__span-10-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transform-sync</span>
 </span><span id="__span-10-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
 </span><span id="__span-10-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">target-vault</span><span class="p p-Indicator">]</span>
@@ -1920,17 +1924,6 @@
 </span><span id="__span-10-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
 </span><span id="__span-10-9"><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_encode</span>
 </span></code></pre></div>
-    syncs:
-      - id: transform-sync
-        source: source-vault
-        targets: [target-vault]
-        sync_type: unidirectional
-        schedule: "0 * * * *"
-        transforms:
-          - field: value
-            type: base64_encode
-          - field: value
-            type: base64_decode</p>
 <div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">transforms</span><span class="p">:</span>
 </span><span id="__span-11-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">script</span>
 </span><span id="__span-11-3"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*connection.*&quot;</span>
@@ -2089,38 +2082,50 @@
 </span></code></pre></div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <h3 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h3>
-<p>✅ <strong>Do</strong>:
-- Start with less frequent syncs (hourly or less)
-- Use staggered schedules for multiple syncs
-- Schedule backups during low-activity times
-- Test schedules in staging first</p>
-<p>❌ <strong>Don't</strong>:
-- Sync too frequently (every minute)
-- Overlap sync windows for same vaults
-- Schedule during peak usage times
-- Make schedule too complex</p>
+<p>✅ <strong>Do</strong>:</p>
+<ul>
+<li>Start with less frequent syncs (hourly or less)</li>
+<li>Use staggered schedules for multiple syncs</li>
+<li>Schedule backups during low-activity times</li>
+<li>Test schedules in staging first</li>
+</ul>
+<p>❌ <strong>Don't</strong>:</p>
+<ul>
+<li>Sync too frequently (every minute)</li>
+<li>Overlap sync windows for same vaults</li>
+<li>Schedule during peak usage times</li>
+<li>Make schedule too complex</li>
+</ul>
 <h3 id="filtering_1">Filtering<a class="headerlink" href="#filtering_1" title="Permanent link">&para;</a></h3>
-<p>✅ <strong>Do</strong>:
-- Use include/exclude patterns for clarity
-- Start restrictive, then broaden
-- Document filter logic
-- Test filters before production</p>
-<p>❌ <strong>Don't</strong>:
-- Use overly complex regex patterns
-- Accidentally exclude important secrets
-- Forget to test filter impact
-- Change filters without testing</p>
+<p>✅ <strong>Do</strong>:</p>
+<ul>
+<li>Use include/exclude patterns for clarity</li>
+<li>Start restrictive, then broaden</li>
+<li>Document filter logic</li>
+<li>Test filters before production</li>
+</ul>
+<p>❌ <strong>Don't</strong>:</p>
+<ul>
+<li>Use overly complex regex patterns</li>
+<li>Accidentally exclude important secrets</li>
+<li>Forget to test filter impact</li>
+<li>Change filters without testing</li>
+</ul>
 <h3 id="transformations_1">Transformations<a class="headerlink" href="#transformations_1" title="Permanent link">&para;</a></h3>
-<p>✅ <strong>Do</strong>:
-- Keep transformations simple
-- Use placeholders for consistency
-- Test transformations thoroughly
-- Document transformation logic</p>
-<p>❌ <strong>Don't</strong>:
-- Use complex custom scripts
-- Modify critical secret values
-- Make irreversible transformations
-- Skip testing transformations</p>
+<p>✅ <strong>Do</strong>:</p>
+<ul>
+<li>Keep transformations simple</li>
+<li>Use placeholders for consistency</li>
+<li>Test transformations thoroughly</li>
+<li>Document transformation logic</li>
+</ul>
+<p>❌ <strong>Don't</strong>:</p>
+<ul>
+<li>Use complex custom scripts</li>
+<li>Modify critical secret values</li>
+<li>Make irreversible transformations</li>
+<li>Skip testing transformations</li>
+</ul>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="sync-not-running">Sync Not Running<a class="headerlink" href="#sync-not-running" title="Permanent link">&para;</a></h3>
 <ol>

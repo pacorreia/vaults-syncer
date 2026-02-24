@@ -2085,20 +2085,20 @@ Prometheus-compatible format:
 <h3 id="build-issues">Build Issues<a class="headerlink" href="#build-issues" title="Permanent link">&para;</a></h3>
 <p><strong>Error</strong>: <code>gcc: command not found</code>
 - <strong>Solution</strong>: Install build tools
-  <div class="highlight"><pre><span></span><code><span id="__span-13-1">apt-get<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>sqlite3<span class="w"> </span>libsqlite3-dev<span class="w">  </span><span class="c1"># Ubuntu/Debian</span>
-</span><span id="__span-13-2">brew<span class="w"> </span>install<span class="w"> </span>gcc<span class="w"> </span>sqlite<span class="w">                                  </span><span class="c1"># macOS</span>
-</span></code></pre></div></p>
+  <code>bash
+  apt-get install build-essential sqlite3 libsqlite3-dev  # Ubuntu/Debian
+  brew install gcc sqlite                                  # macOS</code></p>
 <p><strong>Error</strong>: <code>CGO_ENABLED=1 not set</code>
 - <strong>Solution</strong>: Use <code>CGO_ENABLED=1</code> when building</p>
 <h3 id="runtime-issues">Runtime Issues<a class="headerlink" href="#runtime-issues" title="Permanent link">&para;</a></h3>
 <p><strong>Error</strong>: Configuration validation failed
 - <strong>Solution</strong>: Run dry-run mode for detailed errors
-  <div class="highlight"><pre><span></span><code><span id="__span-14-1">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml<span class="w"> </span>-dry-run
-</span></code></pre></div></p>
+  <code>bash
+  ./bin/sync-daemon -config config.yaml -dry-run</code></p>
 <p><strong>Error</strong>: Connection to vault failed
 - <strong>Solution</strong>: Check endpoint, verify token expiration, test endpoint
-  <div class="highlight"><pre><span></span><code><span id="__span-15-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="nv">$ENDPOINT</span>
-</span></code></pre></div></p>
+  <code>bash
+  curl -H "Authorization: Bearer $TOKEN" $ENDPOINT</code></p>
 <p><strong>Error</strong>: Database locked
 - <strong>Solution</strong>: Ensure only one instance running, check file permissions</p>
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
