@@ -15,7 +15,7 @@ docker run -d \
 
 ### Docker Compose
 ```bash
-# See docs/getting-started/installation.md for full example
+# See getting-started/installation.md for full example
 docker compose up -d
 ```
 
@@ -132,21 +132,21 @@ docker compose logs -f sync-daemon
 
 | Need | Document |
 |------|----------|
-| Getting started | [Getting Started](./docs/getting-started/README.md) |
-| Install | [Installation](./docs/getting-started/installation.md) |
-| Requirements | [Requirements](./docs/getting-started/requirements.md) |
-| 5-min guide | [Quick Start](./docs/getting-started/quick-start.md) |
-| Configure vaults | [Vaults](./docs/configuration/vaults.md) |
-| Set up auth | [Authentication](./docs/configuration/authentication.md) |
-| Create syncs | [Syncs](./docs/configuration/syncs.md) |
-| Config options | [Configuration](./docs/configuration/README.md) |
-| Main index | [Documentation](./docs/README.md) |
+| Getting started | [Getting Started](../getting-started/index.md) |
+| Install | [Installation](../getting-started/installation.md) |
+| Requirements | [Requirements](../getting-started/requirements.md) |
+| 5-min guide | [Quick Start](../getting-started/quick-start.md) |
+| Configure vaults | [Vaults](../configuration/vaults.md) |
+| Set up auth | [Authentication](../configuration/authentication.md) |
+| Create syncs | [Syncs](../configuration/syncs.md) |
+| Config options | [Configuration](../configuration/README.md) |
+| Main index | [Documentation](../index.md) |
 
 ## ✅ Pre-Flight Checklist
 
 Before running in production:
 
-- [ ] Read [Requirements](./docs/getting-started/requirements.md)
+- [ ] Read [Requirements](../getting-started/requirements.md)
 - [ ] Verify network access to all vaults
 - [ ] Test authentication credentials
 - [ ] Create test sync first
@@ -242,10 +242,10 @@ syncs:
 
 ## 📞 Get Help
 
-- 📖 Full documentation: [docs/README.md](./docs/README.md)
+- 📖 Full documentation: [docs index](../index.md)
 - 🐋 Report bugs: [GitHub Issues](https://github.com/pacorreia/vaults-syncer/issues)
 - 💡 Ask questions: [GitHub Discussions](https://github.com/pacorreia/vaults-syncer/discussions)
-- 🤝 Contribute: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- 🤝 Contribute: [CONTRIBUTING.md](https://github.com/pacorreia/vaults-syncer/blob/main/CONTRIBUTING.md)
 
 ## 📊 API Quick Ref
 
@@ -269,7 +269,7 @@ GET /metrics             - Prometheus metrics
 
 ---
 
-For detailed information, see the [full documentation](./docs/README.md).
+For detailed information, see the [full documentation](../index.md).
 
 **Last Updated**: 2024-01-15  
 **Version**: 1.0.0+

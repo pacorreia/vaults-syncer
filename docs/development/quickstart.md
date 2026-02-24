@@ -119,7 +119,7 @@ docker-compose -f e2e/docker-compose.test.yml build --no-cache
 ```
 
 ### Need More Info
-See [TESTING.md](TESTING.md) for detailed documentation.
+See the [testing guide](testing.md) for detailed documentation.
 
 ## Files Used
 

@@ -5,13 +5,14 @@
 [![Coverage](https://img.shields.io/endpoint?url=https://pacorreia.github.io/vaults-syncer/badges/coverage.json)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/pacorreia/vaults-syncer?sort=semver)](https://github.com/pacorreia/vaults-syncer/releases)
 [![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
-[![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](LICENSE)
+[![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](https://github.com/pacorreia/vaults-syncer/blob/main/LICENSE)
 
 A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support for seamless integration between Vaultwarden, Azure Key Vault, HashiCorp Vault, AWS Secrets Manager, and custom vault backends.
 
 ## Features
 
 ✨ **Multi-Vault Support**
+
 - Vaultwarden
 - HashiCorp Vault
 - Azure Key Vault
@@ -19,6 +20,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Generic HTTP-based vaults
 
 🔐 **Flexible Authentication**
+
 - OAuth 2.0 with Vaultwarden support
 - Bearer Token
 - Basic Authentication
@@ -26,6 +28,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Custom Headers
 
 🔄 **Powerful Sync**
+
 - Unidirectional and bidirectional sync
 - Concurrent processing (configurable workers)
 - Scheduled execution (cron format)
@@ -33,12 +36,14 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Pattern-based filtering (include/exclude)
 
 📊 **Monitoring & Observability**
+
 - HTTP REST API for operations
 - Prometheus metrics export
 - Structured JSON logging
 - Health check endpoints
 
 🏗️ **Production Ready**
+
 - SQLite state database
 - Transaction support
 - Error recovery and retry logic

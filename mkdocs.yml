@@ -39,13 +39,14 @@ theme:
 
   repo_url: https://github.com/pacorreia/vaults-syncer
   repo_name: pacorreia/vaults-syncer
-edit_uri: edit/main/docs/
+edit_uri: https://github.com/pacorreia/vaults-syncer/edit/main/docs/
 
 nav:
   - Home: index.md
   - Getting Started:
     - Introduction: getting-started/index.md
     - Quick Start: getting-started/quick-start.md
+    - Quickstart (Scripted): getting-started/quickstart.md
     - Installation: getting-started/installation.md
     - Requirements: getting-started/requirements.md
   - Configuration:

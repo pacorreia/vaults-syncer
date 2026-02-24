@@ -420,4 +420,4 @@ Documentation:
 
 ---
 
-For more information, see [README.md](README.md)
+For more information, see the [docs home](../index.md).
