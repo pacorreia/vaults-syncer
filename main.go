@@ -20,8 +20,12 @@ import (
 )
 
 // Version information. Set via ldflags at build time:
-// go build -ldflags "-X main.Version=1.0.0"
-var Version = "dev"
+// go build -ldflags "-X main.Version=1.0.0 -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=$(git rev-parse HEAD)"
+var (
+	Version   = "dev"
+	BuildDate = "unknown"
+	GitCommit = "unknown"
+)
 
 type appRunner interface {
 	api.Runner
@@ -95,6 +99,12 @@ func run(args []string, deps appDeps) error {
 	// Handle version flag
 	if *version {
 		fmt.Printf("vaults-syncer version %s\n", Version)
+		if BuildDate != "unknown" {
+			fmt.Printf("Build date: %s\n", BuildDate)
+		}
+		if GitCommit != "unknown" {
+			fmt.Printf("Git commit: %s\n", GitCommit)
+		}
 		return nil
 	}
 

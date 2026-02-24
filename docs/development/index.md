@@ -53,8 +53,14 @@ go mod download
 # Build binary
 CGO_ENABLED=1 go build -o bin/sync-daemon .
 
-# Build with version
-CGO_ENABLED=1 go build -ldflags "-X main.Version=1.0.0" -o bin/sync-daemon .
+# Build with complete version information
+VERSION=$(git describe --tags --always --dirty)
+BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+GIT_COMMIT=$(git rev-parse HEAD)
+
+CGO_ENABLED=1 go build \
+  -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+  -o bin/sync-daemon .
 
 # Verify binary
 ./bin/sync-daemon --version

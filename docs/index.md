@@ -241,8 +241,14 @@ This project is written in **Go 1.22** with a modular architecture:
 # Build with default version (dev)
 go build -o sync-daemon .
 
-# Build with specific version
-go build -ldflags "-X main.Version=1.0.0" -o sync-daemon .
+# Build with complete version information
+VERSION=$(git describe --tags --always --dirty)
+BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+GIT_COMMIT=$(git rev-parse HEAD)
+
+go build \
+  -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+  -o sync-daemon .
 
 # Check version
 ./sync-daemon --version

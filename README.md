@@ -495,17 +495,29 @@ CGO_ENABLED=1 go build -o bin/sync-daemon .
 
 ### Building with Version Information
 
-By default, the binary uses version "dev". To build with a specific version:
+By default, the binary uses version "dev". To build with complete version information:
 
 ```bash
-# Using git tag
-go build -ldflags "-X main.Version=$(git describe --tags --always)" -o vaults-syncer .
+# Full version information (recommended)
+VERSION=$(git describe --tags --always --dirty)
+BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+GIT_COMMIT=$(git rev-parse HEAD)
 
-# Using semantic version
+go build -ldflags "\
+  -X main.Version=${VERSION} \
+  -X main.BuildDate=${BUILD_DATE} \
+  -X main.GitCommit=${GIT_COMMIT}" \
+  -o vaults-syncer .
+
+# Or using a simple version tag
 go build -ldflags "-X main.Version=1.2.3" -o vaults-syncer .
 
 # Check version
 ./vaults-syncer -version
+# Output:
+# vaults-syncer version v1.2.3
+# Build date: 2026-02-23T22:00:00Z
+# Git commit: abc123def456...
 ```
 
 ### Development
@@ -546,6 +558,92 @@ docker run -d \
 - **User**: Non-root `sync:sync` (uid 1000)
 - **Health Check**: Built-in via `/health` endpoint
 - **Volumes**: `/etc/sync` for config, `/app/data` for database
+
+## Versioning and Releases
+
+This project uses **automated semantic versioning** based on commit messages:
+
+### Automatic Version Bumping
+
+When code is pushed to `main`, the version is automatically bumped based on commit messages:
+
+- 🐛 **Patch** (default): `v1.2.3` → `v1.2.4`
+  - Default behavior for most commits
+  - Bug fixes, documentation updates, minor improvements
+  - Example: `fix: resolve sync error`, `docs: update README`
+
+- ✨ **Minor**: `v1.2.3` → `v1.3.0`
+  - Use `feat:` or `feature:` in commit message
+  - Or add `[minor]` anywhere in commit message
+  - New features, backwards-compatible changes
+  - Example: `feat: add AWS Secrets Manager support`
+
+- 💥 **Major**: `v1.2.3` → `v2.0.0`
+  - Use `BREAKING CHANGE:` in commit message
+  - Or add `[major]` anywhere in commit message
+  - Breaking changes, API changes
+  - Example: `[major] refactor: change config format`
+
+### Commit Message Examples
+
+```bash
+# Patch bump (default)
+git commit -m "fix: correct OAuth token refresh timing"
+git commit -m "docs: update authentication examples"
+git commit -m "chore: update dependencies"
+
+# Minor bump (new feature)
+git commit -m "feat: add support for Google Secret Manager"
+git commit -m "[minor] implement webhook triggers"
+
+# Major bump (breaking change)  
+git commit -m "BREAKING CHANGE: remove deprecated v1 API"
+git commit -m "[major] refactor config schema"
+```
+
+### Release Process
+
+1. **Make your changes** and commit with appropriate message:
+   ```bash
+   git commit -m "feat: add new vault backend"
+   ```
+
+2. **Push to main** (or merge PR):
+   ```bash
+   git push origin main
+   ```
+
+3. **Automatic version bump**:
+   - Version bump workflow analyzes commits
+   - Creates new git tag (e.g., `v1.3.0`)
+   - Triggers release workflow
+
+4. **Release workflow** automatically:
+   - Builds binaries for all platforms
+   - Creates Docker images (multi-arch)
+   - Publishes GitHub release with assets
+   - Updates `latest` Docker tag
+
+### Manual Version Bump
+
+You can also manually trigger a version bump:
+
+```bash
+# Via GitHub Actions UI
+Actions → Version Bump → Run workflow → Select bump type
+```
+
+### Version Information
+
+Check the version of any build:
+
+```bash
+./vaults-syncer --version
+# Output:
+# vaults-syncer version v1.3.0
+# Build date: 2026-02-23T23:54:26Z
+# Git commit: abc123...
+```
 
 ## Performance Considerations
 
