@@ -1483,27 +1483,30 @@
 </span><span id="__span-4-17"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*/30</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
 </span></code></pre></div>
 <h2 id="useful-commands">🔍 Useful Commands<a class="headerlink" href="#useful-commands" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Check health</span>
-</span><span id="__span-5-2">curl<span class="w"> </span>http://localhost:8080/health
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Check version</span>
+</span><span id="__span-5-2">./sync-daemon<span class="w"> </span>--version
 </span><span id="__span-5-3">
-</span><span id="__span-5-4"><span class="c1"># List vaults</span>
-</span><span id="__span-5-5">curl<span class="w"> </span>http://localhost:8080/vaults
+</span><span id="__span-5-4"><span class="c1"># Check health</span>
+</span><span id="__span-5-5">curl<span class="w"> </span>http://localhost:8080/health
 </span><span id="__span-5-6">
-</span><span id="__span-5-7"><span class="c1"># List syncs</span>
-</span><span id="__span-5-8">curl<span class="w"> </span>http://localhost:8080/syncs
+</span><span id="__span-5-7"><span class="c1"># List vaults</span>
+</span><span id="__span-5-8">curl<span class="w"> </span>http://localhost:8080/vaults
 </span><span id="__span-5-9">
-</span><span id="__span-5-10"><span class="c1"># Get sync status</span>
-</span><span id="__span-5-11">curl<span class="w"> </span>http://localhost:8080/syncs/<span class="o">{</span>sync-id<span class="o">}</span>
+</span><span id="__span-5-10"><span class="c1"># List syncs</span>
+</span><span id="__span-5-11">curl<span class="w"> </span>http://localhost:8080/syncs
 </span><span id="__span-5-12">
-</span><span id="__span-5-13"><span class="c1"># Run sync now</span>
-</span><span id="__span-5-14">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/<span class="o">{</span>sync-id<span class="o">}</span>/run
+</span><span id="__span-5-13"><span class="c1"># Get sync status</span>
+</span><span id="__span-5-14">curl<span class="w"> </span>http://localhost:8080/syncs/<span class="o">{</span>sync-id<span class="o">}</span>
 </span><span id="__span-5-15">
-</span><span id="__span-5-16"><span class="c1"># View metrics</span>
-</span><span id="__span-5-17">curl<span class="w"> </span>http://localhost:9090/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>sync
+</span><span id="__span-5-16"><span class="c1"># Run sync now</span>
+</span><span id="__span-5-17">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/<span class="o">{</span>sync-id<span class="o">}</span>/run
 </span><span id="__span-5-18">
-</span><span id="__span-5-19"><span class="c1"># Check logs</span>
-</span><span id="__span-5-20">docker<span class="w"> </span>logs<span class="w"> </span>akv-sync
-</span><span id="__span-5-21">docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
+</span><span id="__span-5-19"><span class="c1"># View metrics</span>
+</span><span id="__span-5-20">curl<span class="w"> </span>http://localhost:9090/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>sync
+</span><span id="__span-5-21">
+</span><span id="__span-5-22"><span class="c1"># Check logs</span>
+</span><span id="__span-5-23">docker<span class="w"> </span>logs<span class="w"> </span>akv-sync
+</span><span id="__span-5-24">docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
 </span></code></pre></div>
 <h2 id="quick-start-steps">🚀 Quick Start Steps<a class="headerlink" href="#quick-start-steps" title="Permanent link">&para;</a></h2>
 <ol>

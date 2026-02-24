@@ -1766,8 +1766,18 @@
 </span><span id="__span-1-4"><span class="c1"># Build binary</span>
 </span><span id="__span-1-5"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>bin/sync-daemon<span class="w"> </span>.
 </span><span id="__span-1-6">
-</span><span id="__span-1-7"><span class="c1"># Verify binary</span>
-</span><span id="__span-1-8">./bin/sync-daemon<span class="w"> </span>-h
+</span><span id="__span-1-7"><span class="c1"># Build with complete version information</span>
+</span><span id="__span-1-8"><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>describe<span class="w"> </span>--tags<span class="w"> </span>--always<span class="w"> </span>--dirty<span class="k">)</span>
+</span><span id="__span-1-9"><span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-u<span class="w"> </span>+<span class="s1">&#39;%Y-%m-%dT%H:%M:%SZ&#39;</span><span class="k">)</span>
+</span><span id="__span-1-10"><span class="nv">GIT_COMMIT</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD<span class="k">)</span>
+</span><span id="__span-1-11">
+</span><span id="__span-1-12"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>go<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-13"><span class="w">  </span>-ldflags<span class="w"> </span><span class="s2">&quot;-X main.Version=</span><span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span><span class="s2"> -X main.BuildDate=</span><span class="si">${</span><span class="nv">BUILD_DATE</span><span class="si">}</span><span class="s2"> -X main.GitCommit=</span><span class="si">${</span><span class="nv">GIT_COMMIT</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-14"><span class="w">  </span>-o<span class="w"> </span>bin/sync-daemon<span class="w"> </span>.
+</span><span id="__span-1-15">
+</span><span id="__span-1-16"><span class="c1"># Verify binary</span>
+</span><span id="__span-1-17">./bin/sync-daemon<span class="w"> </span>--version
+</span><span id="__span-1-18">./bin/sync-daemon<span class="w"> </span>-h
 </span></code></pre></div>
 <h3 id="docker-build">Docker Build<a class="headerlink" href="#docker-build" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="c1"># Build production image</span>
