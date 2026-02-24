@@ -883,30 +883,8 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hashicorp-vault" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        HashiCorp Vault
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="HashiCorp Vault">
+    <nav class="md-nav" aria-label="Keeper Secrets Manager">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-configuration_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Configuration
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#notes_1" class="md-nav__link">
@@ -919,67 +897,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#aws-secrets-manager" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        AWS Secrets Manager
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="AWS Secrets Manager">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-configuration_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
           <li class="md-nav__item">
   <a href="#notes_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Notes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#generic-rest-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Generic REST API
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Generic REST API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-configuration_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Configuration
       
     </span>
   </a>
@@ -1728,7 +1650,7 @@
 </span></code></pre></div>
 <h2 id="keeper-secrets-manager">Keeper Secrets Manager<a class="headerlink" href="#keeper-secrets-manager" title="Permanent link">&para;</a></h2>
 <p>Keeper provides a JSON API for secrets. Use operations overrides to map list/get/set/delete paths.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="nt">vaults</span><span class="p">:</span>
+<p><div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-7-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keeper</span>
 </span><span id="__span-7-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keeper</span>
 </span><span id="__span-7-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://keeper.example.com/api/secrets&quot;</span>
@@ -1756,63 +1678,75 @@
 </span><span id="__span-7-26"><span class="w">        </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://keeper.example.com/api/secrets/{name}&quot;</span>
 </span><span id="__span-7-27"><span class="w">        </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DELETE</span>
 </span></code></pre></div>
-<h2 id="hashicorp-vault">HashiCorp Vault<a class="headerlink" href="#hashicorp-vault" title="Permanent link">&para;</a></h2>
-<p>HashiCorp Vault is an enterprise secrets management solution.</p>
-<h3 id="basic-configuration_2">Basic Configuration<a class="headerlink" href="#basic-configuration_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><span class="nt">vaults</span><span class="p">:</span>
-</span><span id="__span-8-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hashicorp-prod</span>
-</span><span id="__span-8-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;HashiCorp</span><span class="nv"> </span><span class="s">Vault</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">Production&quot;</span>
-</span><span id="__span-8-4"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
-</span><span id="__span-8-5"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com:8200/v1/secret/data&quot;</span>
-</span><span id="__span-8-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-8-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
-</span><span id="__span-8-8"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-8-9"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_TOKEN}&quot;</span>
-</span><span id="__span-8-10"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-8-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-8-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
-</span></code></pre></div>
+<div class="highlight"><pre><span></span><code><span id="__span-8-1">## HashiCorp Vault
+</span><span id="__span-8-2">
+</span><span id="__span-8-3">HashiCorp Vault is an enterprise secrets management solution.
+</span><span id="__span-8-4">
+</span><span id="__span-8-5">### Basic Configuration
+</span><span id="__span-8-6">
+</span><span id="__span-8-7">```yaml
+</span><span id="__span-8-8">vaults:
+</span><span id="__span-8-9">  - id: hashicorp-prod
+</span><span id="__span-8-10">    name: &quot;HashiCorp Vault - Production&quot;
+</span><span id="__span-8-11">    type: vault
+</span><span id="__span-8-12">    endpoint: &quot;https://vault.example.com:8200/v1/secret/data&quot;
+</span><span id="__span-8-13">    auth:
+</span><span id="__span-8-14">      method: custom
+</span><span id="__span-8-15">      headers:
+</span><span id="__span-8-16">        X-Vault-Token: &quot;${VAULT_TOKEN}&quot;
+</span><span id="__span-8-17">    field_names:
+</span><span id="__span-8-18">      name_field: &quot;name&quot;
+</span><span id="__span-8-19">      value_field: &quot;value&quot;
+</span></code></pre></div></p>
 <h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The generic adapter expects Vault KV v2 semantics (list via <code>metadata</code>, read/write via <code>data</code>).</li>
-<li>If you authenticate with AppRole/Kubernetes, exchange credentials for a token externally and pass it in <code>X-Vault-Token</code>.</li>
+<li>If you authenticate with AppRole/Kubernetes, exchange credentials for a token externally and pass it in <code>X-Vault-Token</code>.
+<div class="highlight"><pre><span></span><code><span id="__span-9-1">## AWS Secrets Manager
+</span><span id="__span-9-2">
+</span><span id="__span-9-3">AWS managed secrets service integrated with IAM.
+</span><span id="__span-9-4">
+</span><span id="__span-9-5">### Basic Configuration
+</span><span id="__span-9-6">
+</span><span id="__span-9-7">```yaml
+</span><span id="__span-9-8">vaults:
+</span><span id="__span-9-9">  - id: aws-prod
+</span><span id="__span-9-10">    name: &quot;AWS Secrets Manager - Production&quot;
+</span><span id="__span-9-11">    type: aws
+</span><span id="__span-9-12">    endpoint: &quot;https://secretsmanager.us-east-1.amazonaws.com&quot;
+</span><span id="__span-9-13">    auth:
+</span><span id="__span-9-14">      method: custom
+</span><span id="__span-9-15">      headers:
+</span><span id="__span-9-16">        X-Amz-Security-Token: &quot;${AWS_SESSION_TOKEN}&quot;
+</span><span id="__span-9-17">    field_names:
+</span><span id="__span-9-18">      name_field: &quot;Name&quot;
+</span><span id="__span-9-19">      value_field: &quot;SecretString&quot;
+</span></code></pre></div></li>
 </ul>
-<h2 id="aws-secrets-manager">AWS Secrets Manager<a class="headerlink" href="#aws-secrets-manager" title="Permanent link">&para;</a></h2>
-<p>AWS managed secrets service integrated with IAM.</p>
-<h3 id="basic-configuration_3">Basic Configuration<a class="headerlink" href="#basic-configuration_3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="nt">vaults</span><span class="p">:</span>
-</span><span id="__span-9-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws-prod</span>
-</span><span id="__span-9-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AWS</span><span class="nv"> </span><span class="s">Secrets</span><span class="nv"> </span><span class="s">Manager</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">Production&quot;</span>
-</span><span id="__span-9-4"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
-</span><span id="__span-9-5"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://secretsmanager.us-east-1.amazonaws.com&quot;</span>
-</span><span id="__span-9-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-9-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
-</span><span id="__span-9-8"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-9-9"><span class="w">        </span><span class="nt">X-Amz-Security-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AWS_SESSION_TOKEN}&quot;</span>
-</span><span id="__span-9-10"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-9-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Name&quot;</span>
-</span><span id="__span-9-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SecretString&quot;</span>
-</span></code></pre></div>
 <h3 id="notes_2">Notes<a class="headerlink" href="#notes_2" title="Permanent link">&para;</a></h3>
 <ul>
-<li>The generic adapter does not implement AWS signing. Use a proxy or pre-signed endpoints if required.</li>
+<li>The generic adapter does not implement AWS signing. Use a proxy or pre-signed endpoints if required.
+<div class="highlight"><pre><span></span><code><span id="__span-10-1">## Generic REST API
+</span><span id="__span-10-2">
+</span><span id="__span-10-3">Configure any HTTP-based vault system with REST API:
+</span><span id="__span-10-4">
+</span><span id="__span-10-5">### Basic Configuration
+</span><span id="__span-10-6">
+</span><span id="__span-10-7">```yaml
+</span><span id="__span-10-8">vaults:
+</span><span id="__span-10-9">  - id: generic-api
+</span><span id="__span-10-10">    name: &quot;Generic REST API&quot;
+</span><span id="__span-10-11">    type: generic
+</span><span id="__span-10-12">    endpoint: &quot;https://secrets.example.com&quot;
+</span><span id="__span-10-13">    auth:
+</span><span id="__span-10-14">      method: bearer
+</span><span id="__span-10-15">      headers:
+</span><span id="__span-10-16">        token: &quot;${API_TOKEN}&quot;
+</span><span id="__span-10-17">    field_names:
+</span><span id="__span-10-18">      name_field: &quot;name&quot;
+</span><span id="__span-10-19">      value_field: &quot;value&quot;
+</span></code></pre></div></li>
 </ul>
-<h2 id="generic-rest-api">Generic REST API<a class="headerlink" href="#generic-rest-api" title="Permanent link">&para;</a></h2>
-<p>Configure any HTTP-based vault system with REST API:</p>
-<h3 id="basic-configuration_4">Basic Configuration<a class="headerlink" href="#basic-configuration_4" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="nt">vaults</span><span class="p">:</span>
-</span><span id="__span-10-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic-api</span>
-</span><span id="__span-10-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Generic</span><span class="nv"> </span><span class="s">REST</span><span class="nv"> </span><span class="s">API&quot;</span>
-</span><span id="__span-10-4"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic</span>
-</span><span id="__span-10-5"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://secrets.example.com&quot;</span>
-</span><span id="__span-10-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-10-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
-</span><span id="__span-10-8"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-10-9"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${API_TOKEN}&quot;</span>
-</span><span id="__span-10-10"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-10-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-10-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
-</span></code></pre></div>
 <h3 id="authentication-methods">Authentication Methods<a class="headerlink" href="#authentication-methods" title="Permanent link">&para;</a></h3>
 <h4 id="bearer-token">Bearer Token<a class="headerlink" href="#bearer-token" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">vaults</span><span class="p">:</span>
@@ -1959,48 +1893,38 @@
 <h2 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h2>
 <h3 id="connection-timeout">Connection Timeout<a class="headerlink" href="#connection-timeout" title="Permanent link">&para;</a></h3>
 <p><strong>Problem</strong>: Vault not reachable</p>
-<p><strong>Solutions</strong>:</p>
-<ul>
-<li>Verify endpoint URL</li>
-<li>Check network connectivity</li>
-<li>Verify firewall rules</li>
-<li>Check DNS resolution</li>
-</ul>
+<p><strong>Solutions</strong>:
+- Verify endpoint URL
+- Check network connectivity
+- Verify firewall rules
+- Check DNS resolution</p>
 <h3 id="authentication-failed">Authentication Failed<a class="headerlink" href="#authentication-failed" title="Permanent link">&para;</a></h3>
 <p><strong>Problem</strong>: Wrong credentials or permissions</p>
-<p><strong>Solutions</strong>:</p>
-<ul>
-<li>Verify credentials</li>
-<li>Check credential expiration</li>
-<li>Verify required permissions</li>
-<li>Check managed identity is enabled</li>
-</ul>
+<p><strong>Solutions</strong>:
+- Verify credentials
+- Check credential expiration
+- Verify required permissions
+- Check managed identity is enabled</p>
 <h3 id="ssl-certificate-error">SSL Certificate Error<a class="headerlink" href="#ssl-certificate-error" title="Permanent link">&para;</a></h3>
 <p><strong>Problem</strong>: TLS verification fails</p>
-<p><strong>Solutions</strong>:</p>
-<ul>
-<li>Verify certificate is valid</li>
-<li>Update system certificates</li>
-<li>For development only: use <code>disable_ssl_verify: true</code></li>
-</ul>
+<p><strong>Solutions</strong>:
+- Verify certificate is valid
+- Update system certificates
+- For development only: use <code>disable_ssl_verify: true</code></p>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
-<p>✅ <strong>Do</strong>:</p>
-<ul>
-<li>Use managed identities on cloud platforms</li>
-<li>Store sensitive values in environment variables</li>
-<li>Verify connectivity during startup</li>
-<li>Enable audit logging</li>
-<li>Use least-privilege permissions</li>
-<li>Rotate credentials regularly</li>
-</ul>
-<p>❌ <strong>Don't</strong>:</p>
-<ul>
-<li>Hardcode credentials in configuration files</li>
-<li>Use <code>disable_ssl_verify: true</code> in production</li>
-<li>Share configuration files with secrets</li>
-<li>Use overly permissive credentials</li>
-<li>Forget to test backup/restore procedures</li>
-</ul>
+<p>✅ <strong>Do</strong>:
+- Use managed identities on cloud platforms
+- Store sensitive values in environment variables
+- Verify connectivity during startup
+- Enable audit logging
+- Use least-privilege permissions
+- Rotate credentials regularly</p>
+<p>❌ <strong>Don't</strong>:
+- Hardcode credentials in configuration files
+- Use <code>disable_ssl_verify: true</code> in production
+- Share configuration files with secrets
+- Use overly permissive credentials
+- Forget to test backup/restore procedures</p>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../authentication/">Configure Authentication</a></li>
