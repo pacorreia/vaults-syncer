@@ -1,5 +1,5 @@
 // Package main provides a daemon for synchronizing secrets across multiple vaults.
-// This daemon provides secure and reliable multi-vault sync with automated release versioning.
+// This daemon provides enterprise-grade secure and reliable multi-vault sync with automated release versioning.
 package main
 
 import (
