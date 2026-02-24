@@ -54,7 +54,7 @@ Syncs are scheduled using standard cron format: `minute hour day month weekday`
 
 ### Cron Format
 
-```text
+```
 ┌───────────── minute (0 - 59)
 │ ┌───────────── hour (0 - 23)
 │ │ ┌───────────── day of month (1 - 31)
@@ -119,7 +119,6 @@ syncs:
 ```
 
 **Use cases**:
-
 - Production → Staging/Dev
 - Archive → Active (one-way replication)
 - Migrate to new system
@@ -139,14 +138,13 @@ syncs:
 **Conflict Resolution Strategies**:
 
 | Strategy | Behavior |
-| ---------- | ---------- |
+|----------|----------|
 | `source-wins` | Source takes precedence on conflict |
 | `target-wins` | Target takes precedence on conflict |
 | `manual` | Conflicts require manual intervention |
 | `newest` | Latest modified secret wins |
 
 **Use cases**:
-
 - Multi-region synchronization
 - Cross-team access to shared credentials
 - Disaster recovery with failover
@@ -228,6 +226,17 @@ syncs:
       - field: value
         type: base64_encode
 ```
+    syncs:
+      - id: transform-sync
+        source: source-vault
+        targets: [target-vault]
+        sync_type: unidirectional
+        schedule: "0 * * * *"
+        transforms:
+          - field: value
+            type: base64_encode
+          - field: value
+            type: base64_decode
 
 ```yaml
 transforms:
@@ -432,14 +441,12 @@ curl -X POST http://localhost:8080/syncs/my-sync/run
 ### Scheduling
 
 ✅ **Do**:
-
 - Start with less frequent syncs (hourly or less)
 - Use staggered schedules for multiple syncs
 - Schedule backups during low-activity times
 - Test schedules in staging first
 
 ❌ **Don't**:
-
 - Sync too frequently (every minute)
 - Overlap sync windows for same vaults
 - Schedule during peak usage times
@@ -448,14 +455,12 @@ curl -X POST http://localhost:8080/syncs/my-sync/run
 ### Filtering
 
 ✅ **Do**:
-
 - Use include/exclude patterns for clarity
 - Start restrictive, then broaden
 - Document filter logic
 - Test filters before production
 
 ❌ **Don't**:
-
 - Use overly complex regex patterns
 - Accidentally exclude important secrets
 - Forget to test filter impact
@@ -464,14 +469,12 @@ curl -X POST http://localhost:8080/syncs/my-sync/run
 ### Transformations
 
 ✅ **Do**:
-
 - Keep transformations simple
 - Use placeholders for consistency
 - Test transformations thoroughly
 - Document transformation logic
 
 ❌ **Don't**:
-
 - Use complex custom scripts
 - Modify critical secret values
 - Make irreversible transformations

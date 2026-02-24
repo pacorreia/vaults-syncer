@@ -66,7 +66,7 @@ Check specific vault integration documentation for:
 
 ### Source Vault (Azure Key Vault)
 
-```text
+```
 Permissions Needed:
 ├── Get Secret
 ├── List Secrets
@@ -99,7 +99,7 @@ az role assignment create \
 
 ### Target Vault (Bitwarden)
 
-```text
+```
 Permissions Needed:
 ├── Admin Access (for user/collection management)
 ├── Cipher Read & Write
@@ -180,7 +180,7 @@ For advanced deployments:
 
 All vaults must support:
 
-```text
+```
 REST API (HTTPS)
 ├── Authentication endpoint
 ├── List secrets/items endpoint
@@ -253,7 +253,7 @@ These are optional and can be enabled via configuration.
 
 ### For 100 Secrets
 
-```text
+```
 CPU: <1 core (minimal usage)
 Memory: ~200 MB
 Storage: ~5 MB
@@ -263,7 +263,7 @@ Sync Time: <5 seconds
 
 ### For 10,000 Secrets
 
-```text
+```
 CPU: 1-2 cores
 Memory: ~500 MB
 Storage: ~50 MB
@@ -273,7 +273,7 @@ Sync Time: 30-60 seconds
 
 ### For 100,000+ Secrets
 
-```text
+```
 CPU: 2-4 cores
 Memory: 1-2 GB
 Storage: 100-500 MB

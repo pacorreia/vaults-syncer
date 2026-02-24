@@ -17,7 +17,7 @@ That's it! This will:
 
 ## What Happens
 
-```text
+```
 START
   ↓
 [Docker] Start PostgreSQL
@@ -45,7 +45,7 @@ DONE ✓
 
 You should see:
 
-```text
+```
 [SUCCESS] Source Vaultwarden is ready
 [SUCCESS] Target Vaultwarden is ready
 [SUCCESS] Sync daemon is ready

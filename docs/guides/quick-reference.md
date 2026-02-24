@@ -249,7 +249,7 @@ syncs:
 
 ## 📊 API Quick Ref
 
-```text
+```
 GET /health              - Health check
 GET /vaults              - List vaults
 GET /vaults/health       - Vault health status

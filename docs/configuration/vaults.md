@@ -83,9 +83,9 @@ vaults:
     field_names:
       name_field: "name"
       value_field: "login"
-```
 
 **Bitwarden Cloud**: use `https://api.bitwarden.com/ciphers` as the endpoint. The OAuth token endpoint defaults to `https://identity.bitwarden.com/connect/token` when the API host is detected.
+```
 
 ### Connection Options
 
@@ -161,7 +161,6 @@ vaults:
     field_names:
       name_field: "name"
       value_field: "login"
-```
 
 ### Bitwarden Cloud Example
 
@@ -222,6 +221,7 @@ vaults:
         endpoint: "https://keeper.example.com/api/secrets/{name}"
         method: DELETE
 ```
+```
 
 ## HashiCorp Vault
 
@@ -248,6 +248,7 @@ vaults:
 
 - The generic adapter expects Vault KV v2 semantics (list via `metadata`, read/write via `data`).
 - If you authenticate with AppRole/Kubernetes, exchange credentials for a token externally and pass it in `X-Vault-Token`.
+```
 
 ## AWS Secrets Manager
 
@@ -273,6 +274,7 @@ vaults:
 ### Notes
 
 - The generic adapter does not implement AWS signing. Use a proxy or pre-signed endpoints if required.
+```
 
 ## Generic REST API
 
@@ -469,7 +471,6 @@ curl http://localhost:8080/vaults/health
 **Problem**: Vault not reachable
 
 **Solutions**:
-
 - Verify endpoint URL
 - Check network connectivity
 - Verify firewall rules
@@ -480,7 +481,6 @@ curl http://localhost:8080/vaults/health
 **Problem**: Wrong credentials or permissions
 
 **Solutions**:
-
 - Verify credentials
 - Check credential expiration
 - Verify required permissions
@@ -491,7 +491,6 @@ curl http://localhost:8080/vaults/health
 **Problem**: TLS verification fails
 
 **Solutions**:
-
 - Verify certificate is valid
 - Update system certificates
 - For development only: use `disable_ssl_verify: true`
@@ -499,7 +498,6 @@ curl http://localhost:8080/vaults/health
 ## Best Practices
 
 ✅ **Do**:
-
 - Use managed identities on cloud platforms
 - Store sensitive values in environment variables
 - Verify connectivity during startup
@@ -508,7 +506,6 @@ curl http://localhost:8080/vaults/health
 - Rotate credentials regularly
 
 ❌ **Don't**:
-
 - Hardcode credentials in configuration files
 - Use `disable_ssl_verify: true` in production
 - Share configuration files with secrets
