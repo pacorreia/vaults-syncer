@@ -112,10 +112,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
-      - name: Download all artifacts
+      - name: Download binary artifacts
         uses: actions/download-artifact@v6
         with:
           path: artifacts
+          pattern: binary-*
 
       - name: Prepare release assets
         run: |
