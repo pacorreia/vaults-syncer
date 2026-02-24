@@ -9,6 +9,8 @@
 
 A containerized, highly customizable daemon for synchronizing secrets across multiple vaults and secret management systems.
 
+> **Note:** For the latest version, visit the [releases page](https://github.com/pacorreia/vaults-syncer/releases).
+
 ## Features
 
 - **Multi-vault Support**: Sync secrets between Azure Key Vault, Vaultwarden, HashiCorp Vault, AWS Secrets Manager, and custom APIs
