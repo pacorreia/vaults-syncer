@@ -1732,31 +1732,32 @@
 </span><span id="__span-0-6">├── Makefile                   # Build tasks (optional)
 </span><span id="__span-0-7">├── README.md                  # Main documentation
 </span><span id="__span-0-8">├── DEVELOPMENT.md             # This file
-</span><span id="__span-0-9">├── config.example.yaml        # Example configuration
-</span><span id="__span-0-10">├── docker-compose.yml         # Docker Compose setup
-</span><span id="__span-0-11">├── go.mod                     # Go module definition
-</span><span id="__span-0-12">├── go.sum                     # Go dependency checksums
-</span><span id="__span-0-13">├── main.go                    # Application entry point
-</span><span id="__span-0-14">│
-</span><span id="__span-0-15">├── api/                       # REST API handlers
-</span><span id="__span-0-16">│   └── handler.go            # HTTP endpoint handlers
-</span><span id="__span-0-17">│
-</span><span id="__span-0-18">├── config/                    # Configuration management
-</span><span id="__span-0-19">│   ├── loader.go             # YAML config loading &amp; validation
-</span><span id="__span-0-20">│   └── types.go              # Configuration data structures
-</span><span id="__span-0-21">│
-</span><span id="__span-0-22">├── sync/                      # Core sync logic
-</span><span id="__span-0-23">│   ├── engine.go             # Main sync engine
-</span><span id="__span-0-24">│   └── runner.go             # Scheduler and execution runner
-</span><span id="__span-0-25">│
-</span><span id="__span-0-26">├── storage/                   # Persistence layer
-</span><span id="__span-0-27">│   └── store.go              # SQLite database operations
-</span><span id="__span-0-28">│
-</span><span id="__span-0-29">├── vault/                     # Vault client abstraction
-</span><span id="__span-0-30">│   └── client.go             # HTTP vault client
-</span><span id="__span-0-31">│
-</span><span id="__span-0-32">└── bin/
-</span><span id="__span-0-33">    └── sync-daemon           # Compiled binary (after build)
+</span><span id="__span-0-9">├── examples/                  # Example configurations
+</span><span id="__span-0-10">│   └── config.example.yaml    # Example configuration
+</span><span id="__span-0-11">├── docker-compose.yml         # Docker Compose setup
+</span><span id="__span-0-12">├── go.mod                     # Go module definition
+</span><span id="__span-0-13">├── go.sum                     # Go dependency checksums
+</span><span id="__span-0-14">├── main.go                    # Application entry point
+</span><span id="__span-0-15">│
+</span><span id="__span-0-16">├── api/                       # REST API handlers
+</span><span id="__span-0-17">│   └── handler.go            # HTTP endpoint handlers
+</span><span id="__span-0-18">│
+</span><span id="__span-0-19">├── config/                    # Configuration management
+</span><span id="__span-0-20">│   ├── loader.go             # YAML config loading &amp; validation
+</span><span id="__span-0-21">│   └── types.go              # Configuration data structures
+</span><span id="__span-0-22">│
+</span><span id="__span-0-23">├── sync/                      # Core sync logic
+</span><span id="__span-0-24">│   ├── engine.go             # Main sync engine
+</span><span id="__span-0-25">│   └── runner.go             # Scheduler and execution runner
+</span><span id="__span-0-26">│
+</span><span id="__span-0-27">├── storage/                   # Persistence layer
+</span><span id="__span-0-28">│   └── store.go              # SQLite database operations
+</span><span id="__span-0-29">│
+</span><span id="__span-0-30">├── vault/                     # Vault client abstraction
+</span><span id="__span-0-31">│   └── client.go             # HTTP vault client
+</span><span id="__span-0-32">│
+</span><span id="__span-0-33">└── bin/
+</span><span id="__span-0-34">    └── sync-daemon           # Compiled binary (after build)
 </span></code></pre></div>
 <h2 id="building-the-project">Building the Project<a class="headerlink" href="#building-the-project" title="Permanent link">&para;</a></h2>
 <h3 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
@@ -1788,7 +1789,7 @@
 </span></code></pre></div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
 <h3 id="example-vault-definitions">Example Vault Definitions<a class="headerlink" href="#example-vault-definitions" title="Permanent link">&para;</a></h3>
-<p>The <code>config.example.yaml</code> includes examples for:</p>
+<p>The <code>examples/config.example.yaml</code> includes examples for:</p>
 <ol>
 <li><strong>Azure Key Vault</strong></li>
 <li>Bearer token authentication</li>
@@ -1817,7 +1818,7 @@
 </ol>
 <h3 id="creating-a-production-config">Creating a Production Config<a class="headerlink" href="#creating-a-production-config" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Copy the example: <code>cp config.example.yaml config.yaml</code></li>
+<li>Copy the example: <code>cp examples/config.example.yaml config.yaml</code></li>
 <li>Define your vaults with actual endpoints</li>
 <li>Set authentication via environment variables (recommended)</li>
 <li>Define sync relationships</li>
