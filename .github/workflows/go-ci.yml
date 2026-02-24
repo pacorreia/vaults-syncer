@@ -146,10 +146,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
+          # Check if tag already exists locally
+          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
+            echo "⚠️  Tag ${VERSION} already exists locally, deleting..."
+            git tag -d "${VERSION}"
+          fi
+          
           git tag -a "${VERSION}" -m "Release ${VERSION}"
           
-          # Use authenticated push to ensure workflows are triggered
-          git push "https://github-actions[bot]:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" "${VERSION}"
+          # Use authenticated push to ensure workflows are triggered (force push to overwrite if needed)
+          git push "https://github-actions[bot]:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" "${VERSION}" --force
           
           echo "✅ Created and pushed tag: ${VERSION}"
 
