@@ -6,7 +6,7 @@ This is a containerized secrets vault synchronization daemon written in Go. It e
 
 ## Project Structure
 
-```
+```text
 akv-vaultwarden-sync/
 ├── .dockerignore              # Docker build exclusions
 ├── .env.example               # Environment variable template
@@ -174,7 +174,7 @@ The `examples/config.example.yaml` includes examples for:
 ## Sync Algorithm
 
 ### Unidirectional Sync
-```
+```text
 1. Get all secrets from source
 2. Apply filters (patterns/exclusions)
 3. For each secret:
@@ -186,7 +186,7 @@ The `examples/config.example.yaml` includes examples for:
 ```
 
 ### Bidirectional Sync
-```
+```text
 1. Get all secrets from source
 2. Apply filters
 3. For each secret:
@@ -378,7 +378,7 @@ ORDER BY created_at DESC;
   ```bash
   apt-get install build-essential sqlite3 libsqlite3-dev  # Ubuntu/Debian
   brew install gcc sqlite                                  # macOS
-  ```
+```
 
 **Error**: `CGO_ENABLED=1 not set`
 - **Solution**: Use `CGO_ENABLED=1` when building
@@ -389,13 +389,13 @@ ORDER BY created_at DESC;
 - **Solution**: Run dry-run mode for detailed errors
   ```bash
   ./bin/sync-daemon -config config.yaml -dry-run
-  ```
+```
 
 **Error**: Connection to vault failed
 - **Solution**: Check endpoint, verify token expiration, test endpoint
   ```bash
   curl -H "Authorization: Bearer $TOKEN" $ENDPOINT
-  ```
+```
 
 **Error**: Database locked
 - **Solution**: Ensure only one instance running, check file permissions

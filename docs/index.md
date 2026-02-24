@@ -12,6 +12,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 ## Features
 
 ✨ **Multi-Vault Support**
+
 - Vaultwarden
 - HashiCorp Vault
 - Azure Key Vault
@@ -19,6 +20,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Generic HTTP-based vaults
 
 🔐 **Flexible Authentication**
+
 - OAuth 2.0 with Vaultwarden support
 - Bearer Token
 - Basic Authentication
@@ -26,6 +28,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Custom Headers
 
 🔄 **Powerful Sync**
+
 - Unidirectional and bidirectional sync
 - Concurrent processing (configurable workers)
 - Scheduled execution (cron format)
@@ -33,12 +36,14 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Pattern-based filtering (include/exclude)
 
 📊 **Monitoring & Observability**
+
 - HTTP REST API for operations
 - Prometheus metrics export
 - Structured JSON logging
 - Health check endpoints
 
 🏗️ **Production Ready**
+
 - SQLite state database
 - Transaction support
 - Error recovery and retry logic
@@ -55,6 +60,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 ## Common Use Cases
 
 ### Backup & Replication
+
 Synchronize secrets from your production vault to a backup vault for disaster recovery.
 
 ```yaml
@@ -68,6 +74,7 @@ syncs:
 ```
 
 ### Multi-Cloud Deployment
+
 Keep secrets in sync across different cloud providers.
 
 ```yaml
@@ -80,6 +87,7 @@ syncs:
 ```
 
 ### Development Environment Sync
+
 Maintain synchronized secrets across dev, staging, and production.
 
 ```yaml
@@ -150,7 +158,7 @@ graph TB
       -p 8080:8080 \
       -p 9090:9090 \
       ghcr.io/pacorreia/vaults-syncer:latest
-    ```
+```
 
 === "Binary"
 
@@ -161,7 +169,7 @@ graph TB
     
     # Run
     ./sync-daemon-linux-amd64 -config config.yaml
-    ```
+```
 
 === "Source"
 
@@ -170,7 +178,7 @@ graph TB
     cd vaults-syncer
     go build -o sync-daemon .
     ./sync-daemon -config config.yaml
-    ```
+```
 
 ### Minimal Configuration
 

@@ -75,7 +75,7 @@ The script will:
 
 ### 3. Example Output
 
-```
+```text
 [INFO] ==========================================
 [INFO] Secrets Vault Sync Daemon - Integration Test
 [INFO] ==========================================
