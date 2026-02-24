@@ -1,10 +1,10 @@
 # Build stage
-FROM golang:1.26-alpine AS builder
+FROM golang:1.22.1-alpine AS builder
 
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache git make
+RUN apk add --no-cache git make gcc musl-dev sqlite-dev
 
 # Copy go mod files
 COPY go.mod go.sum ./
@@ -20,9 +20,12 @@ ARG VERSION=dev
 ARG BUILD_DATE
 ARG GIT_COMMIT
 
+# Build target arguments provided by buildx
+ARG TARGETOS
+ARG TARGETARCH
+
 # Build the application with version information
-# Use CGO_ENABLED=0 for multi-arch building to avoid cross-compilation issues
-RUN CGO_ENABLED=0 GOOS=linux go build \
+RUN CGO_ENABLED=1 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build \
     -a -installsuffix cgo \
     -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
     -o ./bin/sync-daemon .
