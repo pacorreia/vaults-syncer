@@ -209,7 +209,7 @@ docker-compose -f docker-compose.test.yml down -v
 - Update README.md for user-facing changes
 - Update docs/ for detailed documentation
 - Add inline comments for complex logic
-- Update examples in `config.example.yaml`
+- Update examples in `examples/config.example.yaml`
 - Include usage examples in docstrings
 
 ## Areas for Contribution

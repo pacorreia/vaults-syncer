@@ -92,7 +92,7 @@ git clone https://github.com/pacorreia/vaults-syncer.git
 cd vaults-syncer
 
 # Copy example config and environment
-cp config.example.yaml config.yaml
+cp examples/config.example.yaml config.yaml
 cp .env.example .env
 ```
 

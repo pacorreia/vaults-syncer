@@ -15,7 +15,8 @@ akv-vaultwarden-sync/
 ├── Makefile                   # Build tasks (optional)
 ├── README.md                  # Main documentation
 ├── DEVELOPMENT.md             # This file
-├── config.example.yaml        # Example configuration
+├── examples/                  # Example configurations
+│   └── config.example.yaml    # Example configuration
 ├── docker-compose.yml         # Docker Compose setup
 ├── go.mod                     # Go module definition
 ├── go.sum                     # Go dependency checksums
@@ -81,7 +82,7 @@ docker build -t myregistry.azurecr.io/secrets-sync:v1.0.0 .
 
 ### Example Vault Definitions
 
-The `config.example.yaml` includes examples for:
+The `examples/config.example.yaml` includes examples for:
 
 1. **Azure Key Vault**
    - Bearer token authentication
@@ -101,7 +102,7 @@ The `config.example.yaml` includes examples for:
 
 ### Creating a Production Config
 
-1. Copy the example: `cp config.example.yaml config.yaml`
+1. Copy the example: `cp examples/config.example.yaml config.yaml`
 2. Define your vaults with actual endpoints
 3. Set authentication via environment variables (recommended)
 4. Define sync relationships
