@@ -19,6 +19,8 @@ SYNC_DAEMON="http://localhost:8080"
 SOURCE_TOKEN="source_admin_token_12345"
 TARGET_TOKEN="target_admin_token_12345"
 TIMEOUT=300  # 5 minutes timeout
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+COMPOSE_FILE="${SCRIPT_DIR}/docker-compose.test.yml"
 
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -199,7 +201,7 @@ main() {
 
     # Step 1: Start services
     log_info "Starting Docker Compose services..."
-    docker compose -f docker-compose.test.yml up -d
+    docker compose -f "${COMPOSE_FILE}" up -d
 
     echo
     log_info "Waiting for all services to be ready..."
@@ -261,7 +263,7 @@ main() {
     log_info "  Source UI:     http://localhost:8000"
     log_info "  Target UI:     http://localhost:8001"
     echo
-    log_info "To stop services: docker compose -f docker-compose.test.yml down"
+    log_info "To stop services: docker compose -f ${COMPOSE_FILE} down"
 }
 
 # Run if not sourced

@@ -3,7 +3,7 @@
 ## One Command Test
 
 ```bash
-./test-integration.sh
+./e2e/test-integration.sh
 ```
 
 That's it! This will:
@@ -90,10 +90,10 @@ docker logs secrets-sync-daemon
 
 ```bash
 # Stop services
-docker-compose -f docker-compose.test.yml down
+docker-compose -f e2e/docker-compose.test.yml down
 
 # Complete cleanup (remove volumes)
-docker-compose -f docker-compose.test.yml down -v
+docker-compose -f e2e/docker-compose.test.yml down -v
 ```
 
 ## Troubleshooting
@@ -112,10 +112,10 @@ curl http://localhost:8080/health
 ### Build Fails
 ```bash
 # Force rebuild
-docker-compose -f docker-compose.test.yml build --no-cache
+docker-compose -f e2e/docker-compose.test.yml build --no-cache
 
 # Then run test
-./test-integration.sh
+./e2e/test-integration.sh
 ```
 
 ### Need More Info
@@ -125,9 +125,9 @@ See [TESTING.md](TESTING.md) for detailed documentation.
 
 | File | Purpose |
 |------|---------|
-| `docker-compose.test.yml` | Services definition |
-| `config.test.yaml` | Sync daemon configuration |
-| `test-integration.sh` | Test automation script |
+| `e2e/docker-compose.test.yml` | Services definition |
+| `e2e/config.test.yaml` | Sync daemon configuration |
+| `e2e/test-integration.sh` | Test automation script |
 | `.env.test` | Test credentials |
 
 ---
@@ -135,5 +135,5 @@ See [TESTING.md](TESTING.md) for detailed documentation.
 **Pro Tip**: Run test periodically to ensure everything still works:
 ```bash
 # In a cron job
-0 2 * * * cd /path/to/repo && ./test-integration.sh > /tmp/test.log 2>&1
+0 2 * * * cd /path/to/repo && ./e2e/test-integration.sh > /tmp/test.log 2>&1
 ```

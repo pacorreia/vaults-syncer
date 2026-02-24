@@ -9,11 +9,11 @@ on:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
-      - 'docker-compose.test.yml'
+      - 'e2e/docker-compose.test.yml'
       - 'Dockerfile'
-      - 'Dockerfile.mock-vault'
-      - 'config.test.yaml'
-      - 'test-integration.sh'
+      - 'e2e/Dockerfile.mock-vault'
+      - 'e2e/config.test.yaml'
+      - 'e2e/test-integration.sh'
       - '.github/workflows/integration-tests.yml'
   pull_request:
     branches:
@@ -22,11 +22,11 @@ on:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
-      - 'docker-compose.test.yml'
+      - 'e2e/docker-compose.test.yml'
       - 'Dockerfile'
-      - 'Dockerfile.mock-vault'
-      - 'config.test.yaml'
-      - 'test-integration.sh'
+      - 'e2e/Dockerfile.mock-vault'
+      - 'e2e/config.test.yaml'
+      - 'e2e/test-integration.sh'
       - '.github/workflows/integration-tests.yml'
 
 permissions:
@@ -46,15 +46,15 @@ jobs:
 
       - name: Run integration tests
         run: |
-          chmod +x ./test-integration.sh
-          ./test-integration.sh
+          chmod +x ./e2e/test-integration.sh
+          ./e2e/test-integration.sh
 
       - name: Collect Docker logs
         if: failure()
         run: |
-          docker compose -f docker-compose.test.yml ps
-          docker compose -f docker-compose.test.yml logs --no-color
+          docker compose -f e2e/docker-compose.test.yml ps
+          docker compose -f e2e/docker-compose.test.yml logs --no-color
 
       - name: Cleanup containers
         if: always()
-        run: docker compose -f docker-compose.test.yml down -v
+        run: docker compose -f e2e/docker-compose.test.yml down -v

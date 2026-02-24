@@ -62,7 +62,7 @@ This creates the sync daemon image used in the test.
 ### 2. Run the Integration Test
 
 ```bash
-./test-integration.sh
+./e2e/test-integration.sh
 ```
 
 The script will:
@@ -125,7 +125,7 @@ The script will:
 ### Start Services Without Test Script
 
 ```bash
-docker-compose -f docker-compose.test.yml up -d
+docker-compose -f e2e/docker-compose.test.yml up -d
 ```
 
 ### Wait for Services to Be Ready
@@ -205,7 +205,7 @@ curl http://localhost:9090/metrics
 ### View Daemon Logs
 
 ```bash
-docker-compose -f docker-compose.test.yml logs -f sync-daemon
+docker-compose -f e2e/docker-compose.test.yml logs -f sync-daemon
 ```
 
 ### Access SQLite Database
@@ -255,7 +255,7 @@ sqlite> SELECT * FROM syncs_run ORDER BY created_at DESC LIMIT 5;
 
 ### Scenario 4: Filtered Sync
 
-**Edit** `config.test.yaml`:
+**Edit** `e2e/config.test.yaml`:
 ```yaml
 filter:
   patterns:
@@ -273,19 +273,19 @@ filter:
 ### Stop All Services
 
 ```bash
-docker-compose -f docker-compose.test.yml down
+docker-compose -f e2e/docker-compose.test.yml down
 ```
 
 ### Remove Volumes (Clean Slate)
 
 ```bash
-docker-compose -f docker-compose.test.yml down -v
+docker-compose -f e2e/docker-compose.test.yml down -v
 ```
 
 ### Remove All Docker Resources
 
 ```bash
-docker-compose -f docker-compose.test.yml down -v
+docker-compose -f e2e/docker-compose.test.yml down -v
 docker rmi secrets-sync:latest
 ```
 
@@ -295,7 +295,7 @@ docker rmi secrets-sync:latest
 
 ```bash
 # Check Docker Compose logs
-docker-compose -f docker-compose.test.yml logs
+docker-compose -f e2e/docker-compose.test.yml logs
 
 # Verify ports are available
 netstat -tuln | grep -E ":(5432|8000|8001|8080|9090)"
@@ -336,14 +336,14 @@ retry_policy:
   max_backoff: 10000
 
 # Or stop unnecessary services
-docker-compose -f docker-compose.test.yml stop vaultwarden-target
+docker-compose -f e2e/docker-compose.test.yml stop vaultwarden-target
 ```
 
 ### "Connection refused" Errors
 
 ```bash
 # Ensure services have started
-sleep 30 && ./test-integration.sh
+sleep 30 && ./e2e/test-integration.sh
 
 # Or manually verify health
 curl -v http://localhost:8000/alive
@@ -355,7 +355,7 @@ curl -v http://localhost:8080/health
 
 ### Vaultwarden Configuration
 
-Set in `docker-compose.test.yml`:
+Set in `e2e/docker-compose.test.yml`:
 - `ADMIN_TOKEN`: Admin authentication token
 - `SIGNUPS_ALLOWED`: Allow user registration
 - `LOG_LEVEL`: vaultwarden log level
@@ -407,7 +407,7 @@ docker logs secrets-sync-daemon | grep retry
 
 ```bash
 # Test config without running daemon
-./bin/sync-daemon -config config.test.yaml -dry-run
+./bin/sync-daemon -config e2e/config.test.yaml -dry-run
 
 # Should output connection test results
 ```
@@ -427,7 +427,7 @@ jobs:
       - name: Build image
         run: docker build -t secrets-sync:test .
       - name: Run integration tests
-        run: ./test-integration.sh
+        run: ./e2e/test-integration.sh
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v2
@@ -440,14 +440,14 @@ jobs:
 
 - Test uses demo tokens (not production-safe)
 - Vaultwarden instances share PostgreSQL database (consider separate instances for prod tests)
-- Sync runs every 5 minutes by default (configurable in `config.test.yaml`)
+- Sync runs every 5 minutes by default (configurable in `e2e/config.test.yaml`)
 - Database persistence survives container restarts
 - Integration test is non-destructive (can be run multiple times)
 
 ## Next Steps
 
-- Adapt `config.test.yaml` to your vault backends
-- Modify `test-integration.sh` for your testing scenarios
+- Adapt `e2e/config.test.yaml` to your vault backends
+- Modify `e2e/test-integration.sh` for your testing scenarios
 - Create production Docker Compose with your actual vaults
-- Set up CI/CD pipeline using `test-integration.sh`
+- Set up CI/CD pipeline using `e2e/test-integration.sh`
 - Monitor sync daemon with your observability stack

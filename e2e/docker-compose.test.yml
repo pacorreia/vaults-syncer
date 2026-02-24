@@ -4,8 +4,8 @@ services:
   # Mock Vault Servers for testing
   mock-vaults:
     build:
-      context: .
-      dockerfile: Dockerfile.mock-vault
+      context: ..
+      dockerfile: e2e/Dockerfile.mock-vault
     container_name: mock-vaults
     networks:
       - sync-network
@@ -25,7 +25,7 @@ services:
   # Secrets Sync Daemon
   sync-daemon:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
     container_name: secrets-sync-daemon
     networks:

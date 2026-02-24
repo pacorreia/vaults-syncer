@@ -262,7 +262,7 @@ go build \
 go test ./...
 
 # Integration tests
-./test-integration.sh
+./e2e/test-integration.sh
 ```
 
 ## Support Us
