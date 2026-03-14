@@ -113,7 +113,7 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Download binary artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
           pattern: binary-*
