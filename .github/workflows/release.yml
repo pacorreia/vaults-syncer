@@ -94,7 +94,7 @@ jobs:
           fi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
@@ -113,7 +113,7 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Download binary artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
           pattern: binary-*
