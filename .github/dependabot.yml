@@ -8,6 +8,8 @@ updates:
       day: "monday"
       time: "02:00"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
     reviewers:
       - "pacorreia"
     commit-message:
@@ -23,6 +25,8 @@ updates:
       day: "monday"
       time: "03:00"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
     reviewers:
       - "pacorreia"
     commit-message:
@@ -37,6 +41,9 @@ updates:
       day: "monday"
       time: "04:00"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
     reviewers:
       - "pacorreia"
     commit-message:
@@ -51,6 +58,8 @@ updates:
       day: "monday"
       time: "05:00"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
     reviewers:
       - "pacorreia"
     commit-message:
