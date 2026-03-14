@@ -127,9 +127,9 @@ jobs:
         uses: paulhatch/semantic-version@v6.0.1
         with:
           tag_prefix: "v"
-          major_pattern: "(MAJOR|BREAKING CHANGE|\\[major\\])"
+          major_pattern: "/(MAJOR|BREAKING CHANGE|\\[major\\])/"
           major_regexp_flags: "gi"
-          minor_pattern: "(MINOR|feat:|feature:|\\[minor\\])"
+          minor_pattern: "/(MINOR|feat:|feature:|\\[minor\\])/"
           minor_regexp_flags: "gi"
           version_format: "${major}.${minor}.${patch}"
           bump_each_commit: false
