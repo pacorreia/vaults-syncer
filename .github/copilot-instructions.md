@@ -2,7 +2,7 @@
 
 ## Project overview
 - `vaults-syncer` is a Go daemon that synchronizes secrets between multiple vault backends and exposes HTTP endpoints for health, status, and manual sync execution.
-- The repository uses standard library HTTP handlers, `log/slog` for structured logging, SQLite for persistence, and `robfig/cron` for scheduled syncs.
+- The repository uses standard library HTTP handlers, `log/slog` for structured logging, SQLite for persistence, and `robfig/cron/v3` for scheduled syncs.
 
 ## Repository layout
 - `main.go` wires configuration, storage, sync engine, scheduler, and HTTP servers together.
