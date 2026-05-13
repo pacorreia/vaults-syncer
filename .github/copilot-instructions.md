@@ -15,7 +15,7 @@
 
 ## Working conventions
 - Keep changes focused and avoid unrelated refactors.
-- Follow standard Go formatting with `go fmt` when changing Go files.
+- Follow standard Go formatting with `go fmt ./...` when changing Go files.
 - Prefer existing standard library patterns and current project dependencies before adding new packages.
 - Keep exported Go APIs documented with comments.
 - Preserve structured logging patterns that use `slog` key/value fields.
