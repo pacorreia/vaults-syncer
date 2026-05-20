@@ -85,6 +85,19 @@ vaults:
     timeout: 30
     skip_ssl_verify: false
 
+  # AWS Secrets Manager via the AWS CLI (tool backend)
+  # The tool_config path is relative to this config file.
+  - id: aws_prod
+    name: AWS Secrets Manager (prod)
+    type: tool
+    tool_config: "./tools/aws-secretsmanager.yaml"
+
+  # HashiCorp Vault KV v2 via the Vault CLI (tool backend)
+  - id: hvault_kv
+    name: HashiCorp Vault KV
+    type: tool
+    tool_config: "./tools/hashicorp-vault.yaml"
+
 # Define sync relationships between vaults
 syncs:
   # One-way sync: Azure to Vaultwarden
