@@ -74,7 +74,8 @@ config file**. Absolute paths are also accepted.
 
 | Field | Type | Description |
 |---|---|---|
-| `env` | `map[string]string` | Environment variables injected into every command. Supports `${VAR}` expansion. |
+| `env` | `map[string]string` | Environment variables injected into every command. Supports `${VAR}` expansion at config load time. |
+| `env_passthrough` | `[]string` | Names of environment variables to forward from the daemon's runtime environment. Values are read at command execution time, so rotated credentials are picked up without restarting. |
 | `operations` | `map[string]ToolOperationConfig` | Command definitions keyed by operation name (`list`, `get`, `set`, `delete`, `test`). |
 
 ### Operation fields (`operations.<name>`)
@@ -157,15 +158,38 @@ output is the value (for `get`).
 
 ## Environment variable injection
 
-Tool configs support `${VAR}` substitution (same as the main config):
+Tool configs support two ways to pass environment variables to commands:
+
+### `env` — static values (expanded at load time)
 
 ```yaml
 env:
   VAULT_ADDR: "${VAULT_ADDR:-http://127.0.0.1:8200}"
 ```
 
-Variables in the `env` block are injected into the child process environment
-in addition to the variables already present in the daemon's environment.
+Values in the `env` block are expanded once when the config is loaded. Use
+this for variables whose values are known at daemon startup.
+
+### `env_passthrough` — runtime forwarding
+
+```yaml
+env_passthrough:
+  - AWS_ACCESS_KEY_ID
+  - AWS_SECRET_ACCESS_KEY
+  - AWS_SESSION_TOKEN
+```
+
+`env_passthrough` reads the named variables from the daemon's environment
+**at the moment each command runs**. This means rotated credentials (e.g. an
+IAM role's short-lived session tokens refreshed by an agent) are automatically
+picked up without restarting the daemon.
+
+If a listed variable is not set in the daemon's environment, it is silently
+omitted and does not affect the command.
+
+All variables already present in the daemon's environment are also inherited
+by child processes automatically; `env` and `env_passthrough` let you
+override or explicitly forward specific variables.
 
 ---
 

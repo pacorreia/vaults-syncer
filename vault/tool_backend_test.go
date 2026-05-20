@@ -370,6 +370,81 @@ func TestToolBackendEnvInjection(t *testing.T) {
 	}
 }
 
+func TestToolBackendEnvPassthrough(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("env var echo differs on Windows")
+	}
+
+	const envKey = "TOOL_PASSTHROUGH_TEST_VAR"
+	t.Setenv(envKey, "forwarded-value")
+
+	tmp, err := os.CreateTemp("", "tool-passthrough-*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmp.Name())
+	tmp.Close()
+
+	toolCfg := &config.ExternalToolConfig{
+		EnvPassthrough: []string{envKey},
+		Operations: map[string]*config.ToolOperationConfig{
+			"list": {
+				Command: "sh",
+				Args:    []string{"-c", "echo -n $" + envKey + " > " + tmp.Name()},
+				Output:  config.ToolOutputConfig{Format: "lines"},
+			},
+		},
+	}
+	b := NewToolBackend(makeVaultCfg("tb", toolCfg), toolCfg)
+
+	_, err = b.ListSecrets()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got, _ := os.ReadFile(tmp.Name())
+	if string(got) != "forwarded-value" {
+		t.Errorf("expected passthrough var to be forwarded, file contains %q", string(got))
+	}
+}
+
+func TestToolBackendEnvPassthroughMissingVar(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("env var echo differs on Windows")
+	}
+
+	const envKey = "TOOL_PASSTHROUGH_UNSET_VAR_XYZ"
+	// Ensure the variable is absent; if it happens to be set, skip silently.
+	if _, exists := os.LookupEnv(envKey); exists {
+		t.Skipf("env var %s is unexpectedly set in the test environment", envKey)
+	}
+
+	tmp, err := os.CreateTemp("", "tool-passthrough-missing-*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmp.Name())
+	tmp.Close()
+
+	// An unset passthrough var should not be injected (command should still succeed).
+	toolCfg := &config.ExternalToolConfig{
+		EnvPassthrough: []string{envKey},
+		Operations: map[string]*config.ToolOperationConfig{
+			"list": {
+				Command: "sh",
+				Args:    []string{"-c", "echo -n ok > " + tmp.Name()},
+				Output:  config.ToolOutputConfig{Format: "lines"},
+			},
+		},
+	}
+	b := NewToolBackend(makeVaultCfg("tb", toolCfg), toolCfg)
+
+	_, err = b.ListSecrets()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Unit tests for internal helpers
 // ---------------------------------------------------------------------------

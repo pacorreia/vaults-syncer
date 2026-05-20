@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"text/template"
@@ -159,13 +160,21 @@ func (b *ToolBackend) runOp(op *config.ToolOperationConfig, data templateData) (
 
 	cmd := exec.CommandContext(ctx, op.Command, args...) //nolint:gosec // command comes from operator-controlled config
 
-	// Inject tool-level env vars on top of the current process environment.
-	if len(b.toolCfg.Env) > 0 {
-		env := make([]string, 0, len(b.toolCfg.Env))
+	// Inject tool-level env vars and passthrough vars on top of the current process environment.
+	if len(b.toolCfg.Env) > 0 || len(b.toolCfg.EnvPassthrough) > 0 {
+		extra := make([]string, 0, len(b.toolCfg.Env)+len(b.toolCfg.EnvPassthrough))
 		for k, v := range b.toolCfg.Env {
-			env = append(env, fmt.Sprintf("%s=%s", k, v))
+			extra = append(extra, fmt.Sprintf("%s=%s", k, v))
 		}
-		cmd.Env = append(cmd.Environ(), env...)
+		// EnvPassthrough forwards named vars from the current runtime environment.
+		// Values are read at execution time, so rotated credentials are picked up
+		// without restarting the daemon.
+		for _, name := range b.toolCfg.EnvPassthrough {
+			if v, ok := os.LookupEnv(name); ok {
+				extra = append(extra, fmt.Sprintf("%s=%s", name, v))
+			}
+		}
+		cmd.Env = append(cmd.Environ(), extra...)
 	}
 
 	var stdout, stderr bytes.Buffer

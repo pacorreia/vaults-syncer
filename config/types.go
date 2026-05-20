@@ -43,7 +43,13 @@ type OperationConfig struct {
 // It defines CLI commands that are executed to perform vault operations.
 type ExternalToolConfig struct {
 	// Env holds environment variables injected into every command execution.
+	// Values support ${VAR} substitution, which is expanded once at config load time.
 	Env map[string]string `yaml:"env"`
+	// EnvPassthrough is a list of environment variable names whose current runtime
+	// values are forwarded to every command execution. Unlike Env, values are read
+	// from the process environment at the moment each command runs, so they pick up
+	// rotated credentials or tokens without restarting the daemon.
+	EnvPassthrough []string `yaml:"env_passthrough"`
 	// Operations maps operation names (list, get, set, delete, test) to their command definitions.
 	Operations map[string]*ToolOperationConfig `yaml:"operations"`
 }
