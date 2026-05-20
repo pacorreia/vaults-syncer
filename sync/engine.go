@@ -66,7 +66,7 @@ func newEngineWithBackendFactory(
 // ExecuteSync runs a sync operation
 func (e *Engine) ExecuteSync(syncCfg *config.SyncConfig) error {
 	startTime := time.Now()
-	
+
 	e.logger.Info("starting sync", slog.String("sync_id", syncCfg.ID))
 
 	sourceBackend, ok := e.backends[syncCfg.Source]
@@ -83,7 +83,7 @@ func (e *Engine) ExecuteSync(syncCfg *config.SyncConfig) error {
 		return err
 	}
 
-	e.logger.Debug("fetched secrets from source", 
+	e.logger.Debug("fetched secrets from source",
 		slog.String("sync_id", syncCfg.ID),
 		slog.Int("count", len(secrets)),
 	)
@@ -167,15 +167,15 @@ func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName
 		// Record failure
 		sourceChecksum := hashString(secret.Value)
 		obj := &config.SyncObject{
-			SyncID:       syncID,
-			SourceVaultID: sourceID,
-			TargetVaultID: targetID,
-			SecretName:   secretName,
+			SyncID:         syncID,
+			SourceVaultID:  sourceID,
+			TargetVaultID:  targetID,
+			SecretName:     secretName,
 			SourceChecksum: sourceChecksum,
-			LastSyncTime: time.Now().Unix(),
+			LastSyncTime:   time.Now().Unix(),
 			LastSyncStatus: "failed",
-			LastSyncError: err.Error(),
-			DirectionLast: "source_to_target",
+			LastSyncError:  err.Error(),
+			DirectionLast:  "source_to_target",
 		}
 		e.store.UpsertSyncObject(obj)
 		return err
@@ -184,15 +184,15 @@ func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName
 	// Record success
 	sourceChecksum := hashString(secret.Value)
 	obj := &config.SyncObject{
-		SyncID:        syncID,
-		SourceVaultID: sourceID,
-		TargetVaultID: targetID,
-		SecretName:    secretName,
+		SyncID:         syncID,
+		SourceVaultID:  sourceID,
+		TargetVaultID:  targetID,
+		SecretName:     secretName,
 		SourceChecksum: sourceChecksum,
 		TargetChecksum: sourceChecksum,
-		LastSyncTime:  time.Now().Unix(),
+		LastSyncTime:   time.Now().Unix(),
 		LastSyncStatus: "success",
-		DirectionLast: "source_to_target",
+		DirectionLast:  "source_to_target",
 	}
 	e.store.UpsertSyncObject(obj)
 
@@ -220,15 +220,15 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 	// If they're the same, no action needed
 	if sourceChecksum == targetChecksum {
 		obj := &config.SyncObject{
-			SyncID:        syncID,
-			SourceVaultID: sourceID,
-			TargetVaultID: targetID,
-			SecretName:    secretName,
+			SyncID:         syncID,
+			SourceVaultID:  sourceID,
+			TargetVaultID:  targetID,
+			SecretName:     secretName,
 			SourceChecksum: sourceChecksum,
 			TargetChecksum: targetChecksum,
-			LastSyncTime:  time.Now().Unix(),
+			LastSyncTime:   time.Now().Unix(),
 			LastSyncStatus: "in_sync",
-			DirectionLast: "none",
+			DirectionLast:  "none",
 		}
 		e.store.UpsertSyncObject(obj)
 		return nil
@@ -266,16 +266,16 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 		})
 		if err != nil {
 			obj := &config.SyncObject{
-				SyncID:        syncID,
-				SourceVaultID: sourceID,
-				TargetVaultID: targetID,
-				SecretName:    secretName,
+				SyncID:         syncID,
+				SourceVaultID:  sourceID,
+				TargetVaultID:  targetID,
+				SecretName:     secretName,
 				SourceChecksum: sourceChecksum,
 				TargetChecksum: targetChecksum,
-				LastSyncTime:  time.Now().Unix(),
+				LastSyncTime:   time.Now().Unix(),
 				LastSyncStatus: "failed",
-				LastSyncError: err.Error(),
-				DirectionLast: "source_to_target",
+				LastSyncError:  err.Error(),
+				DirectionLast:  "source_to_target",
 			}
 			e.store.UpsertSyncObject(obj)
 			return err
@@ -292,16 +292,16 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 		})
 		if err != nil {
 			obj := &config.SyncObject{
-				SyncID:        syncID,
-				SourceVaultID: sourceID,
-				TargetVaultID: targetID,
-				SecretName:    secretName,
+				SyncID:         syncID,
+				SourceVaultID:  sourceID,
+				TargetVaultID:  targetID,
+				SecretName:     secretName,
 				SourceChecksum: sourceChecksum,
 				TargetChecksum: targetChecksum,
-				LastSyncTime:  time.Now().Unix(),
+				LastSyncTime:   time.Now().Unix(),
 				LastSyncStatus: "failed",
-				LastSyncError: err.Error(),
-				DirectionLast: "target_to_source",
+				LastSyncError:  err.Error(),
+				DirectionLast:  "target_to_source",
 			}
 			e.store.UpsertSyncObject(obj)
 			return err
@@ -311,15 +311,15 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 
 	// Record success
 	obj := &config.SyncObject{
-		SyncID:        syncID,
-		SourceVaultID: sourceID,
-		TargetVaultID: targetID,
-		SecretName:    secretName,
+		SyncID:         syncID,
+		SourceVaultID:  sourceID,
+		TargetVaultID:  targetID,
+		SecretName:     secretName,
 		SourceChecksum: sourceChecksum,
 		TargetChecksum: targetChecksum,
-		LastSyncTime:  time.Now().Unix(),
+		LastSyncTime:   time.Now().Unix(),
 		LastSyncStatus: "success",
-		DirectionLast: direction,
+		DirectionLast:  direction,
 	}
 	e.store.UpsertSyncObject(obj)
 
@@ -437,14 +437,14 @@ func (e *Engine) executeSyncUnidirectionalConcurrent(syncCfg *config.SyncConfig,
 	}
 
 	filteredSecrets := filterSecrets(secrets, syncCfg.Filter)
-	
+
 	// Create a semaphore to limit concurrent goroutines
 	semaphore := make(chan struct{}, workerCount)
 	defer close(semaphore)
 
 	var wg sync.WaitGroup
 	results := make(chan bool, len(filteredSecrets)*len(syncCfg.Targets))
-	
+
 	// Process each secret for each target
 	for _, secretName := range filteredSecrets {
 		for _, targetID := range syncCfg.Targets {
@@ -499,14 +499,14 @@ func (e *Engine) executeSyncBidirectionalConcurrent(syncCfg *config.SyncConfig, 
 	}
 
 	filteredSecrets := filterSecrets(secrets, syncCfg.Filter)
-	
+
 	// Create a semaphore to limit concurrent goroutines
 	semaphore := make(chan struct{}, workerCount)
 	defer close(semaphore)
 
 	var wg sync.WaitGroup
 	results := make(chan bool, len(filteredSecrets))
-	
+
 	// Process each secret concurrently
 	for _, secretName := range filteredSecrets {
 		wg.Add(1)

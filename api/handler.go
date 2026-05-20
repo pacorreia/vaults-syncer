@@ -41,10 +41,10 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	response := map[string]interface{}{
-		"status":   "healthy",
-		"running":  h.runner.IsRunning(),
-		"syncs":    len(h.cfg.Syncs),
-		"vaults":   len(h.cfg.Vaults),
+		"status":  "healthy",
+		"running": h.runner.IsRunning(),
+		"syncs":   len(h.cfg.Syncs),
+		"vaults":  len(h.cfg.Vaults),
 	}
 
 	json.NewEncoder(w).Encode(response)

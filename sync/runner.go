@@ -13,12 +13,12 @@ import (
 
 // Runner manages scheduled and manual sync execution
 type Runner struct {
-	engine    EngineRunner
-	cron      *cron.Cron
-	syncMap   map[string]cron.EntryID
-	mu        sync.RWMutex
-	logger    *slog.Logger
-	running   bool
+	engine  EngineRunner
+	cron    *cron.Cron
+	syncMap map[string]cron.EntryID
+	mu      sync.RWMutex
+	logger  *slog.Logger
+	running bool
 }
 
 // EngineRunner defines the engine behavior required by the runner.
@@ -146,12 +146,12 @@ func (r *Runner) GetSyncStatus(syncID string, store *storage.Store) (map[string]
 	}
 
 	return map[string]interface{}{
-		"sync_id":         syncID,
-		"last_run":        lastRun,
-		"total_objects":   len(syncObjects),
-		"synced_objects":  successCount,
-		"failed_objects":  len(syncObjects) - successCount,
-		"recent_runs":     runs,
+		"sync_id":        syncID,
+		"last_run":       lastRun,
+		"total_objects":  len(syncObjects),
+		"synced_objects": successCount,
+		"failed_objects": len(syncObjects) - successCount,
+		"recent_runs":    runs,
 	}, nil
 }
 

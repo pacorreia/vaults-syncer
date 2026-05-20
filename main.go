@@ -92,7 +92,7 @@ func run(args []string, deps appDeps) error {
 	dbPath := fs.String("db", "sync.db", "Path to SQLite database file")
 	dryRun := fs.Bool("dry-run", false, "Validate config and test connections without starting")
 	version := fs.Bool("version", false, "Print version information and exit")
-	
+
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("failed to parse args: %w", err)
 	}

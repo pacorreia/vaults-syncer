@@ -1,6 +1,8 @@
 package vault
 
 import (
+	"fmt"
+
 	"github.com/pacorreia/vaults-syncer/config"
 )
 
@@ -110,6 +112,11 @@ func NewBackend(cfg *config.VaultConfig) (Backend, error) {
 	// - AWSSecretsManagerBackend for AWS SDK
 	vaultType := cfg.GetVaultType()
 	switch vaultType {
+	case "tool":
+		if cfg.ResolvedTool == nil {
+			return nil, fmt.Errorf("vault %s: tool config not resolved; ensure type is 'tool' and tool_config is set", cfg.ID)
+		}
+		return NewToolBackend(cfg, cfg.ResolvedTool), nil
 	case "vaultwarden", "bitwarden", "keeper", "vault", "azure", "aws", "generic":
 		return NewGenericBackend(client), nil
 	default:
