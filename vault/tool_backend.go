@@ -188,6 +188,7 @@ func (b *ToolBackend) runOp(op *config.ToolOperationConfig, data templateData) (
 	if len(successCodes) == 0 {
 		successCodes = []int{0}
 	}
+	// isSuccessStatus is defined in client.go (same package).
 	if !isSuccessStatus(exitCode, successCodes) {
 		return nil, fmt.Errorf("command exited with code %d: %s", exitCode, strings.TrimSpace(stderr.String()))
 	}

@@ -39,7 +39,7 @@ func makeVaultCfg(id string, toolCfg *config.ExternalToolConfig) *config.VaultCo
 }
 
 // ---------------------------------------------------------------------------
-// ToolBackend – basic construction
+// ToolBackend - basic construction
 // ---------------------------------------------------------------------------
 
 func TestNewToolBackend(t *testing.T) {
@@ -93,7 +93,7 @@ func TestToolBackendCapabilitiesPartial(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// ListSecrets – JSON format
+// ListSecrets - JSON format
 // ---------------------------------------------------------------------------
 
 func TestToolBackendListSecretsJSON(t *testing.T) {
@@ -212,7 +212,7 @@ func TestToolBackendGetSecretText(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// SetSecret & DeleteSecret – verify template rendering
+// SetSecret & DeleteSecret - verify template rendering
 // ---------------------------------------------------------------------------
 
 func TestToolBackendSetSecret(t *testing.T) {
@@ -308,7 +308,7 @@ func TestToolBackendTestConnectionNoOps(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// Error handling – non-zero exit code
+// Error handling - non-zero exit code
 // ---------------------------------------------------------------------------
 
 func TestToolBackendCommandFailure(t *testing.T) {
