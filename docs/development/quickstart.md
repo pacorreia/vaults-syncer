@@ -20,23 +20,21 @@ That's it! This will:
 ```
 START
   ↓
-[Docker] Start PostgreSQL
+[Docker] Build sync-daemon + mock-vaults images
   ↓
-[Docker] Start Vaultwarden Source (port 8000)
-  ↓
-[Docker] Start Vaultwarden Target (port 8001)
+[Docker] Start mock-vaults (source :8000, target :8001)
   ↓
 [Docker] Start Sync Daemon (ports 8080, 9090)
   ↓
-[Script] Inject 3 test secrets: db-password, api-key, aws-access-key
+[Script] Inject 5 test secrets into source mock vault
   ↓
-[Script] Trigger sync manually
+[Script] Trigger sync manually via POST /syncs/.../execute
   ↓
-[Daemon] Reads secrets from source (http://vaultwarden-source)
+[Daemon] Reads secrets from source (http://mock-vaults:8000)
   ↓
-[Daemon] Writes secrets to target (http://vaultwarden-target)
+[Daemon] Writes secrets to target (http://mock-vaults:8001)
   ↓
-[Script] Verify secrets appear in target
+[Script] Verify secrets appear in target vault
   ↓
 DONE ✓
 ```

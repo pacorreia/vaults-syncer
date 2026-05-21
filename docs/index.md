@@ -4,7 +4,7 @@
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://pacorreia.github.io/vaults-syncer/badges/coverage.json)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/pacorreia/vaults-syncer?sort=semver)](https://github.com/pacorreia/vaults-syncer/releases)
-[![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26.1-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](https://github.com/pacorreia/vaults-syncer/blob/main/LICENSE)
 
 A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support for seamless integration between Vaultwarden, Azure Key Vault, HashiCorp Vault, AWS Secrets Manager, and custom vault backends.
@@ -48,6 +48,7 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 - Transaction support
 - Error recovery and retry logic
 - Docker & Kubernetes ready
+- Built-in Material Design 3 Web UI
 
 ## Quick Links
 

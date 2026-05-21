@@ -25,18 +25,23 @@ ARG TARGETOS
 ARG TARGETARCH
 
 # Build the application with version information
-RUN CGO_ENABLED=1 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build \
+# CGO_LDFLAGS=-static produces a fully static binary so the Alpine final
+# stage doesn't need libgcc_s or sqlite-libs at runtime.
+RUN CGO_ENABLED=1 CGO_LDFLAGS="-static" GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build \
     -a -installsuffix cgo \
-    -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+    -ldflags "-extldflags '-static' -X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
     -o ./bin/sync-daemon .
 
-# Final stage
+# Final stage — no apk installs needed:
+#  • binary is statically linked (no libgcc_s / sqlite-libs required)
+#  • CA certs copied from builder (no network call)
+#  • healthcheck uses busybox wget (built into Alpine)
 FROM alpine:3.23
 
 WORKDIR /app
 
-# Install runtime dependencies
-RUN apk add --no-cache ca-certificates curl
+# Copy CA certificates from builder so HTTPS vault calls work
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Copy binary from builder
 COPY --from=builder /app/bin/sync-daemon .
@@ -56,9 +61,9 @@ USER daemon
 # Expose ports
 EXPOSE 8080 9090
 
-# Health check
+# Health check — wget is part of busybox, no extra package needed
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD wget -qO- http://localhost:8080/health || exit 1
 
 # Default command
 ENTRYPOINT ["/app/sync-daemon"]

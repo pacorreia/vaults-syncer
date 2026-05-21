@@ -9,11 +9,13 @@ on:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
-      - 'e2e/docker-compose.test.yml'
       - 'Dockerfile'
+      - 'e2e/docker-compose.test.yml'
       - 'e2e/Dockerfile.mock-vault'
       - 'e2e/config.test.yaml'
       - 'e2e/test-integration.sh'
+      - 'testdata/mock-vault/Dockerfile'
+      - 'docker-compose.dev.yml'
       - '.github/workflows/integration-tests.yml'
   pull_request:
     branches:
@@ -22,11 +24,13 @@ on:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
-      - 'e2e/docker-compose.test.yml'
       - 'Dockerfile'
+      - 'e2e/docker-compose.test.yml'
       - 'e2e/Dockerfile.mock-vault'
       - 'e2e/config.test.yaml'
       - 'e2e/test-integration.sh'
+      - 'testdata/mock-vault/Dockerfile'
+      - 'docker-compose.dev.yml'
       - '.github/workflows/integration-tests.yml'
 
 permissions:
@@ -37,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install integration test tools
         run: |

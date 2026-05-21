@@ -20,20 +20,19 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: '1.26.1'
 
@@ -98,7 +97,7 @@ jobs:
           commit_message: 'Update coverage badge data'
 
       - name: Upload coverage to artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: |
@@ -108,7 +107,7 @@ jobs:
 
       - name: Comment coverage on PR
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v9
+        uses: actions/github-script@v7
         with:
           script: |
             const coverage = '${{ steps.coverage.outputs.percentage }}';
@@ -121,64 +120,4 @@ jobs:
               body: comment
             });
 
-      - name: Auto versioning
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: version
-        uses: paulhatch/semantic-version@v6.0.1
-        with:
-          tag_prefix: "v"
-          major_pattern: "/(MAJOR|BREAKING CHANGE|\\[major\\])/"
-          major_regexp_flags: "gi"
-          minor_pattern: "/(MINOR|feat:|feature:|\\[minor\\])/"
-          minor_regexp_flags: "gi"
-          version_format: "${major}.${minor}.${patch}"
-          bump_each_commit: false
-          search_commit_body: true
-          change_path: "."
-          enable_prerelease_mode: false
-
-      - name: Create and push tag
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="v${{ steps.version.outputs.version }}"
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Check if tag already exists locally
-          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
-            echo "⚠️  Tag ${VERSION} already exists locally, deleting..."
-            git tag -d "${VERSION}"
-          fi
-          
-          git tag -a "${VERSION}" -m "Release ${VERSION}"
-          
-          # Use authenticated push to ensure workflows are triggered (force push to overwrite if needed)
-          git push "https://github-actions[bot]:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" "${VERSION}" --force
-          
-          echo "✅ Created and pushed tag: ${VERSION}"
-
-      - name: Trigger release workflow
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="v${{ steps.version.outputs.version }}"
-          gh workflow run release.yml -f version="${VERSION}" --repo "${{ github.repository }}"
-          echo "✅ Triggered release workflow for ${VERSION}"
-
-      - name: Create version bump summary
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version.outputs.changed == 'true'
-        run: |
-          VERSION="v${{ steps.version.outputs.version }}"
-          PREVIOUS="v${{ steps.version.outputs.previous_version }}"
-          
-          echo "## 🚀 Version Bump: ${VERSION}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Previous version:** ${PREVIOUS}" >> $GITHUB_STEP_SUMMARY
-          echo "- **New version:** ${VERSION}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version increment:** ${{ steps.version.outputs.increment }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflow will automatically build and publish this version." >> $GITHUB_STEP_SUMMARY
+      # Versioning is handled by release-please (release-please.yml)

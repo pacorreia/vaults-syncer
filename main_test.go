@@ -50,6 +50,10 @@ func (m *mockRunner) ExecuteSyncNow(syncID string, cfg *config.Config) error {
 	return nil
 }
 
+func (m *mockRunner) GetNextRun(syncID string) *time.Time {
+	return nil
+}
+
 type mockServer struct {
 	listenErr      error
 	shutdownErr    error

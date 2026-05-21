@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/pacorreia/vaults-syncer/config"
 	"github.com/pacorreia/vaults-syncer/storage"
@@ -23,6 +25,7 @@ type Runner interface {
 	IsRunning() bool
 	GetSyncStatus(syncID string, store *storage.Store) (map[string]interface{}, error)
 	ExecuteSyncNow(syncID string, cfg *config.Config) error
+	GetNextRun(syncID string) *time.Time
 }
 
 // NewHandler creates a new handler
@@ -153,4 +156,48 @@ func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
 	metrics += fmt.Sprintf("runner_running %d\n", runningVal)
 
 	w.Write([]byte(metrics))
+}
+
+// ListVaults handles listing all configured vaults (without sensitive auth data)
+func (h *Handler) ListVaults(w http.ResponseWriter, r *http.Request) {
+	vaults := make([]map[string]interface{}, 0, len(h.cfg.Vaults))
+	for _, v := range h.cfg.Vaults {
+		vaults = append(vaults, map[string]interface{}{
+			"id":       v.ID,
+			"name":     v.Name,
+			"type":     v.Type,
+			"endpoint": v.Endpoint,
+		})
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"vaults": vaults})
+}
+
+// GetSyncRuns handles retrieving the run history for a specific sync
+func (h *Handler) GetSyncRuns(w http.ResponseWriter, r *http.Request) {
+	syncID := r.PathValue("sync_id")
+	if syncID == "" {
+		http.Error(w, "sync_id is required", http.StatusBadRequest)
+		return
+	}
+
+	limit := 20
+	if lStr := r.URL.Query().Get("limit"); lStr != "" {
+		if l, err := strconv.Atoi(lStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	runs, err := h.store.GetSyncRuns(syncID, limit)
+	if err != nil {
+		h.logger.Error("failed to get sync runs",
+			slog.String("sync_id", syncID),
+			slog.String("error", err.Error()),
+		)
+		http.Error(w, fmt.Sprintf("failed to get runs: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"sync_id": syncID, "runs": runs})
 }

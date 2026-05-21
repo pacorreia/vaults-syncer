@@ -10,7 +10,7 @@ Quick start with a single command:
 
 ```bash
 docker run -d \
-  --name akv-sync \
+  --name vaults-syncer \
   -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
   -v sync-data:/app/data \
   -p 8080:8080 \
@@ -23,34 +23,26 @@ docker run -d \
 For production deployments:
 
 ```yaml
-version: '3.8'
-
 services:
   sync-daemon:
-    image: ghcr.io/pacorreia/akv-vaultwarden-sync:latest
-    container_name: akv-sync
+    image: ghcr.io/pacorreia/vaults-syncer:latest
+    container_name: vaults-syncer
     restart: unless-stopped
     volumes:
       - ./config.yaml:/etc/sync/config.yaml:ro
-      - ./data:/app/data
+      - sync-data:/app/data          # use a named volume, not a host path
     ports:
-      - "8080:8080"  # HTTP API
-      - "9090:9090"  # Metrics
-    environment:
-      - LOG_LEVEL=info
-      - LOG_FORMAT=json
-    networks:
-      - backend
+      - "8080:8080"  # HTTP API + Web UI
+      - "9090:9090"  # Prometheus metrics
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
-networks:
-  backend:
-    driver: bridge
+volumes:
+  sync-data:
 ```
 
 Run with:

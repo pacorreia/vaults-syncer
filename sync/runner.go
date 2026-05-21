@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/robfig/cron/v3"
 
@@ -145,14 +146,42 @@ func (r *Runner) GetSyncStatus(syncID string, store *storage.Store) (map[string]
 		}
 	}
 
-	return map[string]interface{}{
+	result := map[string]interface{}{
 		"sync_id":        syncID,
 		"last_run":       lastRun,
 		"total_objects":  len(syncObjects),
 		"synced_objects": successCount,
 		"failed_objects": len(syncObjects) - successCount,
 		"recent_runs":    runs,
-	}, nil
+	}
+
+	if nextRun := r.GetNextRun(syncID); nextRun != nil {
+		result["next_run"] = nextRun.Unix()
+	}
+
+	return result, nil
+}
+
+// GetNextRun returns the next scheduled run time for a sync, or nil if not scheduled.
+func (r *Runner) GetNextRun(syncID string) *time.Time {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	entryID, ok := r.syncMap[syncID]
+	if !ok {
+		return nil
+	}
+
+	entry := r.cron.Entry(entryID)
+	if entry.ID != entryID {
+		return nil
+	}
+
+	next := entry.Next
+	if next.IsZero() {
+		return nil
+	}
+	return &next
 }
 
 // IsRunning returns whether the runner is actively running

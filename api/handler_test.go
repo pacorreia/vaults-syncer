@@ -50,6 +50,10 @@ func (m *mockRunner) ExecuteSyncNow(syncID string, cfg *config.Config) error {
 	return m.executeErr
 }
 
+func (m *mockRunner) GetNextRun(syncID string) *time.Time {
+	return nil
+}
+
 func setupTestHandler(t *testing.T) (*Handler, *mockRunner, *storage.Store) {
 	t.Helper()
 
