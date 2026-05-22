@@ -22,7 +22,7 @@ CLI commands for each operation. Ready-made examples are in
 ```yaml
 # tools/aws-secretsmanager.yaml
 env:
-  AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION:-us-east-1}"
+  AWS_DEFAULT_REGION: "us-east-1"
 
 operations:
   list:
@@ -42,6 +42,9 @@ operations:
 
   set:
     command: aws
+    # Warning: {{.Value}} is passed via argv and may be exposed by process
+    # listings or logs. Prefer a wrapper script or tool-specific input method
+    # that reads the secret value without putting it on the command line.
     args: [secretsmanager, put-secret-value, --secret-id, "{{.Name}}", --secret-string, "{{.Value}}"]
 
   delete:
@@ -74,7 +77,7 @@ config file**. Absolute paths are also accepted.
 
 | Field | Type | Description |
 |---|---|---|
-| `env` | `map[string]string` | Environment variables injected into every command. Supports `${VAR}` expansion at config load time. |
+| `env` | `map[string]string` | Environment variables injected into every command. Supports `$VAR` / `${VAR}` expansion at config load time (shell-style defaults such as `${VAR:-default}` are not supported). |
 | `env_passthrough` | `[]string` | Names of environment variables to forward from the daemon's runtime environment. Values are read at command execution time, so rotated credentials are picked up without restarting. |
 | `operations` | `map[string]ToolOperationConfig` | Command definitions keyed by operation name (`list`, `get`, `set`, `delete`, `test`). |
 
@@ -106,6 +109,11 @@ available depending on the operation:
 |---|---|---|
 | `{{.Name}}` | `get`, `set`, `delete` | The secret name being operated on. |
 | `{{.Value}}` | `set` | The secret value to write. |
+
+When `{{.Value}}` is rendered in `args`, the secret is passed to the child
+process as a command-line argument. Many systems expose argv values via process
+listings, audit logs, or crash reports. Prefer a wrapper script or tool-specific
+input method that can read the value without placing it on the command line.
 
 Example:
 
@@ -164,11 +172,13 @@ Tool configs support two ways to pass environment variables to commands:
 
 ```yaml
 env:
-  VAULT_ADDR: "${VAULT_ADDR:-http://127.0.0.1:8200}"
+  VAULT_ADDR: "${VAULT_ADDR}"
 ```
 
 Values in the `env` block are expanded once when the config is loaded. Use
-this for variables whose values are known at daemon startup.
+this for variables whose values are known at daemon startup. If you need a
+default value, set it directly in the config file or ensure the daemon's
+environment provides it before startup.
 
 ### `env_passthrough` — runtime forwarding
 

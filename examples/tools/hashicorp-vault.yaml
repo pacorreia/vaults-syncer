@@ -46,6 +46,9 @@ operations:
 
   # Write (create or update) a secret.
   # {{.Name}} and {{.Value}} are replaced at runtime.
+  # Warning: {{.Value}} is passed via argv and may be exposed by process
+  # listings or logs. Prefer a wrapper script or tool-specific input method
+  # that keeps the secret off the command line when available.
   set:
     command: vault
     args:
