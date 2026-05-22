@@ -1050,6 +1050,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/tool-backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tool Backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1365,7 +1393,7 @@
 <h3 id="docker-run">Docker Run<a class="headerlink" href="#docker-run" title="Permanent link">&para;</a></h3>
 <p>Quick start with a single command:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-2"><span class="w">  </span>--name<span class="w"> </span>akv-sync<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-2"><span class="w">  </span>--name<span class="w"> </span>vaults-syncer<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-3"><span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/config.yaml:/etc/sync/config.yaml:ro<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-4"><span class="w">  </span>-v<span class="w"> </span>sync-data:/app/data<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-5"><span class="w">  </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
@@ -1374,34 +1402,26 @@
 </span></code></pre></div>
 <h3 id="docker-compose">Docker Compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
 <p>For production deployments:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.8&#39;</span>
-</span><span id="__span-1-2">
-</span><span id="__span-1-3"><span class="nt">services</span><span class="p">:</span>
-</span><span id="__span-1-4"><span class="w">  </span><span class="nt">sync-daemon</span><span class="p">:</span>
-</span><span id="__span-1-5"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/pacorreia/akv-vaultwarden-sync:latest</span>
-</span><span id="__span-1-6"><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv-sync</span>
-</span><span id="__span-1-7"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
-</span><span id="__span-1-8"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-</span><span id="__span-1-9"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./config.yaml:/etc/sync/config.yaml:ro</span>
-</span><span id="__span-1-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./data:/app/data</span>
-</span><span id="__span-1-11"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-</span><span id="__span-1-12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span><span class="w">  </span><span class="c1"># HTTP API</span>
-</span><span id="__span-1-13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;9090:9090&quot;</span><span class="w">  </span><span class="c1"># Metrics</span>
-</span><span id="__span-1-14"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-</span><span id="__span-1-15"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOG_LEVEL=info</span>
-</span><span id="__span-1-16"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOG_FORMAT=json</span>
-</span><span id="__span-1-17"><span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-</span><span id="__span-1-18"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
-</span><span id="__span-1-19"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
-</span><span id="__span-1-20"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;CMD&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;curl&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-f&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;http://localhost:8080/health&quot;</span><span class="p p-Indicator">]</span>
-</span><span id="__span-1-21"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
-</span><span id="__span-1-22"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
-</span><span id="__span-1-23"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-</span><span id="__span-1-24"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40s</span>
-</span><span id="__span-1-25">
-</span><span id="__span-1-26"><span class="nt">networks</span><span class="p">:</span>
-</span><span id="__span-1-27"><span class="w">  </span><span class="nt">backend</span><span class="p">:</span>
-</span><span id="__span-1-28"><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bridge</span>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><span class="nt">services</span><span class="p">:</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">sync-daemon</span><span class="p">:</span>
+</span><span id="__span-1-3"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/pacorreia/vaults-syncer:latest</span>
+</span><span id="__span-1-4"><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaults-syncer</span>
+</span><span id="__span-1-5"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+</span><span id="__span-1-6"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+</span><span id="__span-1-7"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./config.yaml:/etc/sync/config.yaml:ro</span>
+</span><span id="__span-1-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sync-data:/app/data</span><span class="w">          </span><span class="c1"># use a named volume, not a host path</span>
+</span><span id="__span-1-9"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+</span><span id="__span-1-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span><span class="w">  </span><span class="c1"># HTTP API + Web UI</span>
+</span><span id="__span-1-11"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;9090:9090&quot;</span><span class="w">  </span><span class="c1"># Prometheus metrics</span>
+</span><span id="__span-1-12"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+</span><span id="__span-1-13"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;CMD&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;wget&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-qO-&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;http://localhost:8080/health&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-1-14"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+</span><span id="__span-1-15"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+</span><span id="__span-1-16"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</span><span id="__span-1-17"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+</span><span id="__span-1-18">
+</span><span id="__span-1-19"><span class="nt">volumes</span><span class="p">:</span>
+</span><span id="__span-1-20"><span class="w">  </span><span class="nt">sync-data</span><span class="p">:</span>
 </span></code></pre></div>
 <p>Run with:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1">docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
