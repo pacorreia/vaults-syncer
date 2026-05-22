@@ -124,6 +124,7 @@ jobs:
     needs: [release-please, build-binaries]
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
+      # Pin to the patched release for the v4 arbitrary file write fix.
       - uses: actions/download-artifact@v4.1.3
         with:
           pattern: binary-*

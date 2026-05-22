@@ -126,6 +126,7 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Download binary artifacts
+        # Pin to the patched release for the v4 arbitrary file write fix.
         uses: actions/download-artifact@v4.1.3
         with:
           path: artifacts
