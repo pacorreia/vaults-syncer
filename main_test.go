@@ -50,6 +50,10 @@ func (m *mockRunner) ExecuteSyncNow(syncID string, cfg *config.Config) error {
 	return nil
 }
 
+func (m *mockRunner) GetNextRun(syncID string) *time.Time {
+	return nil
+}
+
 type mockServer struct {
 	listenErr      error
 	shutdownErr    error
@@ -373,7 +377,7 @@ syncs: []
 func TestRun_Version(t *testing.T) {
 	// Version flag should exit successfully without loading config or starting services
 	deps := defaultDeps()
-	
+
 	// Ensure none of these are called when -version is used
 	deps.loadConfig = func(path string) (*config.Config, error) {
 		t.Fatal("loadConfig should not be called with -version flag")

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/robfig/cron/v3"
 
@@ -13,12 +14,12 @@ import (
 
 // Runner manages scheduled and manual sync execution
 type Runner struct {
-	engine    EngineRunner
-	cron      *cron.Cron
-	syncMap   map[string]cron.EntryID
-	mu        sync.RWMutex
-	logger    *slog.Logger
-	running   bool
+	engine  EngineRunner
+	cron    *cron.Cron
+	syncMap map[string]cron.EntryID
+	mu      sync.RWMutex
+	logger  *slog.Logger
+	running bool
 }
 
 // EngineRunner defines the engine behavior required by the runner.
@@ -46,7 +47,7 @@ func (r *Runner) Start(cfg *config.Config) error {
 	}
 
 	for _, syncCfg := range cfg.Syncs {
-		if !syncCfg.Enabled {
+		if !syncCfg.IsEnabled() {
 			r.logger.Info("sync disabled, skipping",
 				slog.String("sync_id", syncCfg.ID),
 			)
@@ -145,14 +146,42 @@ func (r *Runner) GetSyncStatus(syncID string, store *storage.Store) (map[string]
 		}
 	}
 
-	return map[string]interface{}{
-		"sync_id":         syncID,
-		"last_run":        lastRun,
-		"total_objects":   len(syncObjects),
-		"synced_objects":  successCount,
-		"failed_objects":  len(syncObjects) - successCount,
-		"recent_runs":     runs,
-	}, nil
+	result := map[string]interface{}{
+		"sync_id":        syncID,
+		"last_run":       lastRun,
+		"total_objects":  len(syncObjects),
+		"synced_objects": successCount,
+		"failed_objects": len(syncObjects) - successCount,
+		"recent_runs":    runs,
+	}
+
+	if nextRun := r.GetNextRun(syncID); nextRun != nil {
+		result["next_run"] = nextRun.Unix()
+	}
+
+	return result, nil
+}
+
+// GetNextRun returns the next scheduled run time for a sync, or nil if not scheduled.
+func (r *Runner) GetNextRun(syncID string) *time.Time {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	entryID, ok := r.syncMap[syncID]
+	if !ok {
+		return nil
+	}
+
+	entry := r.cron.Entry(entryID)
+	if entry.ID != entryID {
+		return nil
+	}
+
+	next := entry.Next
+	if next.IsZero() {
+		return nil
+	}
+	return &next
 }
 
 // IsRunning returns whether the runner is actively running

@@ -1,14 +1,14 @@
 # Integration Testing Guide
 
-This guide explains how to run a complete end-to-end integration test of the Secrets Vault Sync Daemon with two Vaultwarden instances.
+This guide explains how to run a complete end-to-end integration test of the Secrets Vault Sync Daemon using the lightweight in-memory **mock vault**.
 
 ## What's Tested
 
 The integration test verifies:
 - ✅ Docker Compose orchestration with multiple services
-- ✅ Two Vaultwarden instances (source and target)
+- ✅ Mock vault server (source on :8000, target on :8001) 
 - ✅ Sync daemon startup and health checks
-- ✅ Secret injection into source vault
+- ✅ Secret injection into source vault via REST
 - ✅ Automatic synchronization to target vault
 - ✅ REST API endpoints (health, status, execute)
 - ✅ Database persistence and audit trail
@@ -17,60 +17,42 @@ The integration test verifies:
 
 ```mermaid
 graph TB
-    subgraph network["Docker Compose Network"]
+    subgraph network["Docker Compose Network (sync-network)"]
         direction TB
-        
-        postgres[("PostgreSQL<br/>(vaultwarden_db)")]
-        
-        daemon["Sync Daemon<br/>- Health: 8080<br/>- Metrics: 9090"]
-        
-        postgres -.-> daemon
-        
-        source["Vaultwarden<br/>(Source)<br/>Port: 8000<br/>UI + API"]
-        target["Vaultwarden<br/>(Target)<br/>Port: 8001<br/>UI + API"]
-        
-        postgres --> source
-        postgres --> target
-        
-        daemon -->|Secrets Synced| source
-        daemon -->|Secrets Synced| target
+
+        mock["mock-vaults<br/>(in-memory)<br/>Source: 8000 | Target: 8001"]
+        daemon["sync-daemon<br/>API + Web UI: 8080<br/>Metrics: 9090"]
+
+        mock -->|secrets| daemon
+        daemon -->|sync| mock
     end
-    
+
     style network fill:none,stroke:#4a9eff,stroke-width:3px
     style daemon fill:none,stroke:#4a9eff,stroke-width:2px
-    style source fill:none,stroke:#ff6b35,stroke-width:2px
-    style target fill:none,stroke:#00cc66,stroke-width:2px
+    style mock fill:none,stroke:#ff6b35,stroke-width:2px
 ```
 
 ## Prerequisites
 
 - Docker and Docker Compose installed
 - `curl` and `jq` (for the test script)
-- At least 3GB free RAM (PostgreSQL + 2 Vaultwarden instances + daemon)
-- Ports available: 5432, 8000, 8001, 8080, 9090
+- ~512MB free RAM
+- Ports available: 8000, 8001, 8080, 9090
 
 ## Quick Start
 
-### 1. Build the Docker Image
-
-```bash
-docker build -t secrets-sync:latest .
-```
-
-This creates the sync daemon image used in the test.
-
-### 2. Run the Integration Test
+### 1. Build Images and Run
 
 ```bash
 ./e2e/test-integration.sh
 ```
 
 The script will:
-1. Start all Docker services
+1. Build the sync daemon and mock-vault Docker images
 2. Wait for services to be healthy
-3. Inject test secrets into source Vaultwarden
+3. Inject test secrets into the source mock vault
 4. Trigger a manual sync
-5. Verify secrets appeared in target Vaultwarden
+5. Verify secrets appear in the target mock vault
 6. Show final status
 
 ### 3. Example Output

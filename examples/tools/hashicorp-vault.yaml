@@ -1,0 +1,78 @@
+# Tool config for HashiCorp Vault (KV v2) using the Vault CLI.
+# Reference this file from your main config.yaml:
+#
+#   vaults:
+#     - id: hvault_kv
+#       name: HashiCorp Vault KV
+#       type: tool
+#       tool_config: ./tools/hashicorp-vault.yaml
+#
+# The `vault` CLI must be installed and authenticated before the daemon starts
+# (e.g. via VAULT_TOKEN or a Vault Agent). VAULT_ADDR must also be set.
+
+env:
+  VAULT_ADDR: "${VAULT_ADDR}"
+  # VAULT_TOKEN is typically provided by the environment or a Vault Agent.
+
+operations:
+  # List all keys in the KV v2 mount.
+  # Adjust the path (secret/metadata) to match your mount point.
+  list:
+    command: vault
+    args:
+      - kv
+      - list
+      - -format=json
+      - secret/
+    output:
+      format: json
+      path: ""           # The CLI returns a top-level JSON array directly.
+      name_field: ""     # Items are plain strings (key names).
+    success_exit_codes: [0]
+
+  # Read a secret value.
+  # {{.Name}} is replaced with the key name at runtime.
+  get:
+    command: vault
+    args:
+      - kv
+      - get
+      - -format=json
+      - -field=value
+      - "secret/{{.Name}}"
+    output:
+      format: text       # `vault kv get -field=value` prints the raw value.
+    success_exit_codes: [0]
+
+  # Write (create or update) a secret.
+  # {{.Name}} and {{.Value}} are replaced at runtime.
+  # Warning: {{.Value}} is passed via argv and may be exposed by process
+  # listings or logs. Prefer a wrapper script or tool-specific input method
+  # that keeps the secret off the command line when available.
+  set:
+    command: vault
+    args:
+      - kv
+      - put
+      - "secret/{{.Name}}"
+      - "value={{.Value}}"
+    success_exit_codes: [0]
+
+  # Delete a secret (all versions).
+  delete:
+    command: vault
+    args:
+      - kv
+      - metadata
+      - delete
+      - "secret/{{.Name}}"
+    success_exit_codes: [0]
+
+  # Verify connectivity by looking up the daemon's own token.
+  test:
+    command: vault
+    args:
+      - token
+      - lookup
+      - -format=json
+    success_exit_codes: [0]

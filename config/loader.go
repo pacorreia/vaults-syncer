@@ -3,165 +3,113 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-// LoadConfig loads the configuration from a YAML file
+// LoadConfig loads and validates the configuration from a YAML file at the given path.
+// It performs environment variable expansion, applies defaults, resolves external tool
+// config files, and validates the resulting configuration.
 func LoadConfig(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
+	data, err := readConfigFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+		return nil, err
 	}
 
-	// Perform environment variable substitution
-	configStr := os.ExpandEnv(string(data))
+	expanded := expandConfigEnvVars(data)
 
-	var cfg Config
-	if err := yaml.Unmarshal([]byte(configStr), &cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
-	}
-
-	// Set defaults
-	if cfg.Server.Port == 0 {
-		cfg.Server.Port = 8080
-	}
-	if cfg.Server.Address == "" {
-		cfg.Server.Address = "0.0.0.0"
-	}
-	if cfg.Server.MetricsPort == 0 {
-		cfg.Server.MetricsPort = 9090
-	}
-	if cfg.Server.MetricsAddress == "" {
-		cfg.Server.MetricsAddress = "0.0.0.0"
-	}
-	if cfg.Logging.Level == "" {
-		cfg.Logging.Level = "info"
-	}
-	if cfg.Logging.Format == "" {
-		cfg.Logging.Format = "json"
+	cfg, err := parseConfigYAML(expanded)
+	if err != nil {
+		return nil, err
 	}
 
-	// Set retry policy defaults
-	for i := range cfg.Syncs {
-		if cfg.Syncs[i].RetryPolicy.MaxRetries == 0 {
-			cfg.Syncs[i].RetryPolicy.MaxRetries = 3
-		}
-		if cfg.Syncs[i].RetryPolicy.InitialBackoff == 0 {
-			cfg.Syncs[i].RetryPolicy.InitialBackoff = 1000
-		}
-		if cfg.Syncs[i].RetryPolicy.MaxBackoff == 0 {
-			cfg.Syncs[i].RetryPolicy.MaxBackoff = 60000
-		}
-		if cfg.Syncs[i].RetryPolicy.Multiplier == 0 {
-			cfg.Syncs[i].RetryPolicy.Multiplier = 2.0
-		}
-		if cfg.Syncs[i].Enabled == false && cfg.Syncs[i].ID != "" {
-			// Default to enabled if not explicitly set
-			cfg.Syncs[i].Enabled = true
-		}
-		if cfg.Syncs[i].SyncType == "" {
-			cfg.Syncs[i].SyncType = "unidirectional"
-		}
-	}
+	applyConfigDefaults(cfg)
 
-	// Set vault defaults (only optional fields)
-	for i := range cfg.Vaults {
-		if cfg.Vaults[i].Method == "" {
-			cfg.Vaults[i].Method = "PUT"
-		}
-		if cfg.Vaults[i].Timeout == 0 {
-			cfg.Vaults[i].Timeout = 30
-		}
-		// Initialize Auth.Headers map if Auth exists but Headers is nil
-		if cfg.Vaults[i].Auth != nil && cfg.Vaults[i].Auth.Headers == nil {
-			cfg.Vaults[i].Auth.Headers = make(map[string]string)
-		}
+	configDir := filepath.Dir(path)
+	if err := resolveToolConfigs(cfg, configDir); err != nil {
+		return nil, err
 	}
 
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
+	return cfg, nil
+}
+
+// readConfigFile reads the raw bytes of a config file.
+func readConfigFile(path string) ([]byte, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file: %w", err)
+	}
+	return data, nil
+}
+
+// expandConfigEnvVars replaces ${VAR} and $VAR references with their environment values.
+func expandConfigEnvVars(data []byte) string {
+	return os.ExpandEnv(string(data))
+}
+
+// parseConfigYAML unmarshals the YAML string into a Config struct.
+func parseConfigYAML(data string) (*Config, error) {
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(data), &cfg); err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %w", err)
+	}
 	return &cfg, nil
 }
 
-// Validate checks the configuration for errors
-func (c *Config) Validate() error {
-	if len(c.Vaults) == 0 {
-		return fmt.Errorf("no vaults configured")
+// resolveToolConfigs loads the ExternalToolConfig YAML file referenced by each
+// tool-type vault and stores the result in VaultConfig.ResolvedTool.
+// Paths in tool_config are resolved relative to configDir (the directory of the main config file).
+func resolveToolConfigs(cfg *Config, configDir string) error {
+	for i := range cfg.Vaults {
+		v := &cfg.Vaults[i]
+		if strings.ToLower(v.Type) != "tool" {
+			continue
+		}
+		if v.ToolConfig == "" {
+			// Validation will produce a descriptive error; skip here.
+			continue
+		}
+
+		toolPath := v.ToolConfig
+		if !filepath.IsAbs(toolPath) {
+			toolPath = filepath.Join(configDir, toolPath)
+		}
+
+		toolCfg, err := loadExternalToolConfig(toolPath)
+		if err != nil {
+			return fmt.Errorf("vault %s: failed to load tool config '%s': %w", v.ID, v.ToolConfig, err)
+		}
+		v.ResolvedTool = toolCfg
 	}
-
-	vaultIDs := make(map[string]bool)
-	for _, v := range c.Vaults {
-		if v.ID == "" {
-			return fmt.Errorf("vault must have an ID")
-		}
-		if v.Endpoint == "" {
-			return fmt.Errorf("vault %s must have an endpoint", v.ID)
-		}
-		if v.FieldNames.NameField == "" || v.FieldNames.ValueField == "" {
-			return fmt.Errorf("vault %s must define field_names.name_field and field_names.value_field", v.ID)
-		}
-		if vaultIDs[v.ID] {
-			return fmt.Errorf("duplicate vault ID: %s", v.ID)
-		}
-		vaultIDs[v.ID] = true
-
-		// Check for legacy format - NO LONGER SUPPORTED
-		if v.LegacyAuthMethod != "" || len(v.LegacyAuthHeaders) > 0 {
-			return fmt.Errorf("vault %s: legacy 'auth_method' and 'auth_headers' fields are no longer supported. Please migrate to the new 'auth' structure. See README.md for examples", v.ID)
-		}
-
-		// Validate Auth structure is present
-		if v.Auth == nil {
-			return fmt.Errorf("vault %s: 'auth' configuration is required", v.ID)
-		}
-		if v.Auth.Method == "" {
-			return fmt.Errorf("vault %s: 'auth.method' is required", v.ID)
-		}
-
-		// Validate auth method is supported
-		authMethod := strings.ToLower(v.Auth.Method)
-		if authMethod != "bearer" && authMethod != "basic" && authMethod != "oauth2" && authMethod != "api_key" && authMethod != "custom" {
-			return fmt.Errorf("vault %s: invalid auth method '%s', must be one of: bearer, basic, oauth2, api_key, custom", v.ID, v.Auth.Method)
-		}
-
-		// Validate method
-		method := strings.ToUpper(v.Method)
-		if method != "PUT" && method != "POST" {
-			return fmt.Errorf("vault %s has invalid method %s, must be PUT or POST", v.ID, v.Method)
-		}
-	}
-
-	for _, s := range c.Syncs {
-		if s.ID == "" {
-			return fmt.Errorf("sync must have an ID")
-		}
-		if s.Source == "" {
-			return fmt.Errorf("sync %s must have a source", s.ID)
-		}
-		if len(s.Targets) == 0 {
-			return fmt.Errorf("sync %s must have at least one target", s.ID)
-		}
-		if !vaultIDs[s.Source] {
-			return fmt.Errorf("sync %s references unknown source vault %s", s.ID, s.Source)
-		}
-		for _, t := range s.Targets {
-			if !vaultIDs[t] {
-				return fmt.Errorf("sync %s references unknown target vault %s", s.ID, t)
-			}
-		}
-
-		// Bidirectional only allowed for 1:1
-		if s.SyncType == "bidirectional" && len(s.Targets) != 1 {
-			return fmt.Errorf("sync %s: bidirectional sync only allowed for 1:1 (has %d targets)", s.ID, len(s.Targets))
-		}
-		if s.SyncType != "unidirectional" && s.SyncType != "bidirectional" {
-			return fmt.Errorf("sync %s: invalid sync_type %s, must be unidirectional or bidirectional", s.ID, s.SyncType)
-		}
-	}
-
 	return nil
+}
+
+// loadExternalToolConfig reads and parses a single ExternalToolConfig YAML file.
+func loadExternalToolConfig(path string) (*ExternalToolConfig, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read tool config file: %w", err)
+	}
+
+	expanded := os.ExpandEnv(string(data))
+
+	var toolCfg ExternalToolConfig
+	if err := yaml.Unmarshal([]byte(expanded), &toolCfg); err != nil {
+		return nil, fmt.Errorf("failed to parse tool config file: %w", err)
+	}
+
+	// Default success_exit_codes to [0] for any operation that omits it.
+	for _, op := range toolCfg.Operations {
+		if op != nil && len(op.SuccessExitCodes) == 0 {
+			op.SuccessExitCodes = []int{0}
+		}
+	}
+
+	return &toolCfg, nil
 }

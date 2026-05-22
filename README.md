@@ -4,7 +4,7 @@
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://pacorreia.github.io/vaults-syncer/badges/coverage.json)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/pacorreia/vaults-syncer?sort=semver)](https://github.com/pacorreia/vaults-syncer/releases)
-[![Go Version](https://img.shields.io/badge/Go-1.22.1-00ADD8?logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26.1-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](LICENSE)
 
 A containerized, highly customizable daemon for synchronizing secrets across multiple vaults and secret management systems.
@@ -28,6 +28,7 @@ A containerized, highly customizable daemon for synchronizing secrets across mul
 - **Customizable Response Parsing**: JSONPath-based extraction for non-standard vault APIs
 - **Observable**: Prometheus-compatible metrics endpoint and structured JSON logging
 - **Health Checks**: Built-in health check endpoint for container orchestration
+- **Web UI**: Material Design 3 dashboard for monitoring syncs, run history, and vault status
 
 ## Architecture
 
@@ -82,7 +83,7 @@ graph TB
 ### Prerequisites
 
 - Docker & Docker Compose
-- Go 1.21+ (for development)
+- Go 1.26+ (for development)
 - Environment variables for vault access tokens
 
 ### 1. Clone and Setup
@@ -109,10 +110,10 @@ Edit `.env` with your authentication tokens.
 
 ```bash
 # Build and start
-docker-compose up -d
+docker compose up -d
 
 # Check status
-docker-compose logs -f
+docker compose logs -f
 
 # Check health
 curl http://localhost:8080/health
@@ -382,6 +383,13 @@ Returns Prometheus-compatible metrics:
 - `syncs_enabled`: Currently enabled syncs
 - `runner_running`: Runner status (0/1)
 
+### Web UI Dashboard
+```
+GET /
+```
+Built-in Material Design 3 dashboard for monitoring syncs, run history, and vault status.
+Access at `http://localhost:8080`.
+
 ## Database Schema
 
 ### sync_objects
@@ -510,13 +518,13 @@ go build -ldflags "\
   -X main.Version=${VERSION} \
   -X main.BuildDate=${BUILD_DATE} \
   -X main.GitCommit=${GIT_COMMIT}" \
-  -o vaults-syncer .
+  -o sync-daemon .
 
 # Or using a simple version tag
-go build -ldflags "-X main.Version=1.2.3" -o vaults-syncer .
+go build -ldflags "-X main.Version=1.2.3" -o sync-daemon .
 
 # Check version
-./vaults-syncer -version
+./sync-daemon -version
 # Output:
 # vaults-syncer version v1.2.3
 # Build date: 2026-02-23T22:00:00Z
@@ -535,14 +543,14 @@ logging:
   format: json
 
 # Watch logs
-docker-compose logs -f sync-daemon
+docker compose logs -f sync-daemon
 ```
 
 ## Docker
 
 ### Build Image
 ```bash
-docker build -t secrets-sync:latest .
+docker build -t vaults-syncer:latest .
 ```
 
 ### Run Container
@@ -553,99 +561,62 @@ docker run -d \
   -p 8080:8080 \
   -p 9090:9090 \
   -e VAULT_TOKEN=your_token \
-  secrets-sync:latest
+  ghcr.io/pacorreia/vaults-syncer:latest
 ```
 
 ### Image Details
-- **Base**: Alpine Linux 3.19 (~20MB)
-- **User**: Non-root `sync:sync` (uid 1000)
-- **Health Check**: Built-in via `/health` endpoint
+- **Base**: Alpine Linux 3.23 (~20MB)
+- **User**: Non-root `daemon:daemon` (uid 1001)
+- **Health Check**: Built-in via `/health` endpoint (uses `wget`, curl not required)
 - **Volumes**: `/etc/sync` for config, `/app/data` for database
 
 ## Versioning and Releases
 
-This project uses **automated semantic versioning** based on commit messages:
+This project uses [release-please](https://github.com/googleapis/release-please) for automated semantic versioning, following the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
-### Automatic Version Bumping
+### How It Works
 
-When code is pushed to `main`, the version is automatically bumped based on commit messages:
+1. **Commit** with Conventional Commits prefixes on any branch:
+   - `fix:` → patch bump (`v4.0.0` → `v4.0.1`)
+   - `feat:` → minor bump (`v4.0.0` → `v4.1.0`)
+   - `feat!:` or `BREAKING CHANGE:` → major bump (`v4.0.0` → `v5.0.0`)
 
-- 🐛 **Patch** (default): `v1.2.3` → `v1.2.4`
-  - Default behavior for most commits
-  - Bug fixes, documentation updates, minor improvements
-  - Example: `fix: resolve sync error`, `docs: update README`
+2. **Merge to `main`** — release-please opens or updates a **Release PR** containing the CHANGELOG and the proposed version bump.
 
-- ✨ **Minor**: `v1.2.3` → `v1.3.0`
-  - Use `feat:` or `feature:` in commit message
-  - Or add `[minor]` anywhere in commit message
-  - New features, backwards-compatible changes
-  - Example: `feat: add AWS Secrets Manager support`
+3. **Merge the Release PR** — release-please automatically creates a `vX.Y.Z` git tag and GitHub Release.
 
-- 💥 **Major**: `v1.2.3` → `v2.0.0`
-  - Use `BREAKING CHANGE:` in commit message
-  - Or add `[major]` anywhere in commit message
-  - Breaking changes, API changes
-  - Example: `[major] refactor: change config format`
+4. **Build pipeline** publishes for every release:
+   - `vaults-syncer-vX.Y.Z-linux-amd64.tar.gz` and `.deb`
+   - `vaults-syncer-vX.Y.Z-linux-arm64.tar.gz` and `.deb`
+   - `vaults-syncer-vX.Y.Z-windows-amd64.zip`
+   - Docker: `ghcr.io/pacorreia/vaults-syncer:X.Y.Z` and `:latest`
 
 ### Commit Message Examples
 
 ```bash
-# Patch bump (default)
+# Patch bump — bug fixes, chores
 git commit -m "fix: correct OAuth token refresh timing"
-git commit -m "docs: update authentication examples"
-git commit -m "chore: update dependencies"
+git commit -m "chore(deps): update go-sqlite3"
 
-# Minor bump (new feature)
-git commit -m "feat: add support for Google Secret Manager"
-git commit -m "[minor] implement webhook triggers"
+# Minor bump — new feature
+git commit -m "feat: add Google Secret Manager backend"
 
-# Major bump (breaking change)  
-git commit -m "BREAKING CHANGE: remove deprecated v1 API"
-git commit -m "[major] refactor config schema"
-```
+# Major bump — breaking change
+git commit -m "feat!: change config schema"
+# or
+git commit -m "feat: rename endpoint field
 
-### Release Process
-
-1. **Make your changes** and commit with appropriate message:
-   ```bash
-   git commit -m "feat: add new vault backend"
-   ```
-
-2. **Push to main** (or merge PR):
-   ```bash
-   git push origin main
-   ```
-
-3. **Automatic version bump**:
-   - Version bump workflow analyzes commits
-   - Creates new git tag (e.g., `v1.3.0`)
-   - Triggers release workflow
-
-4. **Release workflow** automatically:
-   - Builds binaries for all platforms
-   - Creates Docker images (multi-arch)
-   - Publishes GitHub release with assets
-   - Updates `latest` Docker tag
-
-### Manual Version Bump
-
-You can also manually trigger a version bump:
-
-```bash
-# Via GitHub Actions UI
-Actions → Version Bump → Run workflow → Select bump type
+BREAKING CHANGE: vault.url is now vault.endpoint"
 ```
 
 ### Version Information
 
-Check the version of any build:
-
 ```bash
-./vaults-syncer --version
+./bin/sync-daemon -version
 # Output:
-# vaults-syncer version v1.3.0
-# Build date: 2026-02-23T23:54:26Z
-# Git commit: abc123...
+# vaults-syncer version v4.1.0
+# Build date: 2026-05-22T10:30:00Z
+# Git commit: abc123def456...
 ```
 
 ## Performance Considerations
@@ -675,7 +646,7 @@ Check the version of any build:
 ./bin/sync-daemon -dry-run
 
 # Check logs for specific vault errors
-docker-compose logs sync-daemon | grep -i error
+docker compose logs sync-daemon | grep -i error
 ```
 
 ### Sync Status Check
@@ -741,7 +712,6 @@ ORDER BY last_sync_time DESC;
 Contributions welcome! Areas for enhancement:
 - Additional vault backends (Kubernetes Secrets, AWS Secrets Manager, etc.)
 - Enhanced filtering/transformation capabilities
-- Web UI for configuration management
 - Webhook-based triggers
 - Multi-tenant support
 

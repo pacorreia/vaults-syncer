@@ -1,0 +1,87 @@
+# Local development stack with mock vaults — for testing only
+# Usage: docker compose -f docker-compose.dev.yml up --build
+#
+# Services:
+#   mock-vault     — in-memory Vaultwarden mock (source :8000, target :8001)
+#   seeder         — one-shot: seeds 5 test secrets into the source vault
+#   vaults-syncer  — the daemon (web UI + API on :8080, metrics on :9090)
+#
+# Only vaults-syncer ports are exposed to the host.
+
+services:
+  mock-vault:
+    build:
+      context: .
+      dockerfile: testdata/mock-vault/Dockerfile
+    container_name: mock-vault
+    networks:
+      - vault-net
+    restart: unless-stopped
+
+  seeder:
+    image: curlimages/curl:latest
+    container_name: vault-seeder
+    depends_on:
+      mock-vault:
+        condition: service_healthy
+    networks:
+      - vault-net
+    command:
+      - sh
+      - -c
+      - |
+        curl -sf -X POST http://mock-vault:8000/api/ciphers \
+          -H "Authorization: Bearer source_admin_token_12345" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"db-password","type":1,"login":{"username":"db-password","password":"s3cr3tDbPass!"}}' -o /dev/null \
+          && echo "Seeded: db-password"
+        curl -sf -X POST http://mock-vault:8000/api/ciphers \
+          -H "Authorization: Bearer source_admin_token_12345" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"api-key-stripe","type":1,"login":{"username":"api-key-stripe","password":"sk_test_abc123xyz"}}' -o /dev/null \
+          && echo "Seeded: api-key-stripe"
+        curl -sf -X POST http://mock-vault:8000/api/ciphers \
+          -H "Authorization: Bearer source_admin_token_12345" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"jwt-signing-key","type":1,"login":{"username":"jwt-signing-key","password":"supersecretjwtsigningkey"}}' -o /dev/null \
+          && echo "Seeded: jwt-signing-key"
+        curl -sf -X POST http://mock-vault:8000/api/ciphers \
+          -H "Authorization: Bearer source_admin_token_12345" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"smtp-password","type":1,"login":{"username":"smtp-password","password":"mailPass@2026"}}' -o /dev/null \
+          && echo "Seeded: smtp-password"
+        curl -sf -X POST http://mock-vault:8000/api/ciphers \
+          -H "Authorization: Bearer source_admin_token_12345" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"redis-auth-token","type":1,"login":{"username":"redis-auth-token","password":"redisSecure#Token"}}' -o /dev/null \
+          && echo "Seeded: redis-auth-token"
+    restart: "no"
+
+  vaults-syncer:
+    build: .
+    container_name: vaults-syncer
+    ports:
+      - "8080:8080"  # Web UI + API
+      - "9090:9090"  # Metrics
+    volumes:
+      - ./config.dev.yaml:/etc/sync/config.yaml:ro
+      - dev-data:/app/data
+    depends_on:
+      mock-vault:
+        condition: service_healthy
+    networks:
+      - vault-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  vault-net:
+    driver: bridge
+
+volumes:
+  dev-data:

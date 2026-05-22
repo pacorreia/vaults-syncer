@@ -208,7 +208,7 @@ func TestConfigValidate(t *testing.T) {
 						Source:   "vault1",
 						Targets:  []string{"vault1"},
 						SyncType: "unidirectional",
-						Enabled:  true,
+						Enabled:  boolPtr(true),
 					},
 				},
 			},
@@ -258,7 +258,7 @@ func TestConfigValidate(t *testing.T) {
 						ID:      "sync1",
 						Source:  "nonexistent",
 						Targets: []string{"vault1"},
-						Enabled: true,
+						Enabled: boolPtr(true),
 					},
 				},
 			},
@@ -471,10 +471,12 @@ syncs:
 	if cfg.Syncs[0].SyncType != "unidirectional" {
 		t.Fatalf("expected default sync_type to be unidirectional")
 	}
-	if !cfg.Syncs[0].Enabled {
+	if !cfg.Syncs[0].IsEnabled() {
 		t.Fatalf("expected sync to be enabled by default")
 	}
 }
+
+func boolPtr(b bool) *bool { return &b }
 
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
@@ -779,5 +781,227 @@ func TestLoadConfigInvalidYAML(t *testing.T) {
 	_, err = LoadConfig(tmpFile.Name())
 	if err == nil {
 		t.Error("expected error for invalid YAML")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Tool config loading
+// ---------------------------------------------------------------------------
+
+func TestLoadConfigToolVault(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	toolYAML := `
+env:
+  MY_VAR: hello
+operations:
+  list:
+    command: echo
+    args: ["[]"]
+    output:
+      format: json
+      path: ""
+  get:
+    command: echo
+    args: ["{}"]
+    output:
+      format: json
+      path: ""
+`
+	toolPath := filepath.Join(tmpDir, "my-tool.yaml")
+	if err := os.WriteFile(toolPath, []byte(toolYAML), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	mainYAML := fmt.Sprintf(`
+vaults:
+  - id: tool-vault
+    name: My CLI Tool
+    type: tool
+    tool_config: my-tool.yaml
+syncs: []
+`)
+
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	if err := os.WriteFile(configPath, []byte(mainYAML), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(cfg.Vaults) != 1 {
+		t.Fatalf("expected 1 vault, got %d", len(cfg.Vaults))
+	}
+	v := cfg.Vaults[0]
+	if v.ResolvedTool == nil {
+		t.Fatal("expected ResolvedTool to be populated")
+	}
+	if v.ResolvedTool.Env["MY_VAR"] != "hello" {
+		t.Errorf("expected env MY_VAR=hello, got %q", v.ResolvedTool.Env["MY_VAR"])
+	}
+	if v.ResolvedTool.Operations["list"] == nil {
+		t.Error("expected 'list' operation to be present")
+	}
+}
+
+func TestLoadConfigToolVaultMissingFile(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	mainYAML := `
+vaults:
+  - id: tool-vault
+    name: My CLI Tool
+    type: tool
+    tool_config: nonexistent-tool.yaml
+syncs: []
+`
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	if err := os.WriteFile(configPath, []byte(mainYAML), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadConfig(configPath)
+	if err == nil {
+		t.Fatal("expected error for missing tool config file")
+	}
+	if !strings.Contains(err.Error(), "tool-vault") {
+		t.Errorf("expected error to mention vault ID, got: %v", err)
+	}
+}
+
+func TestLoadConfigToolVaultMissingToolConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	mainYAML := `
+vaults:
+  - id: tool-vault
+    name: My CLI Tool
+    type: tool
+syncs: []
+`
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	if err := os.WriteFile(configPath, []byte(mainYAML), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadConfig(configPath)
+	if err == nil {
+		t.Fatal("expected error for missing tool_config field")
+	}
+	if !strings.Contains(err.Error(), "tool_config") {
+		t.Errorf("expected error to mention 'tool_config', got: %v", err)
+	}
+}
+
+func TestLoadExternalToolConfigSuccessExitCodeDefault(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	toolYAML := `
+operations:
+  list:
+    command: echo
+    args: ["[]"]
+`
+	toolPath := filepath.Join(tmpDir, "tool.yaml")
+	if err := os.WriteFile(toolPath, []byte(toolYAML), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	toolCfg, err := loadExternalToolConfig(toolPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	op := toolCfg.Operations["list"]
+	if len(op.SuccessExitCodes) != 1 || op.SuccessExitCodes[0] != 0 {
+		t.Errorf("expected default success_exit_codes [0], got %v", op.SuccessExitCodes)
+	}
+}
+
+func TestLoadExternalToolConfigEnvExpansion(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("TEST_TOOL_CMD", "vault")
+
+	toolYAML := `
+operations:
+  list:
+    command: "$TEST_TOOL_CMD"
+    args: []
+`
+	toolPath := filepath.Join(tmpDir, "tool.yaml")
+	if err := os.WriteFile(toolPath, []byte(toolYAML), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	toolCfg, err := loadExternalToolConfig(toolPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if toolCfg.Operations["list"].Command != "vault" {
+		t.Errorf("expected command 'vault', got %q", toolCfg.Operations["list"].Command)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Validate – tool-type vaults
+// ---------------------------------------------------------------------------
+
+func TestValidateToolVaultValid(t *testing.T) {
+	cfg := &Config{
+		Vaults: []VaultConfig{
+			{
+				ID:         "tv",
+				Type:       "tool",
+				ToolConfig: "some-tool.yaml",
+				ResolvedTool: &ExternalToolConfig{
+					Operations: map[string]*ToolOperationConfig{
+						"list": {Command: "echo"},
+						"get":  {Command: "echo"},
+					},
+				},
+			},
+		},
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateToolVaultMissingResolvedTool(t *testing.T) {
+	cfg := &Config{
+		Vaults: []VaultConfig{
+			{ID: "tv", Type: "tool", ToolConfig: "tool.yaml"},
+		},
+	}
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "was not loaded") {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateToolVaultMissingListOp(t *testing.T) {
+	cfg := &Config{
+		Vaults: []VaultConfig{
+			{
+				ID:         "tv",
+				Type:       "tool",
+				ToolConfig: "tool.yaml",
+				ResolvedTool: &ExternalToolConfig{
+					Operations: map[string]*ToolOperationConfig{
+						"get": {Command: "echo"},
+					},
+				},
+			},
+		},
+	}
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("expected error for missing list op")
 	}
 }

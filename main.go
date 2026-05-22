@@ -92,7 +92,7 @@ func run(args []string, deps appDeps) error {
 	dbPath := fs.String("db", "sync.db", "Path to SQLite database file")
 	dryRun := fs.Bool("dry-run", false, "Validate config and test connections without starting")
 	version := fs.Bool("version", false, "Print version information and exit")
-	
+
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("failed to parse args: %w", err)
 	}
@@ -160,10 +160,15 @@ func run(args []string, deps appDeps) error {
 
 	// API endpoints
 	mux.HandleFunc("GET /health", apiHandler.Health)
+	mux.HandleFunc("GET /vaults", apiHandler.ListVaults)
 	mux.HandleFunc("GET /syncs", apiHandler.ListSyncs)
 	mux.HandleFunc("GET /syncs/{sync_id}/status", apiHandler.GetSyncStatus)
+	mux.HandleFunc("GET /syncs/{sync_id}/runs", apiHandler.GetSyncRuns)
 	mux.HandleFunc("POST /syncs/{sync_id}/execute", apiHandler.ExecuteSync)
 	mux.HandleFunc("GET /metrics", apiHandler.GetMetrics)
+
+	// Web UI (serves embedded frontend at /)
+	mux.Handle("/", api.ServeUI())
 
 	// Start HTTP server
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Address, cfg.Server.Port)

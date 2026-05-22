@@ -1,9 +1,8 @@
-name: Release
+name: Release (Manual)
+# Automated releases are handled by release-please.yml.
+# This workflow is kept for emergency manual releases only.
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       version:
@@ -17,28 +16,43 @@ permissions:
 
 jobs:
   build-binaries:
-    runs-on: ubuntu-latest
+    # Use the native OS runner for each target so CGO (required by go-sqlite3) works without cross-toolchains.
+    # Linux arm64 is the only cross-compiled target (ubuntu runner + aarch64-linux-gnu-gcc).
     strategy:
+      fail-fast: false
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-        exclude:
-          - goos: windows
+        include:
+          - goos: linux
+            goarch: amd64
+            os: ubuntu-latest
+          - goos: linux
             goarch: arm64
+            os: ubuntu-latest
+          - goos: darwin
+            goarch: amd64
+            os: macos-latest
+          - goos: darwin
+            goarch: arm64
+            os: macos-latest
+          - goos: windows
+            goarch: amd64
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: '1.26.1'
 
       - name: Get version information
         id: version
+        shell: bash
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION="${{ inputs.version }}"
@@ -47,17 +61,18 @@ jobs:
           fi
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           GIT_COMMIT=$(git rev-parse HEAD)
-          
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "build_date=${BUILD_DATE}" >> $GITHUB_OUTPUT
           echo "git_commit=${GIT_COMMIT}" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies
+      - name: Install Linux ARM64 cross-compiler
+        if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Build binary
+        shell: bash
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -65,36 +80,34 @@ jobs:
           BUILD_DATE: ${{ steps.version.outputs.build_date }}
           GIT_COMMIT: ${{ steps.version.outputs.git_commit }}
         run: |
-          # Set CGO flags based on architecture
+          export CGO_ENABLED=1
+          OUTPUT="vaults-syncer-${GOOS}-${GOARCH}"
+
           if [ "$GOOS" = "linux" ]; then
-            export CGO_ENABLED=1
             if [ "$GOARCH" = "arm64" ]; then
               export CC=aarch64-linux-gnu-gcc
-            else
-              export CC=x86_64-linux-gnu-gcc
             fi
+            # Statically link Linux binaries so they run on any glibc-based distro
+            go build -v -a -installsuffix cgo \
+              -ldflags "-extldflags '-static' -X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+              -o "${OUTPUT}" .
+            tar czf "${OUTPUT}.tar.gz" "${OUTPUT}"
+          elif [ "$GOOS" = "windows" ]; then
+            OUTPUT="${OUTPUT}.exe"
+            go build -v \
+              -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+              -o "${OUTPUT}" .
+            7z a "${OUTPUT%.exe}.zip" "${OUTPUT}"
           else
-            export CGO_ENABLED=0
-          fi
-          
-          OUTPUT_NAME="vaults-syncer-${GOOS}-${GOARCH}"
-          if [ "$GOOS" = "windows" ]; then
-            OUTPUT_NAME="${OUTPUT_NAME}.exe"
-          fi
-          
-          go build -v \
-            -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
-            -o ${OUTPUT_NAME} .
-          
-          # Create archive
-          if [ "$GOOS" = "windows" ]; then
-            zip ${OUTPUT_NAME}.zip ${OUTPUT_NAME}
-          else
-            tar czf ${OUTPUT_NAME}.tar.gz ${OUTPUT_NAME}
+            # macOS — native CGO, dynamic linking
+            go build -v \
+              -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
+              -o "${OUTPUT}" .
+            tar czf "${OUTPUT}.tar.gz" "${OUTPUT}"
           fi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
@@ -107,13 +120,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Download binary artifacts
-        uses: actions/download-artifact@v8
+        # Pin to the patched release for the v4 arbitrary file write fix.
+        uses: actions/download-artifact@v4.1.3
         with:
           path: artifacts
           pattern: binary-*
@@ -177,11 +191,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-publish-docker:
+    needs: [create-release]
     runs-on: ubuntu-latest
-    if: always()
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}

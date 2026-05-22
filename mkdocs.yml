@@ -54,6 +54,7 @@ nav:
     - Vaults: configuration/vaults.md
     - Authentication: configuration/authentication.md
     - Syncs: configuration/syncs.md
+    - Tool Backend: configuration/tool-backend.md
   - Guides:
     - Quick Reference: guides/quick-reference.md
   - Development:

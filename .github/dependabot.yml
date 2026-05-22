@@ -1,5 +1,21 @@
 version: 2
 updates:
+  # GitHub Actions — keeps workflow action versions up to date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "01:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    reviewers:
+      - "pacorreia"
+    commit-message:
+      prefix: "chore(actions)"
+      include: "scope"
+
   # Go modules
   - package-ecosystem: "gomod"
     directory: "/"
@@ -33,21 +49,20 @@ updates:
       prefix: "chore(docker)"
       include: "scope"
 
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  # Docker — mock vault (used in dev/test compose stack)
+  - package-ecosystem: "docker"
+    directory: "/testdata/mock-vault"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "04:00"
-    open-pull-requests-limit: 5
+      time: "03:00"
+    open-pull-requests-limit: 3
     labels:
       - "dependencies"
-      - "github-actions"
     reviewers:
       - "pacorreia"
     commit-message:
-      prefix: "chore(actions)"
+      prefix: "chore(docker)"
       include: "scope"
 
   # Python (for mkdocs)
