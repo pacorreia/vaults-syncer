@@ -50,9 +50,6 @@ func applySyncDefaults(cfg *Config) {
 		if s.RetryPolicy.Multiplier == 0 {
 			s.RetryPolicy.Multiplier = 2.0
 		}
-		if !s.Enabled && s.ID != "" {
-			s.Enabled = true
-		}
 		if s.SyncType == "" {
 			s.SyncType = "unidirectional"
 		}
