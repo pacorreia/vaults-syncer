@@ -211,5 +211,10 @@ Pre-built tool configs are provided in [`examples/tools/`](../../examples/tools/
   `timeout`, default 30 s).
 - stdin is not connected; tools that require interactive input are not
   supported.
+- For `set` operations, avoid passing secret values as command-line arguments
+  (for example via `{{.Value}}` in `args`). Command-line arguments may be
+  exposed via process listings, audit logs, or crash reports. Prefer passing
+  secrets through environment variables or via a wrapper script that writes
+  the value to a temporary file and has the CLI read it from there.
 - The tool backend does not support bidirectional sync unless both `get` and
   `set` operations are defined.
