@@ -65,23 +65,6 @@ updates:
       prefix: "chore(docker)"
       include: "scope"
 
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "github-actions"
-    reviewers:
-      - "pacorreia"
-    commit-message:
-      prefix: "chore(actions)"
-      include: "scope"
-
   # Python (for mkdocs)
   - package-ecosystem: "pip"
     directory: "/"
