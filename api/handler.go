@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/pacorreia/vaults-syncer/config"
 	"github.com/pacorreia/vaults-syncer/storage"
@@ -86,7 +85,7 @@ func (h *Handler) ListSyncs(w http.ResponseWriter, r *http.Request) {
 			"targets":  syncCfg.Targets,
 			"type":     syncCfg.SyncType,
 			"schedule": syncCfg.Schedule,
-			"enabled":  syncCfg.Enabled,
+			"enabled":  syncCfg.IsEnabled(),
 		}
 		syncs = append(syncs, syncMap)
 	}
@@ -140,7 +139,7 @@ func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
 	metrics += "# TYPE syncs_enabled gauge\n"
 	enabledCount := 0
 	for _, s := range h.cfg.Syncs {
-		if s.Enabled {
+		if s.IsEnabled() {
 			enabledCount++
 		}
 	}

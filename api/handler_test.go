@@ -14,6 +14,8 @@ import (
 	"github.com/pacorreia/vaults-syncer/storage"
 )
 
+func boolPtr(b bool) *bool { return &b }
+
 type mockRunner struct {
 	running    bool
 	statuses   map[string]map[string]interface{}
@@ -68,8 +70,8 @@ func setupTestHandler(t *testing.T) (*Handler, *mockRunner, *storage.Store) {
 			{ID: "vault2", Endpoint: "http://vault2.example.com"},
 		},
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Source: "vault1", Targets: []string{"vault2"}, Enabled: true, SyncType: "unidirectional"},
-			{ID: "sync2", Source: "vault2", Targets: []string{"vault1"}, Enabled: false, SyncType: "bidirectional"},
+			{ID: "sync1", Source: "vault1", Targets: []string{"vault2"}, Enabled: boolPtr(true), SyncType: "unidirectional"},
+			{ID: "sync2", Source: "vault2", Targets: []string{"vault1"}, Enabled: boolPtr(false), SyncType: "bidirectional"},
 		},
 	}
 

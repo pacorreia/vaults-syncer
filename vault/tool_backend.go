@@ -161,20 +161,33 @@ func (b *ToolBackend) runOp(op *config.ToolOperationConfig, data templateData) (
 	cmd := exec.CommandContext(ctx, op.Command, args...) //nolint:gosec // command comes from operator-controlled config
 
 	// Inject tool-level env vars and passthrough vars on top of the current process environment.
+	// Build a de-duplicated env by parsing the inherited environment into a map, then applying
+	// overrides so that Env and EnvPassthrough values always win over any inherited values.
 	if len(b.toolCfg.Env) > 0 || len(b.toolCfg.EnvPassthrough) > 0 {
-		extra := make([]string, 0, len(b.toolCfg.Env)+len(b.toolCfg.EnvPassthrough))
+		envMap := make(map[string]string)
+		for _, entry := range cmd.Environ() {
+			k, v, found := strings.Cut(entry, "=")
+			if !found {
+				continue
+			}
+			envMap[k] = v
+		}
 		for k, v := range b.toolCfg.Env {
-			extra = append(extra, fmt.Sprintf("%s=%s", k, v))
+			envMap[k] = v
 		}
 		// EnvPassthrough forwards named vars from the current runtime environment.
 		// Values are read at execution time, so rotated credentials are picked up
 		// without restarting the daemon.
 		for _, name := range b.toolCfg.EnvPassthrough {
 			if v, ok := os.LookupEnv(name); ok {
-				extra = append(extra, fmt.Sprintf("%s=%s", name, v))
+				envMap[name] = v
 			}
 		}
-		cmd.Env = append(cmd.Environ(), extra...)
+		env := make([]string, 0, len(envMap))
+		for k, v := range envMap {
+			env = append(env, fmt.Sprintf("%s=%s", k, v))
+		}
+		cmd.Env = env
 	}
 
 	var stdout, stderr bytes.Buffer

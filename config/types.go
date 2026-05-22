@@ -120,7 +120,16 @@ type SyncConfig struct {
 	Transforms        []Transform  `yaml:"transforms"`
 	RetryPolicy       RetryPolicy  `yaml:"retry_policy"`
 	ConcurrentWorkers int          `yaml:"concurrent_workers"` // number of parallel workers (0 = sequential)
-	Enabled           bool         `yaml:"enabled"`
+	// Enabled controls whether this sync is active. Defaults to true when omitted.
+	// Use a pointer so that an explicit `enabled: false` in YAML is preserved and
+	// not overwritten by the defaulting logic.
+	Enabled *bool `yaml:"enabled"`
+}
+
+// IsEnabled reports whether the sync is enabled. Returns true when the field
+// is omitted from YAML (nil pointer) so that syncs are active by default.
+func (s *SyncConfig) IsEnabled() bool {
+	return s.Enabled == nil || *s.Enabled
 }
 
 // FilterConfig allows filtering which secrets to sync

@@ -11,6 +11,8 @@ import (
 	"github.com/pacorreia/vaults-syncer/storage"
 )
 
+func boolPtr(b bool) *bool { return &b }
+
 type mockEngine struct {
 	executeErr error
 	callCount  int
@@ -65,7 +67,7 @@ func TestRunner_Start(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -87,7 +89,7 @@ func TestRunner_Start_AlreadyRunning(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -106,7 +108,7 @@ func TestRunner_Start_DisabledSync(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: false, Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(false), Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -125,7 +127,7 @@ func TestRunner_Start_NoSchedule(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Schedule: "", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Schedule: "", Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -144,7 +146,7 @@ func TestRunner_Start_InvalidSchedule(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Schedule: "not a cron", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Schedule: "not a cron", Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -158,7 +160,7 @@ func TestRunner_Stop(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -188,7 +190,7 @@ func TestRunner_ExecuteSyncNow(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -209,7 +211,7 @@ func TestRunner_ExecuteSyncNow_NotFound(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -224,7 +226,7 @@ func TestRunner_ExecuteSyncNow_EngineError(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync1", Enabled: boolPtr(true), Source: "vault1", Targets: []string{"vault2"}},
 		},
 	}
 
@@ -292,8 +294,8 @@ func TestRunner_GetEntries(t *testing.T) {
 
 	cfg := &config.Config{
 		Syncs: []config.SyncConfig{
-			{ID: "sync1", Enabled: true, Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
-			{ID: "sync2", Enabled: true, Schedule: "*/10 * * * *", Source: "vault2", Targets: []string{"vault1"}},
+			{ID: "sync1", Enabled: boolPtr(true), Schedule: "*/5 * * * *", Source: "vault1", Targets: []string{"vault2"}},
+			{ID: "sync2", Enabled: boolPtr(true), Schedule: "*/10 * * * *", Source: "vault2", Targets: []string{"vault1"}},
 		},
 	}
 

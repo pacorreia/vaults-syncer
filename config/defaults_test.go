@@ -81,7 +81,7 @@ func TestApplySyncDefaults(t *testing.T) {
 	if s.SyncType != "unidirectional" {
 		t.Errorf("expected sync_type 'unidirectional', got %q", s.SyncType)
 	}
-	if !s.Enabled {
+	if !s.IsEnabled() {
 		t.Error("expected sync to be enabled by default")
 	}
 }

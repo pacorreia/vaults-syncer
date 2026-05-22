@@ -208,7 +208,7 @@ func TestConfigValidate(t *testing.T) {
 						Source:   "vault1",
 						Targets:  []string{"vault1"},
 						SyncType: "unidirectional",
-						Enabled:  true,
+						Enabled:  boolPtr(true),
 					},
 				},
 			},
@@ -258,7 +258,7 @@ func TestConfigValidate(t *testing.T) {
 						ID:      "sync1",
 						Source:  "nonexistent",
 						Targets: []string{"vault1"},
-						Enabled: true,
+						Enabled: boolPtr(true),
 					},
 				},
 			},
@@ -471,10 +471,12 @@ syncs:
 	if cfg.Syncs[0].SyncType != "unidirectional" {
 		t.Fatalf("expected default sync_type to be unidirectional")
 	}
-	if !cfg.Syncs[0].Enabled {
+	if !cfg.Syncs[0].IsEnabled() {
 		t.Fatalf("expected sync to be enabled by default")
 	}
 }
+
+func boolPtr(b bool) *bool { return &b }
 
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&

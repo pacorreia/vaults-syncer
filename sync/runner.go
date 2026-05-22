@@ -47,7 +47,7 @@ func (r *Runner) Start(cfg *config.Config) error {
 	}
 
 	for _, syncCfg := range cfg.Syncs {
-		if !syncCfg.Enabled {
+		if !syncCfg.IsEnabled() {
 			r.logger.Info("sync disabled, skipping",
 				slog.String("sync_id", syncCfg.ID),
 			)
