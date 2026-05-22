@@ -25,7 +25,6 @@ type Runner interface {
 	IsRunning() bool
 	GetSyncStatus(syncID string, store *storage.Store) (map[string]interface{}, error)
 	ExecuteSyncNow(syncID string, cfg *config.Config) error
-	GetNextRun(syncID string) *time.Time
 }
 
 // NewHandler creates a new handler
