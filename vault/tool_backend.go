@@ -240,10 +240,13 @@ func (b *ToolBackend) parseGetOutput(op *config.ToolOperationConfig, stdout []by
 }
 
 // renderArgs processes Go templates in each argument string.
+// Templates are parsed with missingkey=error so that references to undefined
+// fields (e.g. typos like {{.name}}) fail fast rather than silently rendering
+// as "<no value>".
 func renderArgs(args []string, data templateData) ([]string, error) {
 	out := make([]string, len(args))
 	for i, arg := range args {
-		tmpl, err := template.New("arg").Parse(arg)
+		tmpl, err := template.New("arg").Option("missingkey=error").Parse(arg)
 		if err != nil {
 			return nil, fmt.Errorf("invalid template in arg %q: %w", arg, err)
 		}
@@ -329,7 +332,9 @@ func parseJSONValue(data []byte, path string) (string, error) {
 	}
 }
 
-// jsonNavigate follows a dot-separated path through nested maps/slices.
+// jsonNavigate follows a dot-separated path through nested maps.
+// Only map[string]interface{} nodes are supported; attempting to traverse
+// into arrays or other types returns an error.
 func jsonNavigate(root interface{}, path string) (interface{}, error) {
 	if path == "" {
 		return root, nil

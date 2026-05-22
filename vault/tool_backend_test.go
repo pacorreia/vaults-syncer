@@ -480,6 +480,12 @@ func TestRenderArgs(t *testing.T) {
 			args:    []string{"{{.Undefined"},
 			wantErr: true,
 		},
+		{
+			name:    "undefined field errors with missingkey=error",
+			args:    []string{"--secret-id", "{{.Typo}}"},
+			data:    templateData{Name: "my-secret"},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {

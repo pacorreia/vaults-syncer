@@ -68,7 +68,7 @@ jobs:
           export CGO_ENABLED=1
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           GIT_COMMIT=$(git rev-parse HEAD)
-          BINARY="vaults-syncer"
+          BINARY="sync-daemon"
           LDFLAGS="-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}"
 
           if [ "$GOOS" = "linux" ]; then
@@ -79,15 +79,15 @@ jobs:
               -o "${BINARY}" .
 
             # ── tar.gz ─────────────────────────────────────────────────────────
-            tar czf "vaults-syncer-${VERSION}-${{ matrix.target }}.tar.gz" "${BINARY}"
+            tar czf "sync-daemon-${VERSION}-${{ matrix.target }}.tar.gz" "${BINARY}"
 
             # ── .deb package ───────────────────────────────────────────────────
             VERSION_CLEAN="${VERSION#v}"
             DEB_ARCH="${{ matrix.goarch }}"
             PKG_DIR="pkg_${DEB_ARCH}"
             mkdir -p "${PKG_DIR}/DEBIAN" "${PKG_DIR}/usr/bin"
-            cp "${BINARY}" "${PKG_DIR}/usr/bin/vaults-syncer"
-            chmod 755 "${PKG_DIR}/usr/bin/vaults-syncer"
+            cp "${BINARY}" "${PKG_DIR}/usr/bin/sync-daemon"
+            chmod 755 "${PKG_DIR}/usr/bin/sync-daemon"
             {
               echo "Package: vaults-syncer"
               echo "Version: ${VERSION_CLEAN}"
@@ -98,12 +98,12 @@ jobs:
               echo "Section: utils"
               echo "Priority: optional"
             } > "${PKG_DIR}/DEBIAN/control"
-            dpkg-deb --build "${PKG_DIR}" "vaults-syncer-${VERSION}-${{ matrix.target }}.deb"
+            dpkg-deb --build "${PKG_DIR}" "sync-daemon-${VERSION}-${{ matrix.target }}.deb"
 
           elif [ "$GOOS" = "windows" ]; then
             BINARY="${BINARY}.exe"
             go build -ldflags "${LDFLAGS}" -o "${BINARY}" .
-            7z a "vaults-syncer-${VERSION}-${{ matrix.target }}.zip" "${BINARY}"
+            7z a "sync-daemon-${VERSION}-${{ matrix.target }}.zip" "${BINARY}"
           fi
 
       - name: Upload artifacts
@@ -111,9 +111,9 @@ jobs:
         with:
           name: binary-${{ matrix.target }}
           path: |
-            vaults-syncer-*.tar.gz
-            vaults-syncer-*.zip
-            vaults-syncer-*.deb
+            sync-daemon-*.tar.gz
+            sync-daemon-*.zip
+            sync-daemon-*.deb
           if-no-files-found: error
           retention-days: 5
 
