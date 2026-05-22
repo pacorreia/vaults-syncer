@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.1](https://github.com/pacorreia/vaults-syncer/compare/v4.1.0...v4.1.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **workflows:** remove outdated v4 download-artifact comments ([48e8805](https://github.com/pacorreia/vaults-syncer/commit/48e88056b8b79b71f68a105e82e814b65fc1c23a))
+
 ## [4.1.0](https://github.com/pacorreia/vaults-syncer/compare/v4.0.0...v4.1.0) (2026-05-22)
 
 
