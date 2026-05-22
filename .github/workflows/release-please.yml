@@ -48,7 +48,7 @@ jobs:
             target: windows-amd64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v5
         with:
@@ -124,8 +124,7 @@ jobs:
     needs: [release-please, build-binaries]
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
-      # Pin to the patched release for the v4 arbitrary file write fix.
-      - uses: actions/download-artifact@v4.1.3
+      - uses: actions/download-artifact@v8.0.1
         with:
           pattern: binary-*
           path: dist
@@ -144,7 +143,7 @@ jobs:
     needs: [release-please, build-binaries]
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
