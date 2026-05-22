@@ -40,13 +40,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.26.1'
 
@@ -107,7 +107,7 @@ jobs:
           fi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
@@ -194,7 +194,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
