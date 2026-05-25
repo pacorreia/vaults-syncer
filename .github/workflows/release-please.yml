@@ -167,8 +167,52 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            VERSION=${{ needs.release-please.outputs.tag_name }}
+            BUILD_DATE=${{ github.run_started_at }}
+            GIT_COMMIT=${{ github.sha }}
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.version_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # ── Step 3c: package and push Helm chart to GHCR OCI (parallel) ─────────────
+  publish-helm-chart:
+    name: Publish Helm Chart
+    runs-on: ubuntu-latest
+    needs: [release-please]
+    if: ${{ needs.release-please.outputs.release_created }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set chart version from release tag
+        id: chart_ver
+        run: |
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Update Chart.yaml versions
+        run: |
+          VERSION="${{ steps.chart_ver.outputs.version }}"
+          sed -i "s/^version:.*/version: ${VERSION}/" helm/vaults-syncer/Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" helm/vaults-syncer/Chart.yaml
+
+      - name: Package Helm chart
+        run: helm package helm/vaults-syncer --destination dist/
+
+      - name: Push Helm chart to GHCR OCI registry
+        run: |
+          helm push dist/vaults-syncer-${{ steps.chart_ver.outputs.version }}.tgz \
+            oci://ghcr.io/${{ github.repository_owner }}/charts
