@@ -197,5 +197,8 @@ func (s *UserStore) DeleteSession(token string) error {
 func (s *UserStore) DeleteExpiredSessions() error {
 	now := time.Now().Unix()
 	_, err := s.db.Exec(`DELETE FROM sessions WHERE expires_at<=?`, now)
-	return err
+	if err != nil {
+		return fmt.Errorf("storage: DeleteExpiredSessions: %w", err)
+	}
+	return nil
 }

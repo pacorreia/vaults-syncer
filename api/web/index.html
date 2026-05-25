@@ -41,28 +41,80 @@
       --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:28px;
       --nav-w: 88px;
     }
+
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;font-family:'Roboto',sans-serif;font-size:14px;
       background:var(--md-surface-container-low);color:var(--md-on-surface);-webkit-font-smoothing:antialiased}
+    body{overflow:hidden}
+    button,input,select{font:inherit}
+    a{color:inherit}
+    .hidden{display:none !important}
+    .visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
     /* Shell */
     .shell{display:grid;grid-template-rows:64px 1fr;
       grid-template-columns:var(--nav-w) 1fr;
       grid-template-areas:"bar bar""nav main";height:100%;overflow:hidden}
 
+    /* Auth views */
+    .auth-shell,.setup-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      padding:24px;background:
+      radial-gradient(circle at top right, rgba(103,80,164,.08), transparent 28%),
+      radial-gradient(circle at bottom left, rgba(98,91,113,.08), transparent 32%),
+      var(--md-surface-container-low);z-index:500}
+    .setup-overlay{background:rgba(28,27,31,.48);backdrop-filter:blur(4px);padding:16px}
+    .setup-panel,.auth-card{width:100%;max-width:460px;background:var(--md-surface);border-radius:var(--r-xl);
+      box-shadow:var(--el3);overflow:hidden}
+    .setup-panel{max-width:640px;min-height:min(720px,100%);display:flex;flex-direction:column}
+    .hero{padding:28px 28px 18px;background:linear-gradient(135deg,var(--md-primary-container),var(--md-surface));
+      color:var(--md-on-primary-container)}
+    .hero-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .hero-icon,.brand-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.55);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .hero-icon .material-icons-round,.brand-icon .material-icons-round{font-size:28px}
+    .hero h1{font-size:28px;font-weight:400;line-height:1.15;margin-bottom:6px}
+    .hero p{font-size:14px;line-height:1.5;color:rgba(33,0,93,.82)}
+    .auth-card .hero{padding-bottom:22px}
+    .auth-content,.setup-content{padding:24px 28px 28px}
+    .setup-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+    .form-stack{display:flex;flex-direction:column;gap:16px}
+    .helper-text{font-size:12px;color:var(--md-on-surface-variant);line-height:1.45}
+    .inline-error{font-size:12px;color:var(--md-error);display:none}
+    .inline-error.show{display:block}
+    .auth-actions,.setup-actions,.dialog-actions,.table-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .auth-actions,.setup-actions{margin-top:20px;justify-content:flex-end}
+
+    /* Fields */
+    .field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .text-field,.select-field,.checkbox-field{display:flex;flex-direction:column;gap:8px}
+    .text-field label,.select-field label{font-size:12px;font-weight:500;letter-spacing:.03em;color:var(--md-on-surface-variant)}
+    .text-field input,.select-field select,.kv-input{
+      width:100%;border:1px solid var(--md-outline);border-radius:var(--r-md);background:var(--md-surface);
+      color:var(--md-on-surface);padding:14px 16px;outline:none;transition:border-color .15s, box-shadow .15s, background .15s
+    }
+    .text-field input:focus,.select-field select:focus,.kv-input:focus{
+      border-color:var(--md-primary);box-shadow:0 0 0 3px rgba(103,80,164,.12)
+    }
+    .text-field input::placeholder,.kv-input::placeholder{color:#7d7587}
+    .checkbox-field{flex-direction:row;align-items:center;gap:10px;padding-top:26px}
+    .checkbox-field input{width:18px;height:18px;accent-color:var(--md-primary)}
+    .checkbox-field label{font-size:13px;color:var(--md-on-surface)}
+
     /* App Bar */
     .app-bar{grid-area:bar;background:var(--md-surface);box-shadow:var(--el2);
       display:flex;align-items:center;padding:0 16px;gap:16px;z-index:100}
     .app-bar-brand{display:flex;align-items:center;gap:12px;width:calc(var(--nav-w) - 16px)}
-    .brand-icon{width:36px;height:36px;border-radius:50%;background:var(--md-primary-container);
-      color:var(--md-on-primary-container);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .brand-icon{width:36px;height:36px;background:var(--md-primary-container);color:var(--md-on-primary-container)}
     .brand-icon .material-icons-round{font-size:20px}
     .app-bar-title{font-size:20px;font-weight:500;white-space:nowrap}
     .app-bar-spacer{flex:1}
-    .app-bar-actions{display:flex;align-items:center;gap:8px}
-    .status-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+    .app-bar-actions{display:flex;align-items:center;gap:8px;min-width:0}
+    .status-chip,.user-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
       border-radius:var(--r-xl);font-size:12px;font-weight:500;
       border:1px solid var(--md-outline-variant);background:var(--md-surface);color:var(--md-on-surface-variant)}
+    .user-chip{max-width:220px}
+    .user-chip .material-icons-round{font-size:16px}
+    .user-chip-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .dot-ok  {background:var(--md-success);box-shadow:0 0 0 2px rgba(56,106,32,.2)}
     .dot-err {background:var(--md-error);box-shadow:0 0 0 2px rgba(179,38,30,.2)}
@@ -81,7 +133,7 @@
     .nav-item.active .nav-indicator{background:var(--md-secondary-container)}
     .nav-item .material-icons-round{font-size:22px;color:var(--md-on-surface-variant);transition:color .15s}
     .nav-item.active .material-icons-round{color:var(--md-on-secondary-container)}
-    .nav-label{font-size:11px;font-weight:500;color:var(--md-on-surface-variant);letter-spacing:.03em}
+    .nav-label{font-size:11px;font-weight:500;color:var(--md-on-surface-variant);letter-spacing:.03em;text-align:center}
     .nav-item.active .nav-label{color:var(--md-on-surface);font-weight:700}
     .nav-badge{position:absolute;top:8px;right:6px;min-width:16px;height:16px;border-radius:8px;
       background:var(--md-error);color:#fff;font-size:10px;font-weight:700;
@@ -98,7 +150,7 @@
       color:var(--md-on-surface-variant);margin-bottom:12px}
 
     /* Stats */
-    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:32px}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px}
     .stat-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);padding:20px 20px 22px}
     .stat-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
       margin-bottom:14px;font-size:20px}
@@ -110,22 +162,27 @@
     .stat-value{font-size:36px;font-weight:300;line-height:1;margin-bottom:4px}
     .stat-label{font-size:12px;color:var(--md-on-surface-variant)}
 
-    /* Activity card */
-    .activity-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);overflow:hidden;margin-bottom:32px}
+    /* Cards / tables */
+    .activity-card,.config-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);overflow:hidden;margin-bottom:32px}
     .card-header{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--md-outline-variant)}
     .card-header-icon{font-size:20px;color:var(--md-primary)}
     .card-header-title{font-size:14px;font-weight:500;flex:1}
-
-    /* Data table */
+    .card-header-subtitle{font-size:12px;color:var(--md-on-surface-variant)}
+    .card-body{padding:16px 20px 20px}
+    .table-wrap{overflow:auto}
     .data-table{width:100%;border-collapse:collapse}
     .data-table th{text-align:left;padding:10px 16px;font-size:12px;font-weight:500;
       color:var(--md-on-surface-variant);border-bottom:1px solid var(--md-outline-variant);white-space:nowrap}
     .data-table td{padding:12px 16px;border-bottom:1px solid var(--md-outline-variant);vertical-align:middle;font-size:13px}
     .data-table tbody tr:last-child td{border-bottom:none}
     .data-table tbody tr:hover{background:rgba(103,80,164,.04)}
+    .mono-pill{font-family:'Roboto Mono',monospace;font-size:11px;background:var(--md-surface-variant);
+      padding:2px 8px;border-radius:var(--r-xl);display:inline-flex;align-items:center}
+    .table-actions{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+    .toolbar-spacer{flex:1}
 
     /* Sync cards */
-    .syncs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+    .syncs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:32px}
     .sync-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);
       overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;display:flex;flex-direction:column}
     .sync-card:hover{box-shadow:var(--el3);transform:translateY(-1px)}
@@ -157,13 +214,13 @@
     .progress-bar.ok {background:var(--md-success)}
     .progress-bar.err{background:var(--md-error)}
     .progress-bar.neu{background:var(--md-outline)}
-    .sync-card-footer{display:flex;align-items:center;justify-content:space-between;
+    .sync-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;
       padding:10px 20px 16px;border-top:1px solid var(--md-outline-variant)}
     .footer-time{font-size:12px;color:var(--md-on-surface-variant);display:flex;align-items:center;gap:4px}
     .footer-time .material-icons-round{font-size:14px}
 
     /* Vault cards */
-    .vaults-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .vaults-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px}
     .vault-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);
       padding:20px;display:flex;flex-direction:column;gap:14px}
     .vault-card-header{display:flex;align-items:center;gap:14px}
@@ -183,11 +240,17 @@
     /* Buttons */
     .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:var(--r-xl);
       font-family:'Roboto',sans-serif;font-size:13px;font-weight:500;letter-spacing:.03em;
-      cursor:pointer;padding:8px 18px;transition:box-shadow .2s,background .15s;outline:none}
+      cursor:pointer;padding:8px 18px;transition:box-shadow .2s,background .15s,color .15s;outline:none;text-decoration:none}
     .btn .material-icons-round{font-size:16px}
     .btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
     .btn-filled{background:var(--md-primary);color:var(--md-on-primary);box-shadow:var(--el1)}
     .btn-filled:hover{box-shadow:var(--el2);background:#7965AF}
+    .btn-tonal{background:var(--md-secondary-container);color:var(--md-on-secondary-container)}
+    .btn-tonal:hover{background:#ddd1f0}
+    .btn-text{background:transparent;color:var(--md-primary)}
+    .btn-text:hover{background:rgba(103,80,164,.08)}
+    .btn-danger{background:var(--md-error-container);color:var(--md-on-error-container)}
+    .btn-danger:hover{background:#f4c9c6}
     .icon-btn{width:40px;height:40px;border-radius:50%;border:none;background:transparent;
       color:var(--md-on-surface-variant);display:flex;align-items:center;justify-content:center;
       cursor:pointer;transition:background .15s;font-size:22px}
@@ -199,18 +262,40 @@
     .dialog-scrim.open{display:flex}
     .dialog{background:var(--md-surface);border-radius:var(--r-xl);box-shadow:var(--el3);
       width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+    .dialog.wide{max-width:880px}
     .dialog-header{display:flex;align-items:center;gap:12px;padding:20px 24px 16px}
     .dialog-icon{width:40px;height:40px;border-radius:50%;background:var(--md-primary-container);
       color:var(--md-on-primary-container);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .dialog-title{font-size:20px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .dialog-divider{height:1px;background:var(--md-outline-variant)}
     .dialog-content{overflow-y:auto;padding:16px 24px 24px;flex:1}
+    .dialog-actions{justify-content:flex-end;margin-top:24px}
     .run-status{display:inline-flex;align-items:center;gap:4px;font-weight:500}
     .run-status .material-icons-round{font-size:14px}
     .run-status.success{color:var(--md-success)}
     .run-status.failed {color:var(--md-error)}
     .run-status.running{color:var(--md-info)}
     .run-error-text{font-size:11px;color:var(--md-error);font-family:'Roboto Mono',monospace;margin-top:2px;word-break:break-word}
+    .supporting-panel{background:var(--md-surface-container);border-radius:var(--r-md);padding:12px 14px;color:var(--md-on-surface-variant);font-size:12px;line-height:1.45}
+    .warning-panel{background:var(--md-warning-container);color:var(--md-warning)}
+
+    /* Header editor */
+    .kv-editor{display:flex;flex-direction:column;gap:10px}
+    .kv-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center}
+    .kv-row .icon-btn{width:36px;height:36px}
+    .masked-note{font-size:11px;color:var(--md-on-surface-variant)}
+
+    /* Empty / loading */
+    .skeleton{background:linear-gradient(90deg,var(--md-surface-variant) 25%,#D3CCE3 50%,var(--md-surface-variant) 75%);
+      background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:var(--r-sm)}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    .skeleton-card{height:220px;border-radius:var(--r-md)}
+    .skeleton-table{height:180px;border-radius:var(--r-md)}
+    .spinning{animation:spin .65s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty-state{display:flex;flex-direction:column;align-items:center;padding:48px 24px;
+      color:var(--md-on-surface-variant);gap:10px;text-align:center}
+    .empty-state .material-icons-round{font-size:48px;opacity:.35}
 
     /* Snackbar */
     #snackbar-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -223,497 +308,1581 @@
     .snackbar .err{color:#F2B8B5}
     @keyframes snack-in{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-    /* Skeleton */
-    .skeleton{background:linear-gradient(90deg,var(--md-surface-variant) 25%,#D3CCE3 50%,var(--md-surface-variant) 75%);
-      background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:var(--r-sm)}
-    @keyframes shimmer{to{background-position:-200% 0}}
-    .skeleton-card{height:220px;border-radius:var(--r-md)}
+    @media (max-width: 960px) {
+      body{overflow:auto}
+      .shell{grid-template-columns:1fr;grid-template-rows:64px auto 1fr;grid-template-areas:"bar""nav""main"}
+      .nav-rail{flex-direction:row;justify-content:flex-start;padding:8px 12px;border-right:none;border-bottom:1px solid var(--md-outline-variant)}
+      .nav-item{width:84px}
+      .main{padding:20px 20px 36px}
+      .sync-card-footer{flex-direction:column;align-items:flex-start}
+      .app-bar-brand{width:auto}
+    }
 
-    .spinning{animation:spin .65s linear infinite;display:inline-block}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .empty-state{display:flex;flex-direction:column;align-items:center;padding:48px 24px;
-      color:var(--md-on-surface-variant);gap:10px;text-align:center}
-    .empty-state .material-icons-round{font-size:48px;opacity:.35}
+    @media (max-width: 720px) {
+      .hero,.auth-content,.setup-content,.dialog-content,.dialog-header{padding-left:20px;padding-right:20px}
+      .field-grid,.kv-row,.sync-meta{grid-template-columns:1fr}
+      .stats-row{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+      .app-bar{padding:0 12px;gap:8px}
+      .refresh-label{display:none}
+      .user-chip{max-width:150px}
+      .setup-panel,.auth-card{max-width:none}
+    }
   </style>
 </head>
 <body>
-<div class="shell">
-
-  <header class="app-bar">
-    <div class="app-bar-brand">
-      <div class="brand-icon"><span class="material-icons-round">lock</span></div>
-      <span class="app-bar-title">Vaults Syncer</span>
-    </div>
-    <div class="app-bar-spacer"></div>
-    <div class="app-bar-actions">
-      <div class="status-chip">
-        <div class="dot dot-idle" id="runner-dot"></div>
-        <span id="runner-label">Connecting…</span>
-      </div>
-      <span class="refresh-label" id="refresh-label"></span>
-      <button class="icon-btn" title="Refresh" onclick="refresh()">
-        <span class="material-icons-round" id="refresh-icon">refresh</span>
-      </button>
-    </div>
-  </header>
-
-  <nav class="nav-rail">
-    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
-      <div class="nav-indicator"><span class="material-icons-round">dashboard</span></div>
-      <span class="nav-label">Dashboard</span>
-    </div>
-    <div class="nav-item" data-page="syncs" onclick="navigate('syncs')">
-      <div class="nav-indicator"><span class="material-icons-round">sync_alt</span></div>
-      <span class="nav-label">Syncs</span>
-      <div class="nav-badge" id="nav-badge-syncs" style="display:none">0</div>
-    </div>
-    <div class="nav-item" data-page="vaults" onclick="navigate('vaults')">
-      <div class="nav-indicator"><span class="material-icons-round">storage</span></div>
-      <span class="nav-label">Vaults</span>
-    </div>
-  </nav>
-
-  <main class="main">
-
-    <!-- Dashboard -->
-    <div id="page-dashboard" class="page active">
-      <div class="page-header">
-        <div class="page-title">Dashboard</div>
-        <div class="page-subtitle">Secret synchronization overview</div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-icon primary"><span class="material-icons-round">sync_alt</span></div>
-          <div class="stat-value" id="stat-total">–</div>
-          <div class="stat-label">Total Syncs</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon success"><span class="material-icons-round">check_circle</span></div>
-          <div class="stat-value" id="stat-enabled">–</div>
-          <div class="stat-label">Active</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon secondary"><span class="material-icons-round">pause_circle</span></div>
-          <div class="stat-value" id="stat-disabled">–</div>
-          <div class="stat-label">Paused</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon info"><span class="material-icons-round">storage</span></div>
-          <div class="stat-value" id="stat-vaults">–</div>
-          <div class="stat-label">Vaults</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon error"><span class="material-icons-round">cancel</span></div>
-          <div class="stat-value" id="stat-failed">–</div>
-          <div class="stat-label">Failed</div>
+  <div id="setup-overlay" class="setup-overlay hidden" aria-hidden="true">
+    <div class="setup-panel" role="dialog" aria-modal="true" aria-labelledby="setup-title">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-icon"><span class="material-icons-round">admin_panel_settings</span></div>
+          <div>
+            <h1 id="setup-title">Welcome to Vaults Syncer</h1>
+            <p>Complete first-run setup to create the initial administrator account and unlock the control plane.</p>
+          </div>
         </div>
       </div>
-      <div class="section-label">Recent Activity</div>
-      <div class="activity-card">
-        <div class="card-header">
-          <span class="material-icons-round card-header-icon">history</span>
-          <span class="card-header-title">Latest run per sync job</span>
-        </div>
-        <table class="data-table">
-          <thead><tr><th>Sync</th><th>Status</th><th>Synced</th><th>Failed</th><th>Duration</th><th>Time</th></tr></thead>
-          <tbody id="activity-body">
-            <tr><td colspan="6"><div class="empty-state" style="padding:24px">
-              <span class="material-icons-round spinning" style="font-size:28px;opacity:.5">sync</span>
-            </div></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Syncs -->
-    <div id="page-syncs" class="page">
-      <div class="page-header">
-        <div class="page-title">Sync Jobs</div>
-        <div class="page-subtitle">Manage and trigger secret synchronizations</div>
-      </div>
-      <div class="syncs-grid" id="syncs-grid">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-      </div>
-    </div>
-
-    <!-- Vaults -->
-    <div id="page-vaults" class="page">
-      <div class="page-header">
-        <div class="page-title">Vaults</div>
-        <div class="page-subtitle">Configured secret vault backends</div>
-      </div>
-      <div class="vaults-grid" id="vaults-grid">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<div class="dialog-scrim" id="dialog-scrim">
-  <div class="dialog" role="dialog" aria-modal="true">
-    <div class="dialog-header">
-      <div class="dialog-icon"><span class="material-icons-round">history</span></div>
-      <div class="dialog-title" id="dialog-title">Sync History</div>
-      <button class="icon-btn" id="dialog-close" aria-label="Close">
-        <span class="material-icons-round">close</span>
-      </button>
-    </div>
-    <div class="dialog-divider"></div>
-    <div class="dialog-content" id="dialog-content"></div>
-  </div>
-</div>
-
-<div id="snackbar-container"></div>
-
-<script>
-  const REFRESH_MS = 30_000;
-  let refreshTimer   = null;
-  let cachedSyncs    = [];
-  let cachedStatuses = {};
-
-  function navigate(page) {
-    document.querySelectorAll('.nav-item').forEach(el =>
-      el.classList.toggle('active', el.dataset.page === page));
-    document.querySelectorAll('.page').forEach(el =>
-      el.classList.toggle('active', el.id === `page-${page}`));
-  }
-
-  function snack(msg, type = 'success') {
-    const c = document.getElementById('snackbar-container');
-    const el = document.createElement('div');
-    el.className = 'snackbar';
-    const icon = type === 'success' ? 'check_circle' : 'error';
-    const cls  = type === 'success' ? 'ok' : 'err';
-    el.innerHTML = `<span class="material-icons-round ${cls}">${icon}</span><span>${escHtml(msg)}</span>`;
-    c.appendChild(el);
-    setTimeout(() => el.remove(), 4000);
-  }
-
-  const escHtml = s => String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-  const fmtTs = ts => ts ? new Date(ts * 1000).toLocaleString() : '—';
-  const fmtDur = ms => ms == null ? '—' : ms < 1000 ? `${ms} ms` : `${(ms/1000).toFixed(1)} s`;
-
-  function timeAgo(ts) {
-    if (!ts) return '—';
-    const s = Math.floor((Date.now() - ts * 1000) / 1000);
-    if (s < 60)    return `${s}s ago`;
-    if (s < 3600)  return `${Math.floor(s/60)}m ago`;
-    if (s < 86400) return `${Math.floor(s/3600)}h ago`;
-    return `${Math.floor(s/86400)}d ago`;
-  }
-
-  function timeUntil(ts) {
-    if (!ts) return '—';
-    const s = Math.floor((ts * 1000 - Date.now()) / 1000);
-    if (s < 0)     return 'overdue';
-    if (s < 60)    return `in ${s}s`;
-    if (s < 3600)  return `in ${Math.floor(s/60)}m`;
-    if (s < 86400) return `in ${Math.floor(s/3600)}h`;
-    return `in ${Math.floor(s/86400)}d`;
-  }
-
-  function statusChip(status) {
-    if (!status) return '';
-    const map = {
-      success:['chip-success','check'], completed:['chip-success','check'],
-      failed:['chip-failed','cancel'],  running:['chip-running','sync'],
-    };
-    const [cls, icon] = map[status] || ['chip-neutral','help'];
-    return `<span class="chip ${cls}"><span class="material-icons-round">${icon}</span>${escHtml(status)}</span>`;
-  }
-
-  function stripeClass(enabled, st) {
-    if (!enabled) return 'stripe-off';
-    if (st === 'success' || st === 'completed') return 'stripe-ok';
-    if (st === 'failed') return 'stripe-err';
-    return 'stripe-neutral';
-  }
-
-  function statusIcon(s) {
-    if (s==='success'||s==='completed') return ['check_circle','success'];
-    if (s==='failed')  return ['cancel','failed'];
-    if (s==='running') return ['sync','running'];
-    return ['help',''];
-  }
-
-  async function apiFetch(url) {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  }
-
-  async function updateHealth() {
-    const dot = document.getElementById('runner-dot');
-    const lbl = document.getElementById('runner-label');
-    try {
-      const d = await apiFetch('/health');
-      dot.className = `dot ${d.running ? 'dot-ok' : 'dot-err'}`;
-      lbl.textContent = d.running ? 'Runner active' : 'Runner stopped';
-    } catch {
-      dot.className = 'dot dot-err';
-      lbl.textContent = 'Unreachable';
-    }
-  }
-
-  async function loadVaults() {
-    try {
-      const data = await apiFetch('/vaults');
-      const vaults = data.vaults || [];
-      document.getElementById('stat-vaults').textContent = vaults.length;
-      const grid = document.getElementById('vaults-grid');
-      if (!vaults.length) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-          <span class="material-icons-round">storage_off</span><span>No vaults configured.</span></div>`;
-        return;
-      }
-      grid.innerHTML = vaults.map(v => `
-        <div class="vault-card">
-          <div class="vault-card-header">
-            <div class="vault-avatar"><span class="material-icons-round">storage</span></div>
-            <div>
-              <div class="vault-name">${escHtml(v.name || v.id)}</div>
-              <div class="vault-id">${escHtml(v.id)}</div>
+      <div class="setup-content">
+        <form id="setup-form" class="form-stack">
+          <div class="field-grid">
+            <div class="text-field">
+              <label for="setup-username">Admin Username</label>
+              <input id="setup-username" name="username" type="text" autocomplete="username" required />
+            </div>
+            <div></div>
+            <div class="text-field">
+              <label for="setup-password">Admin Password</label>
+              <input id="setup-password" name="password" type="password" autocomplete="new-password" minlength="8" required />
+            </div>
+            <div class="text-field">
+              <label for="setup-confirm-password">Confirm Password</label>
+              <input id="setup-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required />
             </div>
           </div>
-          ${v.type ? `<span class="type-badge">${escHtml(v.type)}</span>` : ''}
-          <div class="vault-meta">
-            ${v.endpoint ? `<div class="vault-meta-row">
-              <span class="material-icons-round">link</span>
-              <a href="${escHtml(v.endpoint)}" target="_blank" rel="noopener">${escHtml(v.endpoint)}</a>
+          <p class="helper-text">Passwords must be at least 8 characters. This account will have full administrative access.</p>
+          <p class="inline-error" id="setup-error"></p>
+          <div class="setup-actions">
+            <button type="submit" class="btn btn-filled" id="setup-submit-btn">
+              <span class="material-icons-round">check_circle</span>
+              Complete setup
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="auth-shell" class="auth-shell hidden">
+    <div class="auth-card">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-icon"><span class="material-icons-round">lock</span></div>
+          <div>
+            <h1>Vaults Syncer</h1>
+            <p>Authenticate to view sync health, trigger jobs, and manage configuration.</p>
+          </div>
+        </div>
+      </div>
+      <div class="auth-content">
+        <form id="login-form" class="form-stack">
+          <div class="text-field">
+            <label for="login-username">Username</label>
+            <input id="login-username" name="username" type="text" autocomplete="username" required />
+          </div>
+          <div class="text-field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+          </div>
+          <p class="inline-error" id="login-error"></p>
+          <div class="auth-actions">
+            <button type="submit" class="btn btn-filled" id="login-submit-btn">
+              <span class="material-icons-round">login</span>
+              Login
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell hidden" id="app-shell">
+    <header class="app-bar">
+      <div class="app-bar-brand">
+        <div class="brand-icon"><span class="material-icons-round">lock</span></div>
+        <span class="app-bar-title">Vaults Syncer</span>
+      </div>
+      <div class="app-bar-spacer"></div>
+      <div class="app-bar-actions">
+        <div class="status-chip">
+          <div class="dot dot-idle" id="runner-dot"></div>
+          <span id="runner-label">Connecting…</span>
+        </div>
+        <span class="refresh-label" id="refresh-label"></span>
+        <div class="user-chip" title="Current user">
+          <span class="material-icons-round">account_circle</span>
+          <span class="user-chip-text" id="current-user-label">—</span>
+        </div>
+        <button class="icon-btn" title="Refresh current page" id="refresh-button">
+          <span class="material-icons-round" id="refresh-icon">refresh</span>
+        </button>
+        <button class="btn btn-text" id="logout-button">
+          <span class="material-icons-round">logout</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-rail">
+      <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+        <div class="nav-indicator"><span class="material-icons-round">dashboard</span></div>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item hidden" data-page="vaults-config" data-admin-only="true" onclick="navigate('vaults-config')">
+        <div class="nav-indicator"><span class="material-icons-round">storage</span></div>
+        <span class="nav-label">Vaults Config</span>
+      </div>
+      <div class="nav-item hidden" data-page="syncs-config" data-admin-only="true" onclick="navigate('syncs-config')">
+        <div class="nav-indicator"><span class="material-icons-round">sync_alt</span></div>
+        <span class="nav-label">Syncs Config</span>
+        <div class="nav-badge" id="nav-badge-syncs" style="display:none">0</div>
+      </div>
+      <div class="nav-item hidden" data-page="users" data-admin-only="true" onclick="navigate('users')">
+        <div class="nav-indicator"><span class="material-icons-round">group</span></div>
+        <span class="nav-label">Users</span>
+      </div>
+    </nav>
+
+    <main class="main">
+      <section id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle">Secret synchronization overview</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon primary"><span class="material-icons-round">sync_alt</span></div>
+            <div class="stat-value" id="stat-total">–</div>
+            <div class="stat-label">Total Syncs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success"><span class="material-icons-round">check_circle</span></div>
+            <div class="stat-value" id="stat-enabled">–</div>
+            <div class="stat-label">Active</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon secondary"><span class="material-icons-round">pause_circle</span></div>
+            <div class="stat-value" id="stat-disabled">–</div>
+            <div class="stat-label">Paused</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info"><span class="material-icons-round">storage</span></div>
+            <div class="stat-value" id="stat-vaults">–</div>
+            <div class="stat-label">Vaults</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon error"><span class="material-icons-round">cancel</span></div>
+            <div class="stat-value" id="stat-failed">–</div>
+            <div class="stat-label">Failed</div>
+          </div>
+        </div>
+
+        <div class="section-label">Sync Jobs</div>
+        <div class="syncs-grid" id="syncs-grid">
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+        </div>
+
+        <div class="section-label">Vault Backends</div>
+        <div class="vaults-grid" id="vaults-grid">
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+        </div>
+
+        <div class="section-label">Recent Activity</div>
+        <div class="activity-card">
+          <div class="card-header">
+            <span class="material-icons-round card-header-icon">history</span>
+            <span class="card-header-title">Latest run per sync job</span>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Sync</th><th>Status</th><th>Synced</th><th>Failed</th><th>Duration</th><th>Time</th></tr></thead>
+            <tbody id="activity-body">
+              <tr><td colspan="6"><div class="empty-state" style="padding:24px">
+                <span class="material-icons-round spinning" style="font-size:28px;opacity:.5">sync</span>
+              </div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="page-vaults-config" class="page">
+        <div class="page-header">
+          <div class="page-title">Vaults Config</div>
+          <div class="page-subtitle">Create and manage vault backend definitions.</div>
+        </div>
+        <div class="config-card">
+          <div class="card-header">
+            <span class="material-icons-round card-header-icon">storage</span>
+            <span class="card-header-title">Configured Vaults</span>
+            <span class="card-header-subtitle" id="vaults-config-count"></span>
+          </div>
+          <div class="card-body">
+            <div class="table-toolbar" style="margin-bottom:16px">
+              <div class="helper-text">Admin-only configuration for secret vault connections.</div>
+              <div class="toolbar-spacer"></div>
+              <button class="btn btn-filled" id="add-vault-btn">
+                <span class="material-icons-round">add</span>
+                Add vault
+              </button>
+            </div>
+            <div class="table-wrap" id="vaults-config-wrap">
+              <div class="skeleton skeleton-table"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-syncs-config" class="page">
+        <div class="page-header">
+          <div class="page-title">Syncs Config</div>
+          <div class="page-subtitle">Configure synchronization relationships, schedules, and worker limits.</div>
+        </div>
+        <div class="config-card">
+          <div class="card-header">
+            <span class="material-icons-round card-header-icon">sync_alt</span>
+            <span class="card-header-title">Configured Sync Jobs</span>
+            <span class="card-header-subtitle" id="syncs-config-count"></span>
+          </div>
+          <div class="card-body">
+            <div class="table-toolbar" style="margin-bottom:16px">
+              <div class="helper-text">Admin-only configuration for sync topology and schedules.</div>
+              <div class="toolbar-spacer"></div>
+              <button class="btn btn-filled" id="add-sync-btn">
+                <span class="material-icons-round">add</span>
+                Add sync
+              </button>
+            </div>
+            <div class="table-wrap" id="syncs-config-wrap">
+              <div class="skeleton skeleton-table"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-users" class="page">
+        <div class="page-header">
+          <div class="page-title">Users</div>
+          <div class="page-subtitle">Manage administrator and user accounts.</div>
+        </div>
+        <div class="config-card">
+          <div class="card-header">
+            <span class="material-icons-round card-header-icon">group</span>
+            <span class="card-header-title">User Accounts</span>
+            <span class="card-header-subtitle" id="users-count"></span>
+          </div>
+          <div class="card-body">
+            <div class="table-toolbar" style="margin-bottom:16px">
+              <div class="helper-text">Self-deletion is blocked both in the UI and server-side.</div>
+              <div class="toolbar-spacer"></div>
+              <button class="btn btn-filled" id="add-user-btn">
+                <span class="material-icons-round">person_add</span>
+                Add user
+              </button>
+            </div>
+            <div class="table-wrap" id="users-wrap">
+              <div class="skeleton skeleton-table"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="dialog-scrim" id="dialog-scrim">
+    <div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <div class="dialog-header">
+        <div class="dialog-icon"><span class="material-icons-round" id="dialog-icon">edit</span></div>
+        <div class="dialog-title" id="dialog-title">Dialog</div>
+        <button class="icon-btn" id="dialog-close" aria-label="Close">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+      <div class="dialog-divider"></div>
+      <div class="dialog-content" id="dialog-content"></div>
+    </div>
+  </div>
+
+  <div id="snackbar-container"></div>
+
+  <script>
+    const REFRESH_MS = 30_000;
+    const TOKEN_KEY = 'vaults-syncer-token';
+
+    const state = {
+      setupComplete: false,
+      token: sessionStorage.getItem(TOKEN_KEY) || '',
+      currentUser: null,
+      currentPage: 'dashboard',
+      refreshTimer: null,
+      cachedSyncs: [],
+      cachedStatuses: {},
+      configVaults: [],
+      configSyncs: [],
+      users: [],
+      vaultHeaderCache: {}
+    };
+
+    const escHtml = (s) => String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const escJs = (s) => String(s ?? '')
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/</g, '\\x3C');
+
+    function snack(msg, type = 'success') {
+      const c = document.getElementById('snackbar-container');
+      const el = document.createElement('div');
+      el.className = 'snackbar';
+      const icon = type === 'success' ? 'check_circle' : 'error';
+      const cls  = type === 'success' ? 'ok' : 'err';
+      el.innerHTML = `<span class="material-icons-round ${cls}">${icon}</span><span>${escHtml(msg)}</span>`;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    const pick = (obj, ...keys) => {
+      for (const key of keys) {
+        if (!obj) continue;
+        const parts = key.split('.');
+        let current = obj;
+        for (const part of parts) {
+          if (current == null || !(part in current)) {
+            current = undefined;
+            break;
+          }
+          current = current[part];
+        }
+        if (current !== undefined && current !== null) return current;
+      }
+      return undefined;
+    };
+
+    const trimToNull = (value) => {
+      const trimmed = String(value ?? '').trim();
+      return trimmed ? trimmed : null;
+    };
+
+    const toMillis = (value) => {
+      if (value == null || value === '') return null;
+      if (typeof value === 'number') return value > 1e12 ? value : value * 1000;
+      const parsed = Date.parse(value);
+      return Number.isNaN(parsed) ? null : parsed;
+    };
+
+    const fmtTs = (value) => {
+      const ms = toMillis(value);
+      return ms == null ? '—' : new Date(ms).toLocaleString();
+    };
+
+    const fmtDur = (ms) => ms == null ? '—' : ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`;
+
+    const timeAgo = (value) => {
+      const ms = toMillis(value);
+      if (ms == null) return '—';
+      const s = Math.floor((Date.now() - ms) / 1000);
+      if (s < 0) return 'just now';
+      if (s < 60) return `${s}s ago`;
+      if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+      if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+      return `${Math.floor(s / 86400)}d ago`;
+    };
+
+    const timeUntil = (value) => {
+      const ms = toMillis(value);
+      if (ms == null) return '—';
+      const s = Math.floor((ms - Date.now()) / 1000);
+      if (s < 0) return 'overdue';
+      if (s < 60) return `in ${s}s`;
+      if (s < 3600) return `in ${Math.floor(s / 60)}m`;
+      if (s < 86400) return `in ${Math.floor(s / 3600)}h`;
+      return `in ${Math.floor(s / 86400)}d`;
+    };
+
+    const isAdmin = () => pick(state.currentUser, 'role', 'Role') === 'admin';
+    const currentUserId = () => Number(pick(state.currentUser, 'id', 'ID'));
+
+    function setToken(token) {
+      state.token = token || '';
+      if (state.token) sessionStorage.setItem(TOKEN_KEY, state.token);
+      else sessionStorage.removeItem(TOKEN_KEY);
+    }
+
+    function extractErrorMessage(payload, fallback) {
+      if (typeof payload === 'string') return payload || fallback;
+      return pick(payload, 'error', 'message', 'status') || fallback;
+    }
+
+    async function apiFetch(url, options = {}, config = {}) {
+      const settings = { auth: true, suppressAuthRedirect: false, ...config };
+      const headers = new Headers(options.headers || {});
+      if (settings.auth && state.token) {
+        headers.set('Authorization', `Bearer ${state.token}`);
+      }
+      if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) {
+        headers.set('Content-Type', 'application/json');
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      const contentType = response.headers.get('content-type') || '';
+      const payload = contentType.includes('application/json')
+        ? await response.json().catch(() => null)
+        : await response.text().catch(() => '');
+
+      if (!response.ok) {
+        const message = extractErrorMessage(payload, `HTTP ${response.status}`);
+        if (settings.auth && response.status === 401 && !settings.suppressAuthRedirect) {
+          handleSessionExpired(message);
+        }
+        throw new Error(message);
+      }
+      return payload;
+    }
+
+    function handleSessionExpired(message) {
+      setToken('');
+      state.currentUser = null;
+      stopAutoRefresh();
+      showLogin();
+      if (message) snack(message, 'error');
+    }
+
+    function showSetupWizard() {
+      document.getElementById('setup-overlay').classList.remove('hidden');
+      document.getElementById('auth-shell').classList.add('hidden');
+      document.getElementById('app-shell').classList.add('hidden');
+      document.getElementById('setup-overlay').setAttribute('aria-hidden', 'false');
+    }
+
+    function showLogin() {
+      closeDialog();
+      document.getElementById('setup-overlay').classList.add('hidden');
+      document.getElementById('setup-overlay').setAttribute('aria-hidden', 'true');
+      document.getElementById('app-shell').classList.add('hidden');
+      document.getElementById('auth-shell').classList.remove('hidden');
+      const username = document.getElementById('login-username');
+      setTimeout(() => username.focus(), 0);
+    }
+
+    function showApp() {
+      document.getElementById('setup-overlay').classList.add('hidden');
+      document.getElementById('auth-shell').classList.add('hidden');
+      document.getElementById('app-shell').classList.remove('hidden');
+      document.getElementById('current-user-label').textContent = pick(state.currentUser, 'username', 'Username') || 'Unknown user';
+      renderNav();
+      navigate(state.currentPage || 'dashboard');
+    }
+
+    function renderNav() {
+      document.querySelectorAll('[data-admin-only="true"]').forEach((el) => {
+        el.classList.toggle('hidden', !isAdmin());
+      });
+      if (!isAdmin() && state.currentPage !== 'dashboard') {
+        state.currentPage = 'dashboard';
+      }
+    }
+
+    function statusChip(status) {
+      if (!status) return '';
+      const map = {
+        success:['chip-success','check'], completed:['chip-success','check'],
+        failed:['chip-failed','cancel'],  running:['chip-running','sync']
+      };
+      const [cls, icon] = map[String(status).toLowerCase()] || ['chip-neutral','help'];
+      return `<span class="chip ${cls}"><span class="material-icons-round">${icon}</span>${escHtml(status)}</span>`;
+    }
+
+    function stripeClass(enabled, status) {
+      const normalized = String(status || '').toLowerCase();
+      if (!enabled) return 'stripe-off';
+      if (normalized === 'success' || normalized === 'completed') return 'stripe-ok';
+      if (normalized === 'failed') return 'stripe-err';
+      return 'stripe-neutral';
+    }
+
+    function statusIcon(status) {
+      const normalized = String(status || '').toLowerCase();
+      if (normalized === 'success' || normalized === 'completed') return ['check_circle','success'];
+      if (normalized === 'failed') return ['cancel','failed'];
+      if (normalized === 'running') return ['sync','running'];
+      return ['help',''];
+    }
+
+    function dialogElements() {
+      return {
+        scrim: document.getElementById('dialog-scrim'),
+        dialog: document.getElementById('dialog'),
+        title: document.getElementById('dialog-title'),
+        icon: document.getElementById('dialog-icon'),
+        content: document.getElementById('dialog-content')
+      };
+    }
+
+    function openDialog({ title, icon = 'edit', content = '', wide = false }) {
+      const els = dialogElements();
+      els.title.textContent = title;
+      els.icon.textContent = icon;
+      els.content.innerHTML = content;
+      els.dialog.classList.toggle('wide', wide);
+      els.scrim.classList.add('open');
+    }
+
+    function closeDialog() {
+      dialogElements().scrim.classList.remove('open');
+    }
+
+    function setFormBusy(button, busyText, isBusy) {
+      if (!button) return;
+      if (isBusy) {
+        button.dataset.originalHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = `<span class="material-icons-round spinning">sync</span>${escHtml(busyText)}`;
+      } else {
+        button.disabled = false;
+        button.innerHTML = button.dataset.originalHtml || button.innerHTML;
+      }
+    }
+
+    function isSyncEnabled(sync) {
+      const enabled = pick(sync, 'enabled', 'Enabled');
+      return enabled == null ? true : Boolean(enabled);
+    }
+
+    function dashboardSyncId(sync) {
+      return pick(sync, 'id', 'ID') || '—';
+    }
+
+    function renderSyncCard(sync, status) {
+      const syncId = dashboardSyncId(sync);
+      const source = pick(sync, 'source', 'Source') || '—';
+      const targets = pick(sync, 'targets', 'Targets') || [];
+      const schedule = pick(sync, 'schedule', 'Schedule') || '—';
+      const enabled = isSyncEnabled(sync);
+      const lr = pick(status, 'last_run', 'LastRun') || null;
+      const nextTs = pick(status, 'next_run', 'NextRun');
+      const total = pick(status, 'total_objects', 'TotalObjects') ?? 0;
+      const synced = pick(status, 'synced_objects', 'SyncedObjects') ?? 0;
+      const failed = pick(status, 'failed_objects', 'FailedObjects') ?? 0;
+      const pct = total > 0 ? Math.round((synced / total) * 100) : 0;
+      const st = pick(lr, 'Status', 'status');
+      const ts = pick(lr, 'CreatedAt', 'created_at');
+      const prog = !total ? 'neu' : failed > 0 ? 'err' : 'ok';
+      return `
+        <div class="sync-card" onclick="openHistory('${escHtml(escJs(syncId))}')">
+          <div class="sync-card-stripe ${stripeClass(enabled, st)}"></div>
+          <div class="sync-card-body">
+            <div class="sync-card-header">
+              <div class="sync-title">${escHtml(syncId)}</div>
+              <div class="chip-row">
+                <span class="chip ${enabled ? 'chip-on' : 'chip-off'}">
+                  <span class="material-icons-round">${enabled ? 'check_circle' : 'pause_circle'}</span>
+                  ${enabled ? 'Active' : 'Paused'}
+                </span>
+                ${statusChip(st)}
+              </div>
+            </div>
+            <div class="sync-meta">
+              <div class="meta-item">
+                <span class="meta-label">Source</span>
+                <span class="meta-value">${escHtml(source)}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Targets</span>
+                <span class="meta-value">${escHtml(Array.isArray(targets) ? targets.join(', ') || '—' : String(targets || '—'))}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Schedule</span>
+                <span class="meta-value mono">${escHtml(schedule)}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Next run</span>
+                <span class="meta-value">${timeUntil(nextTs)}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Secrets</span>
+                <span class="meta-value">${total ? `${synced} / ${total}` : '—'}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Last run</span>
+                <span class="meta-value">${timeAgo(ts)}</span>
+              </div>
+            </div>
+            ${total ? `<div class="progress-track" title="${pct}% synced">
+              <div class="progress-bar ${prog}" style="width:${pct}%"></div>
             </div>` : ''}
           </div>
-        </div>`).join('');
-    } catch (e) { console.error('vaults:', e); }
-  }
-
-  function renderSyncCard(sync, status) {
-    const lr = status?.last_run;
-    const nextTs = status?.next_run;
-    const total  = status?.total_objects  ?? 0;
-    const synced = status?.synced_objects ?? 0;
-    const failed = status?.failed_objects ?? 0;
-    const pct    = total > 0 ? Math.round((synced/total)*100) : 0;
-    const st     = lr?.Status || lr?.status;
-    const ts     = lr?.CreatedAt || lr?.created_at;
-    const prog   = !total ? 'neu' : failed > 0 ? 'err' : 'ok';
-    return `
-      <div class="sync-card" onclick="openHistory('${escHtml(sync.id)}')">
-        <div class="sync-card-stripe ${stripeClass(sync.enabled, st)}"></div>
-        <div class="sync-card-body">
-          <div class="sync-card-header">
-            <div class="sync-title">${escHtml(sync.id)}</div>
-            <div class="chip-row">
-              <span class="chip ${sync.enabled ? 'chip-on' : 'chip-off'}">
-                <span class="material-icons-round">${sync.enabled ? 'check_circle' : 'pause_circle'}</span>
-                ${sync.enabled ? 'Active' : 'Paused'}
-              </span>
-              ${statusChip(st)}
-            </div>
+          <div class="sync-card-footer">
+            <span class="footer-time">
+              <span class="material-icons-round">schedule</span>
+              ${ts ? fmtTs(ts) : 'No runs yet'}
+            </span>
+            <button class="btn btn-filled"
+              onclick="event.stopPropagation();triggerSync('${escHtml(escJs(syncId))}',this)"
+              ${!enabled ? 'disabled' : ''}
+              title="${!enabled ? 'Sync is paused' : 'Run now'}">
+              <span class="material-icons-round">play_arrow</span>Run now
+            </button>
           </div>
-          <div class="sync-meta">
-            <div class="meta-item">
-              <span class="meta-label">Source</span>
-              <span class="meta-value">${escHtml(sync.source)}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">Targets</span>
-              <span class="meta-value">${escHtml((sync.targets||[]).join(', ')||'—')}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">Schedule</span>
-              <span class="meta-value mono">${escHtml(sync.schedule||'—')}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">Next run</span>
-              <span class="meta-value">${timeUntil(nextTs)}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">Secrets</span>
-              <span class="meta-value">${total ? `${synced} / ${total}` : '—'}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">Last run</span>
-              <span class="meta-value">${timeAgo(ts)}</span>
-            </div>
-          </div>
-          ${total ? `<div class="progress-track" title="${pct}% synced">
-            <div class="progress-bar ${prog}" style="width:${pct}%"></div>
-          </div>` : ''}
-        </div>
-        <div class="sync-card-footer">
-          <span class="footer-time">
-            <span class="material-icons-round">schedule</span>
-            ${ts ? fmtTs(ts) : 'No runs yet'}
-          </span>
-          <button class="btn btn-filled"
-            onclick="event.stopPropagation();triggerSync('${escHtml(sync.id)}',this)"
-            ${!sync.enabled ? 'disabled' : ''}
-            title="${!sync.enabled ? 'Sync is paused' : 'Run now'}">
-            <span class="material-icons-round">play_arrow</span>Run now
-          </button>
-        </div>
-      </div>`;
-  }
-
-  async function loadSyncs() {
-    try {
-      const data = await apiFetch('/syncs');
-      cachedSyncs = data.syncs || [];
-      document.getElementById('stat-total').textContent    = cachedSyncs.length;
-      document.getElementById('stat-enabled').textContent  = cachedSyncs.filter(s=>s.enabled).length;
-      document.getElementById('stat-disabled').textContent = cachedSyncs.filter(s=>!s.enabled).length;
-
-      const paused = cachedSyncs.filter(s=>!s.enabled).length;
-      const badge = document.getElementById('nav-badge-syncs');
-      badge.textContent = paused;
-      badge.style.display = paused > 0 ? 'flex' : 'none';
-
-      const statuses = await Promise.allSettled(
-        cachedSyncs.map(s => apiFetch(`/syncs/${encodeURIComponent(s.id)}/status`)));
-      cachedStatuses = {};
-      statuses.forEach((r,i) => { if(r.status==='fulfilled') cachedStatuses[cachedSyncs[i].id]=r.value; });
-
-      let failedCount = 0;
-      cachedSyncs.forEach(s => {
-        const st = cachedStatuses[s.id]?.last_run?.Status || cachedStatuses[s.id]?.last_run?.status;
-        if (st === 'failed') failedCount++;
-      });
-      document.getElementById('stat-failed').textContent = failedCount;
-
-      const grid = document.getElementById('syncs-grid');
-      grid.innerHTML = cachedSyncs.length
-        ? cachedSyncs.map(s => renderSyncCard(s, cachedStatuses[s.id])).join('')
-        : `<div class="empty-state" style="grid-column:1/-1">
-            <span class="material-icons-round">sync_disabled</span><span>No syncs configured.</span></div>`;
-
-      renderActivity();
-    } catch (e) {
-      console.error('syncs:', e);
-      document.getElementById('syncs-grid').innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1;color:var(--md-error)">
-          <span class="material-icons-round">error</span>
-          <span>Failed to load syncs.</span></div>`;
+        </div>`;
     }
-  }
 
-  function renderActivity() {
-    const body = document.getElementById('activity-body');
-    const rows = cachedSyncs
-      .map(s => { const lr = cachedStatuses[s.id]?.last_run; return lr ? {syncId:s.id,...lr} : null; })
-      .filter(Boolean)
-      .sort((a,b) => (b.CreatedAt||b.created_at||0) - (a.CreatedAt||a.created_at||0));
-
-    if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:24px">
-        <span class="material-icons-round">history_toggle_off</span>
-        <span>No runs recorded yet.</span></div></td></tr>`;
-      return;
+    async function updateHealth() {
+      const dot = document.getElementById('runner-dot');
+      const lbl = document.getElementById('runner-label');
+      try {
+        const data = await apiFetch('/health');
+        const running = Boolean(pick(data, 'running', 'Running'));
+        dot.className = `dot ${running ? 'dot-ok' : 'dot-err'}`;
+        lbl.textContent = running ? 'Runner active' : 'Runner stopped';
+      } catch {
+        dot.className = 'dot dot-err';
+        lbl.textContent = 'Unreachable';
+      }
     }
-    body.innerHTML = rows.map(r => {
-      const st = r.Status||r.status||'—';
-      const [icon, cls] = statusIcon(st);
-      const ts = r.CreatedAt||r.created_at;
-      const tf = r.TotalFailed??r.total_failed??0;
-      return `<tr>
-        <td><span style="font-weight:500;cursor:pointer;color:var(--md-primary)"
-          onclick="navigate('syncs')">${escHtml(r.syncId)}</span></td>
-        <td><span class="run-status ${cls}">
-          <span class="material-icons-round">${icon}</span>${escHtml(st)}
-        </span></td>
-        <td>${r.TotalSynced??r.total_synced??'—'}</td>
-        <td style="${tf>0?'color:var(--md-error)':''}">${tf||'—'}</td>
-        <td style="color:var(--md-on-surface-variant)">${fmtDur(r.DurationMs??r.duration_ms)}</td>
-        <td style="color:var(--md-on-surface-variant);white-space:nowrap">${timeAgo(ts)}</td>
-      </tr>`;
-    }).join('');
-  }
 
-  async function triggerSync(syncId, btn) {
-    btn.disabled = true;
-    const orig = btn.innerHTML;
-    btn.innerHTML = `<span class="material-icons-round spinning">sync</span> Running…`;
-    try {
-      const r = await fetch(`/syncs/${encodeURIComponent(syncId)}/execute`, {method:'POST'});
-      r.ok ? snack(`Sync "${syncId}" triggered`, 'success') : snack(`Failed: ${await r.text()}`, 'error');
-      if (r.ok) setTimeout(refresh, 2500);
-    } catch (e) {
-      snack(`Network error: ${e.message}`, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = orig;
+    async function loadDashboardVaults() {
+      try {
+        const data = await apiFetch('/vaults');
+        const vaults = pick(data, 'vaults', 'Vaults') || [];
+        document.getElementById('stat-vaults').textContent = vaults.length;
+        const grid = document.getElementById('vaults-grid');
+        if (!vaults.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+            <span class="material-icons-round">storage_off</span><span>No vaults configured.</span></div>`;
+          return;
+        }
+        grid.innerHTML = vaults.map((vault) => {
+          const id = pick(vault, 'id', 'ID') || '—';
+          const name = pick(vault, 'name', 'Name') || id;
+          const type = pick(vault, 'type', 'Type');
+          const endpoint = pick(vault, 'endpoint', 'Endpoint');
+          return `
+            <div class="vault-card">
+              <div class="vault-card-header">
+                <div class="vault-avatar"><span class="material-icons-round">storage</span></div>
+                <div>
+                  <div class="vault-name">${escHtml(name)}</div>
+                  <div class="vault-id">${escHtml(id)}</div>
+                </div>
+              </div>
+              ${type ? `<span class="type-badge">${escHtml(type)}</span>` : ''}
+              <div class="vault-meta">
+                ${endpoint ? `<div class="vault-meta-row">
+                  <span class="material-icons-round">link</span>
+                  <a href="${escHtml(endpoint)}" target="_blank" rel="noopener">${escHtml(endpoint)}</a>
+                </div>` : ''}
+              </div>
+            </div>`;
+        }).join('');
+      } catch (error) {
+        console.error('vault dashboard load failed', error);
+      }
     }
-  }
 
-  async function openHistory(syncId) {
-    const scrim   = document.getElementById('dialog-scrim');
-    const content = document.getElementById('dialog-content');
-    document.getElementById('dialog-title').textContent = syncId;
-    content.innerHTML = `<div class="empty-state">
-      <span class="material-icons-round spinning" style="font-size:32px;opacity:.5">sync</span></div>`;
-    scrim.classList.add('open');
-    try {
-      const data = await apiFetch(`/syncs/${encodeURIComponent(syncId)}/runs?limit=25`);
-      const runs = data.runs || [];
-      if (!runs.length) {
-        content.innerHTML = `<div class="empty-state">
+    async function loadDashboardSyncs() {
+      try {
+        const data = await apiFetch('/syncs');
+        state.cachedSyncs = pick(data, 'syncs', 'Syncs') || [];
+        document.getElementById('stat-total').textContent = state.cachedSyncs.length;
+        document.getElementById('stat-enabled').textContent = state.cachedSyncs.filter((sync) => isSyncEnabled(sync)).length;
+        document.getElementById('stat-disabled').textContent = state.cachedSyncs.filter((sync) => !isSyncEnabled(sync)).length;
+
+        const paused = state.cachedSyncs.filter((sync) => !isSyncEnabled(sync)).length;
+        const badge = document.getElementById('nav-badge-syncs');
+        badge.textContent = paused;
+        badge.style.display = paused > 0 ? 'flex' : 'none';
+
+        const statuses = await Promise.allSettled(
+          state.cachedSyncs.map((sync) => apiFetch(`/syncs/${encodeURIComponent(dashboardSyncId(sync))}/status`))
+        );
+        state.cachedStatuses = {};
+        statuses.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            state.cachedStatuses[dashboardSyncId(state.cachedSyncs[index])] = result.value;
+          }
+        });
+
+        let failedCount = 0;
+        state.cachedSyncs.forEach((sync) => {
+          const status = pick(state.cachedStatuses[dashboardSyncId(sync)], 'last_run.Status', 'last_run.status', 'LastRun.Status', 'LastRun.status');
+          if (String(status || '').toLowerCase() === 'failed') failedCount++;
+        });
+        document.getElementById('stat-failed').textContent = failedCount;
+
+        const grid = document.getElementById('syncs-grid');
+        grid.innerHTML = state.cachedSyncs.length
+          ? state.cachedSyncs.map((sync) => renderSyncCard(sync, state.cachedStatuses[dashboardSyncId(sync)])).join('')
+          : `<div class="empty-state" style="grid-column:1/-1">
+              <span class="material-icons-round">sync_disabled</span><span>No syncs configured.</span></div>`;
+
+        renderActivity();
+      } catch (error) {
+        console.error('sync dashboard load failed', error);
+        document.getElementById('syncs-grid').innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;color:var(--md-error)">
+            <span class="material-icons-round">error</span>
+            <span>Failed to load syncs.</span></div>`;
+      }
+    }
+
+    function renderActivity() {
+      const body = document.getElementById('activity-body');
+      const rows = state.cachedSyncs
+        .map((sync) => {
+          const lr = pick(state.cachedStatuses[dashboardSyncId(sync)], 'last_run', 'LastRun');
+          return lr ? { syncId: dashboardSyncId(sync), ...lr } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => (toMillis(pick(b, 'CreatedAt', 'created_at')) || 0) - (toMillis(pick(a, 'CreatedAt', 'created_at')) || 0));
+
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:24px">
           <span class="material-icons-round">history_toggle_off</span>
-          <span>No runs recorded yet.</span></div>`;
+          <span>No runs recorded yet.</span></div></td></tr>`;
         return;
       }
-      content.innerHTML = `<table class="data-table">
-        <thead><tr><th>Time</th><th>Status</th><th>Synced</th><th>Failed</th><th>Duration</th></tr></thead>
-        <tbody>${runs.map(r => {
-          const st = r.Status||r.status||'—';
-          const [icon, cls] = statusIcon(st);
-          const ts = r.CreatedAt||r.created_at;
-          const tf = r.TotalFailed??r.total_failed??0;
-          const em = r.ErrorMessage||r.error_message;
-          return `<tr>
-            <td style="color:var(--md-on-surface-variant);white-space:nowrap">${fmtTs(ts)}</td>
-            <td><span class="run-status ${cls}">
-              <span class="material-icons-round">${icon}</span>${escHtml(st)}
-            </span>${em?`<div class="run-error-text">${escHtml(em)}</div>`:''}</td>
-            <td>${r.TotalSynced??r.total_synced??'—'}</td>
-            <td style="${tf>0?'color:var(--md-error)':''}">${tf||'—'}</td>
-            <td style="color:var(--md-on-surface-variant)">${fmtDur(r.DurationMs??r.duration_ms)}</td>
-          </tr>`;
-        }).join('')}</tbody></table>`;
-    } catch (e) {
-      content.innerHTML = `<div class="empty-state" style="color:var(--md-error)">
-        <span class="material-icons-round">error</span>
-        <span>Failed to load: ${escHtml(e.message)}</span></div>`;
+      body.innerHTML = rows.map((run) => {
+        const status = pick(run, 'Status', 'status') || '—';
+        const [icon, cls] = statusIcon(status);
+        const ts = pick(run, 'CreatedAt', 'created_at');
+        const failed = pick(run, 'TotalFailed', 'total_failed') ?? 0;
+        const synced = pick(run, 'TotalSynced', 'total_synced') ?? '—';
+        const duration = pick(run, 'DurationMs', 'duration_ms');
+        return `<tr>
+          <td><button class="btn btn-text" style="padding:0;color:var(--md-primary)" onclick="openHistory('${escHtml(escJs(run.syncId))}')">${escHtml(run.syncId)}</button></td>
+          <td><span class="run-status ${cls}">
+            <span class="material-icons-round">${icon}</span>${escHtml(status)}
+          </span></td>
+          <td>${escHtml(synced)}</td>
+          <td style="${failed > 0 ? 'color:var(--md-error)' : ''}">${failed || '—'}</td>
+          <td style="color:var(--md-on-surface-variant)">${fmtDur(duration)}</td>
+          <td style="color:var(--md-on-surface-variant);white-space:nowrap">${timeAgo(ts)}</td>
+        </tr>`;
+      }).join('');
     }
-  }
 
-  document.getElementById('dialog-close').addEventListener('click', () =>
-    document.getElementById('dialog-scrim').classList.remove('open'));
-  document.getElementById('dialog-scrim').addEventListener('click', e => {
-    if (e.target === document.getElementById('dialog-scrim'))
-      document.getElementById('dialog-scrim').classList.remove('open');
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.getElementById('dialog-scrim').classList.remove('open');
-  });
+    async function triggerSync(syncId, button) {
+      setFormBusy(button, 'Running…', true);
+      try {
+        await apiFetch(`/syncs/${encodeURIComponent(syncId)}/execute`, { method: 'POST' });
+        snack(`Sync "${syncId}" triggered`, 'success');
+        setTimeout(refreshCurrentPage, 2500);
+      } catch (error) {
+        snack(`Failed to trigger sync: ${error.message}`, 'error');
+      } finally {
+        setFormBusy(button, '', false);
+      }
+    }
 
-  async function refresh() {
-    const icon = document.getElementById('refresh-icon');
-    icon.classList.add('spinning');
-    try {
-      await Promise.all([updateHealth(), loadVaults(), loadSyncs()]);
-      document.getElementById('refresh-label').textContent =
-        `Updated ${new Date().toLocaleTimeString()}`;
-    } finally { icon.classList.remove('spinning'); }
-  }
+    async function openHistory(syncId) {
+      openDialog({
+        title: syncId,
+        icon: 'history',
+        content: `<div class="empty-state"><span class="material-icons-round spinning" style="font-size:32px;opacity:.5">sync</span></div>`
+      });
+      try {
+        const data = await apiFetch(`/syncs/${encodeURIComponent(syncId)}/runs?limit=25`);
+        const runs = pick(data, 'runs', 'Runs') || [];
+        const content = document.getElementById('dialog-content');
+        if (!runs.length) {
+          content.innerHTML = `<div class="empty-state">
+            <span class="material-icons-round">history_toggle_off</span>
+            <span>No runs recorded yet.</span></div>`;
+          return;
+        }
+        content.innerHTML = `<table class="data-table">
+          <thead><tr><th>Time</th><th>Status</th><th>Synced</th><th>Failed</th><th>Duration</th></tr></thead>
+          <tbody>${runs.map((run) => {
+            const status = pick(run, 'Status', 'status') || '—';
+            const [icon, cls] = statusIcon(status);
+            const ts = pick(run, 'CreatedAt', 'created_at');
+            const failed = pick(run, 'TotalFailed', 'total_failed') ?? 0;
+            const synced = pick(run, 'TotalSynced', 'total_synced') ?? '—';
+            const duration = pick(run, 'DurationMs', 'duration_ms');
+            const error = pick(run, 'ErrorMessage', 'error_message');
+            return `<tr>
+              <td style="color:var(--md-on-surface-variant);white-space:nowrap">${fmtTs(ts)}</td>
+              <td><span class="run-status ${cls}">
+                <span class="material-icons-round">${icon}</span>${escHtml(status)}
+              </span>${error ? `<div class="run-error-text">${escHtml(error)}</div>` : ''}</td>
+              <td>${escHtml(synced)}</td>
+              <td style="${failed > 0 ? 'color:var(--md-error)' : ''}">${failed || '—'}</td>
+              <td style="color:var(--md-on-surface-variant)">${fmtDur(duration)}</td>
+            </tr>`;
+          }).join('')}</tbody></table>`;
+      } catch (error) {
+        document.getElementById('dialog-content').innerHTML = `<div class="empty-state" style="color:var(--md-error)">
+          <span class="material-icons-round">error</span>
+          <span>Failed to load: ${escHtml(error.message)}</span></div>`;
+      }
+    }
 
-  refresh();
-  refreshTimer = setInterval(refresh, REFRESH_MS);
-</script>
+    function startAutoRefresh() {
+      stopAutoRefresh();
+      if (state.currentPage === 'dashboard') {
+        state.refreshTimer = setInterval(refreshCurrentPage, REFRESH_MS);
+      }
+    }
+
+    function stopAutoRefresh() {
+      if (state.refreshTimer) {
+        clearInterval(state.refreshTimer);
+        state.refreshTimer = null;
+      }
+    }
+
+    async function refreshCurrentPage() {
+      const icon = document.getElementById('refresh-icon');
+      icon.classList.add('spinning');
+      try {
+        if (state.currentPage === 'dashboard') {
+          await Promise.all([updateHealth(), loadDashboardVaults(), loadDashboardSyncs()]);
+        } else if (state.currentPage === 'vaults-config') {
+          await loadVaultConfigs();
+        } else if (state.currentPage === 'syncs-config') {
+          await loadSyncConfigs();
+        } else if (state.currentPage === 'users') {
+          await loadUsers();
+        }
+        document.getElementById('refresh-label').textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      } finally {
+        icon.classList.remove('spinning');
+      }
+    }
+
+    async function navigate(page) {
+      if (page !== 'dashboard' && !isAdmin()) {
+        page = 'dashboard';
+      }
+      state.currentPage = page;
+      document.querySelectorAll('.nav-item').forEach((el) => {
+        el.classList.toggle('active', el.dataset.page === page);
+      });
+      document.querySelectorAll('.page').forEach((el) => {
+        el.classList.toggle('active', el.id === `page-${page}`);
+      });
+
+      if (page === 'dashboard') {
+        await refreshCurrentPage();
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+        await refreshCurrentPage();
+      }
+    }
+
+    function normalizeVaultConfig(vault) {
+      return {
+        id: pick(vault, 'id', 'ID') || '',
+        name: pick(vault, 'name', 'Name') || '',
+        type: pick(vault, 'type', 'Type') || 'generic',
+        endpoint: pick(vault, 'endpoint', 'Endpoint') || '',
+        authMethod: pick(vault, 'auth.method', 'Auth.Method') || 'none',
+        authHeaders: pick(vault, 'auth.headers', 'Auth.Headers') || null
+      };
+    }
+
+    function renderVaultConfigTable() {
+      const wrap = document.getElementById('vaults-config-wrap');
+      document.getElementById('vaults-config-count').textContent = `${state.configVaults.length} total`;
+      if (!state.configVaults.length) {
+        wrap.innerHTML = `<div class="empty-state">
+          <span class="material-icons-round">storage_off</span>
+          <span>No vault configurations found.</span></div>`;
+        return;
+      }
+      wrap.innerHTML = `<table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Endpoint</th><th>Auth</th><th></th></tr></thead>
+        <tbody>${state.configVaults.map((rawVault) => {
+          const vault = normalizeVaultConfig(rawVault);
+          return `<tr>
+            <td><span class="mono-pill">${escHtml(vault.id)}</span></td>
+            <td>${escHtml(vault.name || '—')}</td>
+            <td>${escHtml(vault.type)}</td>
+            <td>${vault.endpoint ? `<a href="${escHtml(vault.endpoint)}" target="_blank" rel="noopener">${escHtml(vault.endpoint)}</a>` : '—'}</td>
+            <td>${escHtml(vault.authMethod)}</td>
+            <td>
+              <div class="table-actions">
+                <button class="btn btn-tonal" onclick="openVaultDialog('edit','${escHtml(escJs(vault.id))}')">
+                  <span class="material-icons-round">edit</span>Edit
+                </button>
+                <button class="btn btn-danger" onclick="deleteVault('${escHtml(escJs(vault.id))}')">
+                  <span class="material-icons-round">delete</span>Delete
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    }
+
+    async function loadVaultConfigs() {
+      try {
+        const data = await apiFetch('/api/config/vaults');
+        state.configVaults = pick(data, 'vaults', 'Vaults') || [];
+        renderVaultConfigTable();
+      } catch (error) {
+        if (error.message.toLowerCase().includes('forbidden')) {
+          snack('Administrator access is required.', 'error');
+          return navigate('dashboard');
+        }
+        document.getElementById('vaults-config-wrap').innerHTML = `<div class="empty-state" style="color:var(--md-error)">
+          <span class="material-icons-round">error</span>
+          <span>Failed to load vault configuration.</span></div>`;
+      }
+    }
+
+    function headerRowHtml(key = '', value = '', masked = false) {
+      return `<div class="kv-row" data-masked="${masked ? 'true' : 'false'}">
+        <input class="kv-input header-key" type="text" placeholder="Header name" value="${escHtml(key)}" />
+        <input class="kv-input header-value" type="text" placeholder="Header value" value="${escHtml(value)}" />
+        <button type="button" class="icon-btn" title="Remove header"><span class="material-icons-round">delete</span></button>
+      </div>`;
+    }
+
+    function appendHeaderRow(container, key = '', value = '', masked = false) {
+      container.insertAdjacentHTML('beforeend', headerRowHtml(key, value, masked));
+      const row = container.lastElementChild;
+      row.querySelector('.icon-btn').addEventListener('click', () => row.remove());
+    }
+
+    async function openVaultDialog(mode, vaultId = '') {
+      const editing = mode === 'edit';
+      let vault = { id: '', name: '', type: 'generic', endpoint: '', authMethod: 'none', authHeaders: null };
+      let unknownMaskedHeaders = false;
+      if (editing) {
+        const data = await apiFetch(`/api/config/vaults/${encodeURIComponent(vaultId)}`);
+        vault = normalizeVaultConfig(data);
+        const cachedHeaders = state.vaultHeaderCache[vaultId] || null;
+        if (vault.authMethod === 'custom') {
+          if (vault.authHeaders && Object.keys(vault.authHeaders).length) {
+            state.vaultHeaderCache[vaultId] = { ...vault.authHeaders };
+          }
+          if (cachedHeaders && Object.keys(cachedHeaders).length) {
+            vault.authHeaders = cachedHeaders;
+          } else if (!vault.authHeaders || !Object.keys(vault.authHeaders).length) {
+            unknownMaskedHeaders = true;
+          }
+        }
+      }
+
+      openDialog({
+        title: editing ? `Edit vault ${vaultId}` : 'Add vault',
+        icon: 'storage',
+        content: `
+          <form id="vault-form" class="form-stack">
+            <div class="field-grid">
+              <div class="text-field">
+                <label for="vault-id">ID</label>
+                <input id="vault-id" name="id" type="text" value="${escHtml(vault.id)}" ${editing ? 'disabled' : ''} required />
+              </div>
+              <div class="text-field">
+                <label for="vault-name">Name</label>
+                <input id="vault-name" name="name" type="text" value="${escHtml(vault.name)}" required />
+              </div>
+              <div class="select-field">
+                <label for="vault-type">Type</label>
+                <select id="vault-type" name="type">
+                  ${['generic','hashicorp-vault','aws-secrets-manager','azure-key-vault','gcp-secret-manager','tool'].map((type) => `<option value="${type}" ${vault.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+                </select>
+              </div>
+              <div class="text-field">
+                <label for="vault-endpoint">Endpoint URL</label>
+                <input id="vault-endpoint" name="endpoint" type="url" value="${escHtml(vault.endpoint)}" placeholder="https://vault.example.com" required />
+              </div>
+              <div class="select-field">
+                <label for="vault-auth-method">Auth method</label>
+                <select id="vault-auth-method" name="authMethod">
+                  ${['none','custom','oauth'].map((type) => `<option value="${type}" ${vault.authMethod === type ? 'selected' : ''}>${type}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div id="vault-header-section" class="form-stack ${vault.authMethod === 'custom' ? '' : 'hidden'}">
+              <div>
+                <div class="helper-text">Auth headers</div>
+                <div class="masked-note">Existing sensitive values are masked with *** and preserved only when already available in this browser session.</div>
+              </div>
+              ${unknownMaskedHeaders ? `<div class="supporting-panel warning-panel">Stored custom header values are hidden by the API. Re-enter every required header before saving to avoid clearing them.</div>` : ''}
+              <div class="kv-editor" id="vault-header-editor"></div>
+              <div>
+                <button type="button" class="btn btn-text" id="add-header-btn"><span class="material-icons-round">add</span>Add header</button>
+              </div>
+            </div>
+            <p class="inline-error" id="vault-form-error"></p>
+            <div class="dialog-actions">
+              <button type="button" class="btn btn-text" id="vault-cancel-btn">Cancel</button>
+              <button type="submit" class="btn btn-filled" id="vault-save-btn"><span class="material-icons-round">save</span>${editing ? 'Save changes' : 'Create vault'}</button>
+            </div>
+          </form>`
+      });
+
+      const form = document.getElementById('vault-form');
+      const headerSection = document.getElementById('vault-header-section');
+      const headerEditor = document.getElementById('vault-header-editor');
+      const knownHeaders = vault.authHeaders && Object.keys(vault.authHeaders).length ? vault.authHeaders : null;
+      if (vault.authMethod === 'custom') {
+        if (knownHeaders) {
+          Object.entries(knownHeaders).forEach(([key, value]) => appendHeaderRow(headerEditor, key, value ? '***' : '', Boolean(value)));
+        } else {
+          appendHeaderRow(headerEditor, '', unknownMaskedHeaders ? '***' : '', unknownMaskedHeaders);
+        }
+      }
+
+      document.getElementById('add-header-btn').addEventListener('click', () => appendHeaderRow(headerEditor));
+      document.getElementById('vault-auth-method').addEventListener('change', (event) => {
+        const showHeaders = event.target.value === 'custom';
+        headerSection.classList.toggle('hidden', !showHeaders);
+        if (showHeaders && !headerEditor.children.length) appendHeaderRow(headerEditor);
+      });
+      document.getElementById('vault-cancel-btn').addEventListener('click', closeDialog);
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const saveButton = document.getElementById('vault-save-btn');
+        const errorEl = document.getElementById('vault-form-error');
+        errorEl.classList.remove('show');
+        try {
+          const id = trimToNull(form.querySelector('#vault-id').value) || vaultId;
+          const name = trimToNull(form.querySelector('#vault-name').value);
+          const type = form.querySelector('#vault-type').value;
+          const endpoint = trimToNull(form.querySelector('#vault-endpoint').value);
+          const authMethod = form.querySelector('#vault-auth-method').value;
+          if (!id || !name || !endpoint) throw new Error('ID, name, and endpoint are required.');
+
+          let headers = null;
+          if (authMethod === 'custom') {
+            headers = {};
+            for (const row of headerEditor.querySelectorAll('.kv-row')) {
+              const key = trimToNull(row.querySelector('.header-key').value);
+              const valueInput = row.querySelector('.header-value');
+              const rawValue = valueInput.value;
+              const masked = row.dataset.masked === 'true';
+              if (!key && (!rawValue || rawValue === '***')) continue;
+              if (!key) throw new Error('Header names are required when a value is provided.');
+              if (masked && rawValue === '***') {
+                if (knownHeaders && knownHeaders[key] != null) {
+                  headers[key] = knownHeaders[key];
+                } else {
+                  throw new Error('Please re-enter all masked auth header values before saving.');
+                }
+              } else {
+                const finalValue = trimToNull(rawValue);
+                if (!finalValue) throw new Error(`Header "${key}" requires a value.`);
+                headers[key] = finalValue;
+              }
+            }
+            if (!Object.keys(headers).length) {
+              throw new Error('At least one auth header is required for custom auth.');
+            }
+          }
+
+          const authPayload = authMethod === 'none' ? null : {
+            method: authMethod,
+            Method: authMethod,
+            headers: headers || undefined,
+            Headers: headers || undefined
+          };
+
+          const payload = {
+            id, ID: id,
+            name, Name: name,
+            type, Type: type,
+            endpoint, Endpoint: endpoint,
+            auth: authPayload,
+            Auth: authPayload
+          };
+
+          setFormBusy(saveButton, editing ? 'Saving…' : 'Creating…', true);
+          await apiFetch(editing ? `/api/config/vaults/${encodeURIComponent(vaultId)}` : '/api/config/vaults', {
+            method: editing ? 'PUT' : 'POST',
+            body: JSON.stringify(payload)
+          });
+          if (authMethod === 'custom' && headers) {
+            state.vaultHeaderCache[id] = { ...headers };
+          } else {
+            delete state.vaultHeaderCache[id];
+          }
+          snack(`Vault ${editing ? 'updated' : 'created'} successfully.`, 'success');
+          closeDialog();
+          await loadVaultConfigs();
+          if (state.currentPage === 'dashboard') await refreshCurrentPage();
+        } catch (error) {
+          errorEl.textContent = error.message;
+          errorEl.classList.add('show');
+        } finally {
+          setFormBusy(saveButton, '', false);
+        }
+      });
+    }
+
+    async function deleteVault(vaultId) {
+      if (!confirm(`Delete vault "${vaultId}"?`)) return;
+      try {
+        await apiFetch(`/api/config/vaults/${encodeURIComponent(vaultId)}`, { method: 'DELETE' });
+        delete state.vaultHeaderCache[vaultId];
+        snack('Vault deleted.', 'success');
+        await loadVaultConfigs();
+        if (state.currentPage === 'dashboard') await refreshCurrentPage();
+      } catch (error) {
+        snack(`Failed to delete vault: ${error.message}`, 'error');
+      }
+    }
+
+    function normalizeSyncConfig(sync) {
+      return {
+        id: pick(sync, 'id', 'ID') || '',
+        source: pick(sync, 'source', 'Source') || '',
+        targets: pick(sync, 'targets', 'Targets') || [],
+        syncType: pick(sync, 'sync_type', 'SyncType') || 'unidirectional',
+        schedule: pick(sync, 'schedule', 'Schedule') || '',
+        enabled: isSyncEnabled(sync),
+        concurrentWorkers: pick(sync, 'concurrent_workers', 'ConcurrentWorkers') || 1
+      };
+    }
+
+    function renderSyncConfigTable() {
+      const wrap = document.getElementById('syncs-config-wrap');
+      document.getElementById('syncs-config-count').textContent = `${state.configSyncs.length} total`;
+      if (!state.configSyncs.length) {
+        wrap.innerHTML = `<div class="empty-state">
+          <span class="material-icons-round">sync_disabled</span>
+          <span>No sync configurations found.</span></div>`;
+        return;
+      }
+      wrap.innerHTML = `<table class="data-table">
+        <thead><tr><th>ID</th><th>Source</th><th>Targets</th><th>Type</th><th>Schedule</th><th>Workers</th><th>Status</th><th></th></tr></thead>
+        <tbody>${state.configSyncs.map((rawSync) => {
+          const sync = normalizeSyncConfig(rawSync);
+          return `<tr>
+            <td><span class="mono-pill">${escHtml(sync.id)}</span></td>
+            <td>${escHtml(sync.source)}</td>
+            <td>${escHtml(sync.targets.join(', '))}</td>
+            <td>${escHtml(sync.syncType)}</td>
+            <td><span class="mono-pill">${escHtml(sync.schedule || '—')}</span></td>
+            <td>${escHtml(sync.concurrentWorkers)}</td>
+            <td>${statusChip(sync.enabled ? 'active' : 'paused').replace('help','pause_circle')}</td>
+            <td>
+              <div class="table-actions">
+                <button class="btn btn-tonal" onclick="openSyncDialog('edit','${escHtml(escJs(sync.id))}')">
+                  <span class="material-icons-round">edit</span>Edit
+                </button>
+                <button class="btn btn-danger" onclick="deleteSyncConfig('${escHtml(escJs(sync.id))}')">
+                  <span class="material-icons-round">delete</span>Delete
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    }
+
+    async function ensureConfigVaultsLoaded() {
+      if (!state.configVaults.length) {
+        const data = await apiFetch('/api/config/vaults');
+        state.configVaults = pick(data, 'vaults', 'Vaults') || [];
+      }
+    }
+
+    async function loadSyncConfigs() {
+      try {
+        const data = await apiFetch('/api/config/syncs');
+        state.configSyncs = pick(data, 'syncs', 'Syncs') || [];
+        renderSyncConfigTable();
+      } catch (error) {
+        if (error.message.toLowerCase().includes('forbidden')) {
+          snack('Administrator access is required.', 'error');
+          return navigate('dashboard');
+        }
+        document.getElementById('syncs-config-wrap').innerHTML = `<div class="empty-state" style="color:var(--md-error)">
+          <span class="material-icons-round">error</span>
+          <span>Failed to load sync configuration.</span></div>`;
+      }
+    }
+
+    async function openSyncDialog(mode, syncId = '') {
+      await ensureConfigVaultsLoaded();
+      const editing = mode === 'edit';
+      let sync = { id: '', source: '', targets: [], syncType: 'unidirectional', schedule: '', enabled: true, concurrentWorkers: 1 };
+      if (editing) {
+        const data = await apiFetch(`/api/config/syncs/${encodeURIComponent(syncId)}`);
+        sync = normalizeSyncConfig(data);
+      }
+      const vaultOptions = state.configVaults.map((vault) => normalizeVaultConfig(vault));
+      openDialog({
+        title: editing ? `Edit sync ${syncId}` : 'Add sync',
+        icon: 'sync_alt',
+        content: `
+          <form id="sync-form" class="form-stack">
+            <div class="field-grid">
+              <div class="text-field">
+                <label for="sync-id">ID</label>
+                <input id="sync-id" name="id" type="text" value="${escHtml(sync.id)}" ${editing ? 'disabled' : ''} required />
+              </div>
+              <div class="select-field">
+                <label for="sync-source">Source</label>
+                <select id="sync-source" name="source" required>
+                  <option value="">Select source vault</option>
+                  ${vaultOptions.map((vault) => `<option value="${escHtml(vault.id)}" ${sync.source === vault.id ? 'selected' : ''}>${escHtml(vault.id)}${vault.name ? ` — ${escHtml(vault.name)}` : ''}</option>`).join('')}
+                </select>
+              </div>
+              <div class="text-field">
+                <label for="sync-targets">Targets</label>
+                <input id="sync-targets" name="targets" type="text" value="${escHtml(sync.targets.join(', '))}" placeholder="vault-b, vault-c" required />
+              </div>
+              <div class="select-field">
+                <label for="sync-type">Sync type</label>
+                <select id="sync-type" name="syncType">
+                  ${['unidirectional','bidirectional'].map((type) => `<option value="${type}" ${sync.syncType === type ? 'selected' : ''}>${type}</option>`).join('')}
+                </select>
+              </div>
+              <div class="text-field">
+                <label for="sync-schedule">Schedule</label>
+                <input id="sync-schedule" name="schedule" type="text" value="${escHtml(sync.schedule)}" placeholder="0 */5 * * * *" required />
+              </div>
+              <div class="text-field">
+                <label for="sync-workers">Concurrent workers</label>
+                <input id="sync-workers" name="concurrentWorkers" type="number" min="1" max="20" value="${escHtml(sync.concurrentWorkers || 1)}" required />
+              </div>
+              <div class="checkbox-field">
+                <input id="sync-enabled" name="enabled" type="checkbox" ${sync.enabled ? 'checked' : ''} />
+                <label for="sync-enabled">Enabled</label>
+              </div>
+            </div>
+            <div class="supporting-panel">Targets are entered as a comma-separated list of configured vault IDs. Bidirectional syncs should use exactly one target.</div>
+            <p class="inline-error" id="sync-form-error"></p>
+            <div class="dialog-actions">
+              <button type="button" class="btn btn-text" id="sync-cancel-btn">Cancel</button>
+              <button type="submit" class="btn btn-filled" id="sync-save-btn"><span class="material-icons-round">save</span>${editing ? 'Save changes' : 'Create sync'}</button>
+            </div>
+          </form>`
+      });
+
+      document.getElementById('sync-cancel-btn').addEventListener('click', closeDialog);
+      document.getElementById('sync-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const saveButton = document.getElementById('sync-save-btn');
+        const errorEl = document.getElementById('sync-form-error');
+        errorEl.classList.remove('show');
+        try {
+          const id = trimToNull(document.getElementById('sync-id').value) || syncId;
+          const source = trimToNull(document.getElementById('sync-source').value);
+          const targets = String(document.getElementById('sync-targets').value || '')
+            .split(',')
+            .map((part) => part.trim())
+            .filter(Boolean);
+          const syncType = document.getElementById('sync-type').value;
+          const schedule = trimToNull(document.getElementById('sync-schedule').value);
+          const concurrentWorkers = Number(document.getElementById('sync-workers').value);
+          const enabled = document.getElementById('sync-enabled').checked;
+          if (!id || !source || !targets.length || !schedule) throw new Error('All sync fields are required.');
+          if (!Number.isInteger(concurrentWorkers) || concurrentWorkers < 1 || concurrentWorkers > 20) {
+            throw new Error('Concurrent workers must be between 1 and 20.');
+          }
+          const payload = {
+            id, ID: id,
+            source, Source: source,
+            targets, Targets: targets,
+            sync_type: syncType,
+            SyncType: syncType,
+            schedule, Schedule: schedule,
+            enabled, Enabled: enabled,
+            concurrent_workers: concurrentWorkers,
+            ConcurrentWorkers: concurrentWorkers
+          };
+          setFormBusy(saveButton, editing ? 'Saving…' : 'Creating…', true);
+          await apiFetch(editing ? `/api/config/syncs/${encodeURIComponent(syncId)}` : '/api/config/syncs', {
+            method: editing ? 'PUT' : 'POST',
+            body: JSON.stringify(payload)
+          });
+          snack(`Sync ${editing ? 'updated' : 'created'} successfully.`, 'success');
+          closeDialog();
+          await loadSyncConfigs();
+          if (state.currentPage === 'dashboard') await refreshCurrentPage();
+        } catch (error) {
+          errorEl.textContent = error.message;
+          errorEl.classList.add('show');
+        } finally {
+          setFormBusy(saveButton, '', false);
+        }
+      });
+    }
+
+    async function deleteSyncConfig(syncId) {
+      if (!confirm(`Delete sync "${syncId}"?`)) return;
+      try {
+        await apiFetch(`/api/config/syncs/${encodeURIComponent(syncId)}`, { method: 'DELETE' });
+        snack('Sync deleted.', 'success');
+        await loadSyncConfigs();
+        if (state.currentPage === 'dashboard') await refreshCurrentPage();
+      } catch (error) {
+        snack(`Failed to delete sync: ${error.message}`, 'error');
+      }
+    }
+
+    function normalizeUser(user) {
+      return {
+        id: Number(pick(user, 'id', 'ID')),
+        username: pick(user, 'username', 'Username') || '',
+        role: pick(user, 'role', 'Role') || 'user',
+        createdAt: pick(user, 'created_at', 'CreatedAt') || null
+      };
+    }
+
+    function renderUsersTable() {
+      const wrap = document.getElementById('users-wrap');
+      document.getElementById('users-count').textContent = `${state.users.length} total`;
+      if (!state.users.length) {
+        wrap.innerHTML = `<div class="empty-state">
+          <span class="material-icons-round">group_off</span>
+          <span>No users found.</span></div>`;
+        return;
+      }
+      wrap.innerHTML = `<table class="data-table">
+        <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Created</th><th></th></tr></thead>
+        <tbody>${state.users.map((rawUser) => {
+          const user = normalizeUser(rawUser);
+          const isSelf = user.id === currentUserId();
+          return `<tr>
+            <td>${escHtml(user.id)}</td>
+            <td>${escHtml(user.username)}</td>
+            <td>${escHtml(user.role)}</td>
+            <td>${fmtTs(user.createdAt)}</td>
+            <td>
+              <div class="table-actions">
+                ${isSelf ? `<span class="helper-text">Current user</span>` : `<button class="btn btn-danger" onclick="deleteUser(${user.id},'${escHtml(escJs(user.username))}')"><span class="material-icons-round">delete</span>Delete</button>`}
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    }
+
+    async function loadUsers() {
+      try {
+        const data = await apiFetch('/api/users');
+        state.users = pick(data, 'users', 'Users') || [];
+        renderUsersTable();
+      } catch (error) {
+        if (error.message.toLowerCase().includes('forbidden')) {
+          snack('Administrator access is required.', 'error');
+          return navigate('dashboard');
+        }
+        document.getElementById('users-wrap').innerHTML = `<div class="empty-state" style="color:var(--md-error)">
+          <span class="material-icons-round">error</span>
+          <span>Failed to load users.</span></div>`;
+      }
+    }
+
+    function openUserDialog() {
+      openDialog({
+        title: 'Add user',
+        icon: 'person_add',
+        content: `
+          <form id="user-form" class="form-stack">
+            <div class="field-grid">
+              <div class="text-field">
+                <label for="user-username">Username</label>
+                <input id="user-username" type="text" autocomplete="username" required />
+              </div>
+              <div class="select-field">
+                <label for="user-role">Role</label>
+                <select id="user-role">
+                  <option value="admin">admin</option>
+                  <option value="user" selected>user</option>
+                </select>
+              </div>
+              <div class="text-field">
+                <label for="user-password">Password</label>
+                <input id="user-password" type="password" autocomplete="new-password" minlength="8" required />
+              </div>
+            </div>
+            <p class="helper-text">Passwords must be at least 8 characters.</p>
+            <p class="inline-error" id="user-form-error"></p>
+            <div class="dialog-actions">
+              <button type="button" class="btn btn-text" id="user-cancel-btn">Cancel</button>
+              <button type="submit" class="btn btn-filled" id="user-save-btn"><span class="material-icons-round">save</span>Create user</button>
+            </div>
+          </form>`
+      });
+
+      document.getElementById('user-cancel-btn').addEventListener('click', closeDialog);
+      document.getElementById('user-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const saveButton = document.getElementById('user-save-btn');
+        const errorEl = document.getElementById('user-form-error');
+        errorEl.classList.remove('show');
+        try {
+          const username = trimToNull(document.getElementById('user-username').value);
+          const password = document.getElementById('user-password').value;
+          const role = document.getElementById('user-role').value;
+          if (!username || !password) throw new Error('Username and password are required.');
+          if (password.length < 8) throw new Error('Password must be at least 8 characters.');
+          setFormBusy(saveButton, 'Creating…', true);
+          await apiFetch('/api/users', {
+            method: 'POST',
+            body: JSON.stringify({ username, password, role })
+          });
+          snack('User created successfully.', 'success');
+          closeDialog();
+          await loadUsers();
+        } catch (error) {
+          errorEl.textContent = error.message;
+          errorEl.classList.add('show');
+        } finally {
+          setFormBusy(saveButton, '', false);
+        }
+      });
+    }
+
+    async function deleteUser(userId, username) {
+      if (Number(userId) === currentUserId()) return;
+      if (!confirm(`Delete user "${username}"?`)) return;
+      try {
+        await apiFetch(`/api/users/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+        snack('User deleted.', 'success');
+        await loadUsers();
+      } catch (error) {
+        snack(`Failed to delete user: ${error.message}`, 'error');
+      }
+    }
+
+    async function fetchCurrentUser() {
+      state.currentUser = await apiFetch('/api/auth/me');
+      document.getElementById('current-user-label').textContent = pick(state.currentUser, 'username', 'Username') || 'Unknown user';
+    }
+
+    async function bootstrap() {
+      try {
+        const setup = await apiFetch('/api/setup', {}, { auth: false, suppressAuthRedirect: true });
+        state.setupComplete = Boolean(pick(setup, 'complete', 'Complete'));
+      } catch (error) {
+        snack(`Failed to check setup status: ${error.message}`, 'error');
+        showLogin();
+        return;
+      }
+
+      if (!state.setupComplete) {
+        showSetupWizard();
+        return;
+      }
+
+      if (!state.token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        await fetchCurrentUser();
+        showApp();
+      } catch {
+        setToken('');
+        showLogin();
+      }
+    }
+
+    document.getElementById('dialog-close').addEventListener('click', closeDialog);
+    document.getElementById('dialog-scrim').addEventListener('click', (event) => {
+      if (event.target === document.getElementById('dialog-scrim')) closeDialog();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeDialog();
+    });
+
+    document.getElementById('refresh-button').addEventListener('click', refreshCurrentPage);
+    document.getElementById('logout-button').addEventListener('click', async () => {
+      try {
+        await apiFetch('/api/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.warn('logout failed', error);
+      } finally {
+        setToken('');
+        window.location.reload();
+      }
+    });
+    document.getElementById('add-vault-btn').addEventListener('click', () => openVaultDialog('create'));
+    document.getElementById('add-sync-btn').addEventListener('click', () => openSyncDialog('create'));
+    document.getElementById('add-user-btn').addEventListener('click', openUserDialog);
+
+    document.getElementById('setup-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const errorEl = document.getElementById('setup-error');
+      const submitButton = document.getElementById('setup-submit-btn');
+      errorEl.classList.remove('show');
+      const username = trimToNull(document.getElementById('setup-username').value);
+      const password = document.getElementById('setup-password').value;
+      const confirmPassword = document.getElementById('setup-confirm-password').value;
+      try {
+        if (!username || !password || !confirmPassword) throw new Error('All setup fields are required.');
+        if (password.length < 8) throw new Error('Admin password must be at least 8 characters.');
+        if (password !== confirmPassword) throw new Error('Passwords do not match.');
+        setFormBusy(submitButton, 'Completing…', true);
+        await apiFetch('/api/setup', {
+          method: 'POST',
+          body: JSON.stringify({ admin_username: username, admin_password: password })
+        }, { auth: false, suppressAuthRedirect: true });
+        state.setupComplete = true;
+        snack('Setup complete. Please sign in.', 'success');
+        document.getElementById('setup-form').reset();
+        document.getElementById('login-username').value = username;
+        showLogin();
+      } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.classList.add('show');
+      } finally {
+        setFormBusy(submitButton, '', false);
+      }
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const errorEl = document.getElementById('login-error');
+      const submitButton = document.getElementById('login-submit-btn');
+      errorEl.classList.remove('show');
+      const username = trimToNull(document.getElementById('login-username').value);
+      const password = document.getElementById('login-password').value;
+      try {
+        if (!username || !password) throw new Error('Username and password are required.');
+        setFormBusy(submitButton, 'Signing in…', true);
+        const data = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        }, { auth: false, suppressAuthRedirect: true });
+        const token = pick(data, 'token', 'Token');
+        if (!token) throw new Error('No token returned by server.');
+        setToken(token);
+        await fetchCurrentUser();
+        snack('Signed in successfully.', 'success');
+        document.getElementById('login-form').reset();
+        showApp();
+      } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.classList.add('show');
+      } finally {
+        setFormBusy(submitButton, '', false);
+      }
+    });
+
+    window.navigate = navigate;
+    window.openHistory = openHistory;
+    window.triggerSync = triggerSync;
+    window.openVaultDialog = openVaultDialog;
+    window.deleteVault = deleteVault;
+    window.openSyncDialog = openSyncDialog;
+    window.deleteSyncConfig = deleteSyncConfig;
+    window.deleteUser = deleteUser;
+
+    bootstrap();
+  </script>
 </body>
 </html>

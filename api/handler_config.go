@@ -289,9 +289,17 @@ func (h *ConfigHandler) DeleteSyncConfig(w http.ResponseWriter, r *http.Request)
 // ---------------------------------------------------------------------------
 
 func (h *ConfigHandler) notifyConfigChanged() {
-	if h.onConfigChanged != nil {
-		go h.onConfigChanged()
+	if h.onConfigChanged == nil {
+		return
 	}
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				h.logger.Error("onConfigChanged panicked", slog.Any("panic", r))
+			}
+		}()
+		h.onConfigChanged()
+	}()
 }
 
 // sanitiseVault strips sensitive fields before sending vault config to the frontend.

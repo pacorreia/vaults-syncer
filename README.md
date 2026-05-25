@@ -84,27 +84,41 @@ graph TB
 
 - Docker & Docker Compose
 - Go 1.26+ (for development)
-- Environment variables for vault access tokens
 
-### 1. Clone and Setup
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/pacorreia/vaults-syncer.git
 cd vaults-syncer
-
-# Copy example config and environment
-cp examples/config.example.yaml config.yaml
-cp .env.example .env
 ```
 
-### 2. Configure
+### 2. Configure the database
 
-Edit `config.yaml` to define:
-- Vault endpoints and authentication
-- Sync relationships (source → targets)
-- Schedules and filters
+All configuration is stored in a database. Select a backend by setting environment variables:
 
-Edit `.env` with your authentication tokens.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_TYPE` | `sqlite` \| `postgres` \| `mssql` | `sqlite` |
+| `DB_PATH` | SQLite file path | `sync.db` |
+| `DB_DSN` | PostgreSQL/MSSQL connection string | — |
+| `MASTER_ENCRYPTION_KEY` | 32-byte hex key for encrypting vault credentials | generated on first start |
+| `SERVER_PORT` | HTTP listen port | `8080` |
+| `METRICS_PORT` | Prometheus metrics port | `9090` |
+
+#### Encryption key
+
+On the **first start**, if `MASTER_ENCRYPTION_KEY` is not set, the daemon:
+1. Generates a cryptographically-random 32-byte key.
+2. Prints it in a prominent banner on stdout.
+3. Exits (**or** continues if already bootstrapped).
+
+**Save this key immediately** and set it before the next restart:
+
+```bash
+export MASTER_ENCRYPTION_KEY=<printed-value>
+```
+
+If the key is lost, encrypted vault credentials stored in the database cannot be recovered.
 
 ### 3. Run with Docker Compose
 
@@ -114,22 +128,32 @@ docker compose up -d
 
 # Check status
 docker compose logs -f
-
-# Check health
-curl http://localhost:8080/health
 ```
 
-### 4. Manual Sync
+### 4. First-time setup via Web UI
+
+Open `http://localhost:8080` in your browser. On first start:
+
+1. The **Setup Wizard** prompts for an admin username and password.
+2. After setup, log in with the credentials you just created.
+3. Navigate to **Vaults Config** to add vault backends.
+4. Navigate to **Syncs Config** to define sync relationships.
+5. Use the **Dashboard** to monitor sync health, trigger manual syncs, and view run history.
+
+### 5. Manual Sync via API
 
 ```bash
+# Authenticate first
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+
 # List all syncs
-curl http://localhost:8080/syncs
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/syncs
 
-# Get sync status
-curl http://localhost:8080/syncs/azure_to_vaultwarden/status
-
-# Trigger sync manually
-curl -X POST http://localhost:8080/syncs/azure_to_vaultwarden/execute
+# Trigger a sync
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/syncs/my-sync/execute
 ```
 
 ## Configuration

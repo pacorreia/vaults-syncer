@@ -182,6 +182,9 @@ func run(args []string, deps appDeps) error {
 			return
 		}
 
+		// Stop the old runner. cron.Stop() blocks until all running jobs complete,
+		// ensuring no goroutines are still holding a reference to the old config
+		// before we create the new engine and update the handler's view of the config.
 		runner.Stop()
 
 		newEngine, err := deps.newEngine(cfg, store, logger)
@@ -196,6 +199,10 @@ func run(args []string, deps appDeps) error {
 			return
 		}
 
+		// Update the shared config atomically (mutex-protected inside SetConfig).
+		// In-flight HTTP requests reading the old config via apiHandler.getConfig()
+		// will see either the old or new config atomically; this is acceptable for
+		// read-only status/list endpoints that do not mutate state.
 		apiHandler.SetConfig(cfg)
 		logger.Info("configuration reloaded from database",
 			slog.Int("vaults", len(cfg.Vaults)),

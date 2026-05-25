@@ -96,7 +96,14 @@ func (h *SetupHandler) CompleteSetup(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info("first-run setup completed", slog.String("admin", req.AdminUsername))
 
 	if h.onSetupComplete != nil {
-		go h.onSetupComplete()
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					h.logger.Error("onSetupComplete panicked", slog.Any("panic", r))
+				}
+			}()
+			h.onSetupComplete()
+		}()
 	}
 
 	jsonOK(w, map[string]string{"status": "setup complete"})
