@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/pacorreia/vaults-syncer/config"
 	"github.com/pacorreia/vaults-syncer/storage"
@@ -16,6 +17,7 @@ type Handler struct {
 	runner Runner
 	store  *storage.Store
 	cfg    *config.Config
+	cfgMu  sync.RWMutex
 	logger *slog.Logger
 }
 
@@ -36,16 +38,32 @@ func NewHandler(runner Runner, store *storage.Store, cfg *config.Config, logger 
 	}
 }
 
+// SetConfig atomically updates the handler's active configuration. It is safe
+// to call concurrently with in-flight requests.
+func (h *Handler) SetConfig(cfg *config.Config) {
+	h.cfgMu.Lock()
+	defer h.cfgMu.Unlock()
+	h.cfg = cfg
+}
+
+// getConfig returns the current configuration (thread-safe).
+func (h *Handler) getConfig() *config.Config {
+	h.cfgMu.RLock()
+	defer h.cfgMu.RUnlock()
+	return h.cfg
+}
+
 // Health handles health check requests
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
+	cfg := h.getConfig()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	response := map[string]interface{}{
 		"status":  "healthy",
 		"running": h.runner.IsRunning(),
-		"syncs":   len(h.cfg.Syncs),
-		"vaults":  len(h.cfg.Vaults),
+		"syncs":   len(cfg.Syncs),
+		"vaults":  len(cfg.Vaults),
 	}
 
 	json.NewEncoder(w).Encode(response)
@@ -76,9 +94,10 @@ func (h *Handler) GetSyncStatus(w http.ResponseWriter, r *http.Request) {
 
 // ListSyncs handles listing all syncs
 func (h *Handler) ListSyncs(w http.ResponseWriter, r *http.Request) {
+	cfg := h.getConfig()
 	syncs := make([]map[string]interface{}, 0)
 
-	for _, syncCfg := range h.cfg.Syncs {
+	for _, syncCfg := range cfg.Syncs {
 		syncMap := map[string]interface{}{
 			"id":       syncCfg.ID,
 			"source":   syncCfg.Source,
@@ -108,9 +127,10 @@ func (h *Handler) ExecuteSync(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cfg := h.getConfig()
 	// Execute sync asynchronously
 	go func() {
-		if err := h.runner.ExecuteSyncNow(syncID, h.cfg); err != nil {
+		if err := h.runner.ExecuteSyncNow(syncID, cfg); err != nil {
 			h.logger.Error("manual sync execution failed",
 				slog.String("sync_id", syncID),
 				slog.String("error", err.Error()),
@@ -128,17 +148,18 @@ func (h *Handler) ExecuteSync(w http.ResponseWriter, r *http.Request) {
 
 // GetMetrics handles Prometheus-style metrics requests
 func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
+	cfg := h.getConfig()
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 
 	// Simple metrics output
 	metrics := "# HELP syncs_configured Total number of syncs configured\n"
-	metrics += fmt.Sprintf("# TYPE syncs_configured gauge\nsyncs_configured %d\n", len(h.cfg.Syncs))
+	metrics += fmt.Sprintf("# TYPE syncs_configured gauge\nsyncs_configured %d\n", len(cfg.Syncs))
 
 	metrics += "# HELP syncs_enabled Total number of enabled syncs\n"
 	metrics += "# TYPE syncs_enabled gauge\n"
 	enabledCount := 0
-	for _, s := range h.cfg.Syncs {
+	for _, s := range cfg.Syncs {
 		if s.IsEnabled() {
 			enabledCount++
 		}
@@ -158,8 +179,9 @@ func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
 
 // ListVaults handles listing all configured vaults (without sensitive auth data)
 func (h *Handler) ListVaults(w http.ResponseWriter, r *http.Request) {
-	vaults := make([]map[string]interface{}, 0, len(h.cfg.Vaults))
-	for _, v := range h.cfg.Vaults {
+	cfg := h.getConfig()
+	vaults := make([]map[string]interface{}, 0, len(cfg.Vaults))
+	for _, v := range cfg.Vaults {
 		vaults = append(vaults, map[string]interface{}{
 			"id":       v.ID,
 			"name":     v.Name,
