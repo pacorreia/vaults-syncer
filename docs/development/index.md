@@ -2,45 +2,58 @@
 
 ## Project Overview
 
-This is a containerized secrets vault synchronization daemon written in Go. It enables syncing secrets between multiple vault backends including Azure Key Vault, Vaultwarden, HashiCorp Vault, and generic HTTP-based APIs.
+This is a containerized secrets vault synchronization daemon written in Go. It enables syncing secrets between multiple vault backends including Azure Key Vault, Bitwarden, Vaultwarden, HashiCorp Vault, AWS Secrets Manager (via CLI tool backend), Keeper Secrets Manager, and generic HTTP-based APIs.
 
 ## Project Structure
 
 ```
-akv-vaultwarden-sync/
+vaults-syncer/
 ├── .dockerignore              # Docker build exclusions
-├── .env.example               # Environment variable template
 ├── .gitignore                 # Git exclusions
 ├── Dockerfile                 # Multi-stage Docker build
-├── Makefile                   # Build tasks (optional)
 ├── README.md                  # Main documentation
-├── DEVELOPMENT.md             # This file
 ├── examples/                  # Example configurations
-│   └── config.example.yaml    # Example configuration
+│   ├── config.example.yaml    # Example configuration
+│   └── tools/                 # Tool backend config examples
 ├── docker-compose.yml         # Docker Compose setup
 ├── go.mod                     # Go module definition
 ├── go.sum                     # Go dependency checksums
 ├── main.go                    # Application entry point
 │
 ├── api/                       # REST API handlers
-│   └── handler.go            # HTTP endpoint handlers
+│   ├── handler.go            # Runtime HTTP endpoint handlers
+│   ├── handler_auth.go       # Auth handlers (login/logout/me)
+│   ├── handler_config.go     # Admin config CRUD handlers
+│   ├── handler_setup.go      # First-run setup handler
+│   ├── handler_users.go      # User management handlers
+│   └── ui.go                 # Embedded Web UI serving
+│
+├── auth/                      # Authentication middleware
 │
 ├── config/                    # Configuration management
 │   ├── loader.go             # YAML config loading & validation
-│   └── types.go              # Configuration data structures
+│   ├── defaults.go           # Default value application
+│   ├── types.go              # Configuration data structures
+│   └── validate.go           # Configuration validation
+│
+├── security/                  # Encryption utilities
 │
 ├── sync/                      # Core sync logic
 │   ├── engine.go             # Main sync engine
 │   └── runner.go             # Scheduler and execution runner
 │
 ├── storage/                   # Persistence layer
-│   └── store.go              # SQLite database operations
+│   ├── db.go                 # Database connection (SQLite/PostgreSQL/MSSQL)
+│   ├── store.go              # Core sync state storage
+│   ├── config_store.go       # Vault/sync config persistence
+│   ├── settings_store.go     # Key-value settings storage
+│   └── user_store.go         # User management
 │
-├── vault/                     # Vault client abstraction
-│   └── client.go             # HTTP vault client
-│
-└── bin/
-    └── sync-daemon           # Compiled binary (after build)
+└── vault/                     # Vault client abstraction
+    ├── backend.go            # Backend interface and GenericBackend
+    ├── client.go             # HTTP vault client
+    ├── parser.go             # Response parsing
+    └── tool_backend.go       # CLI-backed vault backend
 ```
 
 ## Building the Project
@@ -51,7 +64,7 @@ akv-vaultwarden-sync/
 # Install dependencies
 go mod download
 
-# Build binary
+# Build binary (CGO_ENABLED=1 required for sqlite3)
 CGO_ENABLED=1 go build -o bin/sync-daemon .
 
 # Build with complete version information
@@ -84,29 +97,31 @@ docker build -t myregistry.azurecr.io/secrets-sync:v1.0.0 .
 
 The `examples/config.example.yaml` includes examples for:
 
-1. **Azure Key Vault**
+1. **Azure Key Vault** (type `azure`)
    - Bearer token authentication
    - REST API endpoints
 
-2. **Vaultwarden**
-   - Bitwarden-compatible vault
-   - Bearer token auth
+2. **Vaultwarden** (type `vaultwarden`)
+   - OAuth2 authentication with device parameters
+   - Self-hosted Bitwarden-compatible API
 
-3. **HashiCorp Vault**
-   - Generic vault platform
-   - Bearer token auth
+3. **HashiCorp Vault** (type `vault`)
+   - Custom header authentication (X-Vault-Token)
+   - KV v2 API
 
-4. **Custom HTTP API**
+4. **AWS Secrets Manager** (type `tool`)
+   - CLI-backed via the AWS CLI
+   - No HTTP credentials needed in config
+
+5. **Generic REST API** (type `generic`)
    - API key authentication
    - Flexible field mapping
 
 ### Creating a Production Config
 
-1. Copy the example: `cp examples/config.example.yaml config.yaml`
-2. Define your vaults with actual endpoints
-3. Set authentication via environment variables (recommended)
-4. Define sync relationships
-5. Validate with dry-run: `./bin/sync-daemon -config config.yaml -dry-run`
+1. Configure vaults via the Web UI at `http://localhost:8080`
+2. Alternatively, use the admin API: `POST /api/config/vaults`
+3. Validate by triggering a sync: `POST /api/syncs/{id}/execute`
 
 ## Architecture Decisions
 
@@ -204,10 +219,11 @@ The `examples/config.example.yaml` includes examples for:
 
 | Method | Implementation | Use Case |
 |--------|-----------------|----------|
-| Bearer Token | Authorization header | APIs, Azure, Vault |
-| Basic Auth | Base64 encoded credentials | Legacy systems |
-| API Key | Custom header (X-API-Key) | Third-party APIs |
-| Custom | Arbitrary headers | Proprietary systems |
+| Bearer Token | `Authorization: Bearer <token>` header | APIs, Azure AD, generic tokens |
+| Basic Auth | Base64 encoded `username:password` | Legacy systems |
+| OAuth 2.0 | Client credentials flow, automatic token refresh | Bitwarden, Vaultwarden, Azure SP |
+| API Key | Custom header (e.g. `api_key`, `X-API-Key`) | Third-party APIs |
+| Custom | Arbitrary headers (e.g. `X-Vault-Token`) | HashiCorp Vault, proprietary systems |
 
 ## Error Handling
 
@@ -235,16 +251,19 @@ The `examples/config.example.yaml` includes examples for:
 
 ### Dry-Run Mode
 ```bash
-./bin/sync-daemon -config config.yaml -dry-run
+./bin/sync-daemon -dry-run
 ```
-- Validates configuration
-- Tests connections to all vaults
-- Initializes database schema
-- Exits without starting scheduler
+- Validates database connection
+- Exits without starting the scheduler
 
 ### Manual Sync Execution
 ```bash
-curl -X POST http://localhost:8080/syncs/sync_id/execute
+# Requires authentication (Bearer token)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"pass"}' | jq -r .token)
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/sync_id/execute
 ```
 - Triggers immediate sync
 - Bypasses cron schedule
@@ -252,7 +271,8 @@ curl -X POST http://localhost:8080/syncs/sync_id/execute
 
 ### Check Sync Status
 ```bash
-curl http://localhost:8080/syncs/sync_id/status | jq
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/sync_id/status
 ```
 - View last run results
 - Inspect failed objects
@@ -294,7 +314,7 @@ Consider:
 
 ### Health Endpoint
 ```bash
-GET /health
+GET /api/health  (requires auth)
 ```
 Returns:
 - Status (healthy/unhealthy)
@@ -303,7 +323,7 @@ Returns:
 
 ### Metrics
 ```bash
-GET /metrics
+GET /metrics  (port 9090, no auth)
 ```
 Prometheus-compatible format:
 - `syncs_configured`
@@ -346,28 +366,23 @@ ORDER BY created_at DESC;
 - Immutable once written
 - Helps detect unauthorized changes
 
-## Future Enhancements
+## Possible Future Enhancements
 
 ### Vault Backends
-- AWS Secrets Manager
-- Google Secret Manager
-- Kubernetes Secrets
-- CyberArk
-- Thycotic Secret Server
+- Google Secret Manager native adapter
+- Kubernetes Secrets native adapter
+- CyberArk PAM integration
 
 ### Features
 - Webhook-based triggers for event-driven sync
-- Secret transformation/encryption during transit
-- Field-level filtering and mapping
+- Field-level filtering and value mapping
 - Backup/snapshot functionality
 - Multi-tenant support
 
 ### Operations
-- Web UI for configuration
-- Metrics dashboard (Grafana integration)
 - Advanced search in audit trail
 - Scheduled reports
-- API versioning and stability
+- API versioning and stability guarantees
 
 ## Troubleshooting
 
@@ -385,13 +400,13 @@ ORDER BY created_at DESC;
 
 ### Runtime Issues
 
-**Error**: Configuration validation failed
+**Error**: `Configuration validation failed`
 - **Solution**: Run dry-run mode for detailed errors
   ```bash
-  ./bin/sync-daemon -config config.yaml -dry-run
+  ./bin/sync-daemon -dry-run
   ```
 
-**Error**: Connection to vault failed
+**Error**: `Connection to vault failed`
 - **Solution**: Check endpoint, verify token expiration, test endpoint
   ```bash
   curl -H "Authorization: Bearer $TOKEN" $ENDPOINT

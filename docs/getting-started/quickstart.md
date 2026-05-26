@@ -2,151 +2,109 @@
 
 Get Secrets Vault Sync running in 5 minutes!
 
-## 1. Create Configuration
-
-Save this as `config.yaml`:
-
-```yaml
-vaults:
-  # Source vault (where secrets are read from)
-  - id: vault-prod
-    name: Production Vault
-    type: vaultwarden
-    endpoint: https://vault.example.com/api/ciphers
-    method: POST
-    auth:
-      method: oauth2
-      oauth:
-        token_endpoint: https://vault.example.com/identity/connect/token
-        client_id: your-client-id
-        client_secret: your-secret
-        scope: api
-        extra_params:
-          deviceIdentifier: akv-sync
-    field_names:
-      name_field: name
-      value_field: name
-    headers:
-      Accept: application/json
-      Content-Type: application/json
-
-  # Target vault (where secrets are written)
-  - id: vault-backup
-    name: Backup Vault
-    type: vaultwarden
-    endpoint: https://backup.example.com/api/ciphers
-    method: POST
-    auth:
-      method: bearer
-      headers:
-        token: your-bearer-token
-    field_names:
-      name_field: name
-      value_field: name
-    headers:
-      Accept: application/json
-      Content-Type: application/json
-
-# Define sync relationships
-syncs:
-  - id: backup-sync
-    source: vault-prod
-    targets:
-      - vault-backup
-    sync_type: unidirectional
-    schedule: "0 */4 * * *"  # Every 4 hours
-    filter:
-      patterns:
-        - "*"  # Sync all secrets
-
-# Server configuration
-server:
-  port: 8080
-  address: 0.0.0.0
-
-# Logging
-logging:
-  level: info
-  format: json
-```
-
-## 2. Run with Docker
+## 1. Run with Docker
 
 ```bash
 docker run -d \
-  --name akv-sync \
-  -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
+  --name vaults-syncer \
   -v sync-data:/app/data \
   -p 8080:8080 \
+  -p 9090:9090 \
   ghcr.io/pacorreia/vaults-syncer:latest
 ```
 
-Or with Docker Compose:
-
-```yaml
-version: '3.8'
-
-services:
-  sync-daemon:
-    image: ghcr.io/pacorreia/vaults-syncer:latest
-    volumes:
-      - ./config.yaml:/etc/sync/config.yaml:ro
-      - sync-data:/app/data
-    ports:
-      - "8080:8080"
-      - "9090:9090"
-    environment:
-      - LOG_LEVEL=info
-
-volumes:
-  sync-data:
-```
-
-Run it:
+Check the logs for the generated encryption key on first start:
 
 ```bash
-docker compose up -d
+docker logs vaults-syncer
 ```
 
-## 3. Verify It's Working
-
-Check daemon health:
+Look for a banner with `MASTER ENCRYPTION KEY – SAVE THIS NOW` and copy the printed key. Set it before the next restart:
 
 ```bash
-curl http://localhost:8080/health
+export MASTER_ENCRYPTION_KEY=<printed-value>
 ```
 
-Expected response:
+## 2. Complete Setup
 
-```json
-{
-  "running": true,
-  "status": "healthy",
-  "syncs": 1,
-  "vaults": 2
-}
-```
+Open `http://localhost:8080` and follow the Setup Wizard to create an admin account.
 
-## 4. Trigger First Sync
+## 3. Add Vaults
+
+Via the Web UI, navigate to **Vaults Config**, or use the API:
 
 ```bash
-curl -X POST http://localhost:8080/syncs/backup-sync/execute
+# Get auth token
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+
+# Add source vault (Vaultwarden)
+curl -s -X POST http://localhost:8080/api/config/vaults \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "vault-prod",
+    "type": "vaultwarden",
+    "endpoint": "https://vault.example.com/api/ciphers",
+    "method": "POST",
+    "auth": {
+      "method": "oauth2",
+      "oauth": {
+        "token_endpoint": "https://vault.example.com/identity/connect/token",
+        "client_id": "your-client-id",
+        "client_secret": "your-secret",
+        "scope": "api",
+        "extra_params": {"deviceIdentifier": "sync-daemon"}
+      }
+    },
+    "field_names": {"name_field": "name", "value_field": "login"}
+  }'
+
+# Add target vault (backup Vaultwarden)
+curl -s -X POST http://localhost:8080/api/config/vaults \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "vault-backup",
+    "type": "vaultwarden",
+    "endpoint": "https://backup.example.com/api/ciphers",
+    "method": "POST",
+    "auth": {"method": "bearer", "headers": {"token": "your-bearer-token"}},
+    "field_names": {"name_field": "name", "value_field": "login"}
+  }'
 ```
 
-Monitor progress:
+## 4. Create a Sync
 
 ```bash
-curl http://localhost:8080/syncs/backup-sync/status
+curl -s -X POST http://localhost:8080/api/config/syncs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "backup-sync",
+    "source": "vault-prod",
+    "targets": ["vault-backup"],
+    "sync_type": "unidirectional",
+    "schedule": "0 */4 * * *",
+    "enabled": true
+  }'
 ```
 
-## 5. View Logs
+## 5. Trigger and Monitor
 
 ```bash
-# Docker
-docker logs akv-sync -f
+# Trigger sync immediately
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/backup-sync/execute
 
-# Or view directly
-tail -f /path/to/logs.json
+# Check status
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/backup-sync/status
+
+# View run history
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/backup-sync/runs
 ```
 
 ## Common Configuration Patterns
@@ -155,46 +113,34 @@ tail -f /path/to/logs.json
 
 Sync all secrets from production to backup every 4 hours:
 
-```yaml
-syncs:
-  - id: prod-to-backup
-    source: production
-    targets:
-      - backup
-    sync_type: unidirectional
-    schedule: "0 */4 * * *"
+```json
+{
+  "id": "prod-to-backup",
+  "source": "production",
+  "targets": ["backup"],
+  "sync_type": "unidirectional",
+  "schedule": "0 */4 * * *",
+  "enabled": true
+}
 ```
 
-### Multi-Cloud
+### Multi-Environment Sync
 
-Sync between Azure and AWS:
+Keep dev and staging in sync with filtered production secrets:
 
-```yaml
-syncs:
-  - id: az-to-aws
-    source: azure-vault
-    targets:
-      - aws-vault
-    sync_type: bidirectional
-```
-
-### Development Sync
-
-Keep dev and staging in sync with production non-prod secrets:
-
-```yaml
-syncs:
-  - id: prod-to-dev
-    source: production
-    targets:
-      - development
-      - staging
-    filter:
-      patterns:
-        - "dev-*"
-        - "shared-*"
-      exclude:
-        - "*-prod"
+```json
+{
+  "id": "prod-to-dev",
+  "source": "production",
+  "targets": ["development", "staging"],
+  "sync_type": "unidirectional",
+  "schedule": "0 6 * * *",
+  "filter": {
+    "patterns": ["dev-*", "shared-*"],
+    "exclude": ["*-prod"]
+  },
+  "enabled": true
+}
 ```
 
 ## Next Steps

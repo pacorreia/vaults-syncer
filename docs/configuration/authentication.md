@@ -335,10 +335,15 @@ vaults:
 vaults:
   - id: vault-token
     type: vault
-    endpoint: "https://vault.example.com:8200"
+    endpoint: "https://vault.example.com:8200/v1/secret/data"
+    method: POST
     auth:
-      method: token
-      token: "${VAULT_TOKEN}"
+      method: custom
+      headers:
+        X-Vault-Token: "${VAULT_TOKEN}"
+    field_names:
+      name_field: "name"
+      value_field: "value"
 ```
 
 ### AppRole Authentication
@@ -553,17 +558,22 @@ az keyvault secret set \
 
 ### Using HashiCorp Vault
 
-```bash
-# Store in HashiCorp Vault
-vault kv put secret/sync/bitwarden \
-  client_id="..." \
-  client_secret="..."
+Retrieve secrets from HashiCorp Vault and set them as environment variables before starting the daemon:
 
-# Reference in config
+```bash
+# Retrieve credentials and export as environment variables
+export BITWARDEN_CLIENT_ID=$(vault kv get -field=client_id secret/sync/bitwarden)
+export BITWARDEN_CLIENT_SECRET=$(vault kv get -field=client_secret secret/sync/bitwarden)
+```
+
+Then reference them normally in vault configuration:
+
+```yaml
 auth:
   method: oauth2
-  client_id: vault://secret/sync/bitwarden:client_id
-  client_secret: vault://secret/sync/bitwarden:client_secret
+  oauth:
+    client_id: "${BITWARDEN_CLIENT_ID}"
+    client_secret: "${BITWARDEN_CLIENT_SECRET}"
 ```
 
 ## Certificate and Key Rotation

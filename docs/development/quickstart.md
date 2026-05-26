@@ -63,11 +63,18 @@ You should see:
 (No password required for test setup)
 
 ### Check Sync Status
+
 ```bash
-curl http://localhost:8080/syncs/vaultwarden_sync/status | jq
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"testpass"}' | jq -r .token)
+
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/status | jq
 ```
 
 ### View Metrics
+
 ```bash
 curl http://localhost:9090/metrics
 ```
@@ -102,9 +109,11 @@ docker-compose -f e2e/docker-compose.test.yml down -v
 lsof -i :8000 :8001 :8080 :9090 :5432
 
 # Or manually check services
-curl http://localhost:8000/alive
+curl http://localhost:8080/alive
 curl http://localhost:8001/alive
-curl http://localhost:8080/health
+curl -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"testpass"}'
 ```
 
 ### Build Fails

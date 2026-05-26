@@ -19,9 +19,12 @@ The application is configured through a YAML configuration file that defines:
 Define and configure vault connections using the generic HTTP adapter:
 
 - **Azure Key Vault** (type `azure`)
-- **Bitwarden / Vaultwarden** (types `bitwarden`, `vaultwarden`)
+- **Bitwarden** (type `bitwarden`)
+- **Vaultwarden** (type `vaultwarden`)
 - **HashiCorp Vault** (type `vault`)
+- **AWS Secrets Manager** (type `aws`)
 - **Keeper Secrets Manager** (type `keeper`)
+- **CLI-backed vaults** (type `tool`) — see [Tool Backend](./tool-backend.md)
 - **Custom REST APIs** (type `generic`)
 
 Learn how to:
@@ -250,84 +253,47 @@ syncs:
         - "app-*"
 ```
 
-## Configuration File Locations
+## Configuration Storage
 
-The application looks for configuration in this order:
+All configuration (vaults and syncs) is stored in the database and managed through the Web UI or the admin API. There is no configuration file read at startup.
 
-1. **Command-line flag**: `-config /path/to/config.yaml`
-2. **Environment variable**: `CONFIG_PATH=/path/to/config.yaml`
-3. **Current directory**: `./config.yaml`
-4. **System directory**: `/etc/akv-sync/config.yaml`
+### Environment Variables
+
+The daemon reads environment variables at startup:
+
+```bash
+export DB_TYPE=sqlite             # sqlite (default), postgres, or mssql
+export DB_PATH=sync.db            # SQLite file path
+export DB_DSN=                    # PostgreSQL/MSSQL connection string
+export MASTER_ENCRYPTION_KEY=     # Required after first start (32-byte base64 key)
+export SERVER_PORT=8080           # HTTP API + Web UI port
+export SERVER_ADDRESS=0.0.0.0     # HTTP listen address
+export METRICS_PORT=9090          # Prometheus metrics port
+```
 
 ### Example Usage
 
 ```bash
-# Specify config file
-./sync-daemon -config /etc/sync/config.yaml
+# Run with custom database path
+DB_PATH=/data/sync.db ./sync-daemon
 
-# Use environment variable
-export CONFIG_PATH=/etc/sync/config.yaml
-./sync-daemon
+# Run with PostgreSQL
+DB_TYPE=postgres DB_DSN="host=db port=5432 user=sync password=secret dbname=sync sslmode=disable" ./sync-daemon
 
 # Docker
-docker run -v /path/to/config.yaml:/etc/sync/config.yaml:ro \
+docker run \
+  -e DB_TYPE=sqlite \
+  -e MASTER_ENCRYPTION_KEY=<key> \
+  -v sync-data:/app/data \
   ghcr.io/pacorreia/vaults-syncer:latest
-```
-
-## Environment Variables
-
-Use environment variables for sensitive values:
-
-```yaml
-vaults:
-  - id: bitwarden
-    type: bitwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${BITWARDEN_CLIENT_ID}
-        client_secret: ${BITWARDEN_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-```
-
-Set environment variables:
-
-```bash
-# Linux/macOS
-export BITWARDEN_CLIENT_ID=your-client-id
-export BITWARDEN_CLIENT_SECRET=your-client-secret
-
-# Windows PowerShell
-$env:BITWARDEN_CLIENT_ID = "your-client-id"
-$env:BITWARDEN_CLIENT_SECRET = "your-client-secret"
-
-# Docker
-docker run -e BITWARDEN_CLIENT_ID=... -e BITWARDEN_CLIENT_SECRET=... ...
-```
-
-## Configuration Validation
-
-### Validate Configuration
-
-```bash
-# Validate syntax
-./sync-daemon -validate-config config.yaml
-
-# Docker
-docker run --rm -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
-  ghcr.io/pacorreia/vaults-syncer:latest validate
 ```
 
 ### Common Configuration Errors
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `unknown vault type` | Invalid vault type | Check supported types: azure, bitwarden, vaultwarden, vault, keeper, aws, generic |
-| `endpoint required` | Missing endpoint | Add endpoint URL for vault |
+| `unknown vault type` | Invalid vault type | Check supported types: azure, bitwarden, vaultwarden, vault, aws, keeper, generic, tool |
+| `endpoint required` | Missing endpoint | Add endpoint URL for vault (not required for type `tool`) |
 | `invalid cron schedule` | Bad cron syntax | Use 5-field cron format: `minute hour day month weekday` |
 | `authentication failed` | Wrong credentials | Verify auth method and credentials |
 | `vault not found` | Unknown vault reference | Check sync source/target references existing vault IDs |

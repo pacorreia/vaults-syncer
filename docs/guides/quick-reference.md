@@ -7,9 +7,11 @@
 ### Docker (Fastest)
 ```bash
 docker run -d \
-  --name akv-sync \
-  -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
+  --name vaults-syncer \
+  -v sync-data:/app/data \
   -p 8080:8080 \
+  -p 9090:9090 \
+  -e MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY} \
   ghcr.io/pacorreia/vaults-syncer:latest
 ```
 
@@ -21,44 +23,38 @@ docker compose up -d
 
 ### Binary
 ```bash
-# Download from releases, then
-./sync-daemon -config config.yaml
+# Download from releases, then:
+# Set required env vars
+export MASTER_ENCRYPTION_KEY=<your-key>
+./sync-daemon
 ```
 
 ## ⚙️ Basic Configuration
 
-```yaml
-vaults:
-  - id: source
-    type: azure
-    endpoint: https://myvault.vault.azure.net/secrets
-    auth:
-      method: bearer
-      headers:
-        token: ${AZURE_ACCESS_TOKEN}
-    field_names:
-      name_field: name
-      value_field: value
-  
-  - id: target
-    type: bitwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${CLIENT_ID}
-        client_secret: ${CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
+The daemon stores configuration in its database. Use the Web UI at `http://localhost:8080` or the admin API to add vaults and syncs. Below is the data format used by the API.
 
-syncs:
-  - id: my-sync
-    source: source
-    targets: [target]
-    sync_type: unidirectional
-    schedule: "0 * * * *"
+```json
+// POST /api/config/vaults
+{
+  "id": "source",
+  "type": "azure",
+  "endpoint": "https://myvault.vault.azure.net/secrets",
+  "auth": {
+    "method": "bearer",
+    "headers": {"token": "${AZURE_ACCESS_TOKEN}"}
+  },
+  "field_names": {"name_field": "name", "value_field": "value"}
+}
+
+// POST /api/config/syncs
+{
+  "id": "my-sync",
+  "source": "source",
+  "targets": ["target"],
+  "sync_type": "unidirectional",
+  "schedule": "0 * * * *",
+  "enabled": true
+}
 ```
 
 ## 🔐 Authentication Quick Reference
@@ -98,26 +94,37 @@ schedule: "*/30 * * * *"
 # Check version
 ./sync-daemon --version
 
-# Check health
-curl http://localhost:8080/health
+# Validate database connection only
+./sync-daemon -dry-run
+
+# Get an auth token (all API calls below require this)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+
+# Check health (authenticated)
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/health
 
 # List vaults
-curl http://localhost:8080/vaults
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/vaults
 
 # List syncs
-curl http://localhost:8080/syncs
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs
 
 # Get sync status
-curl http://localhost:8080/syncs/{sync-id}
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs/{sync-id}/status
+
+# View run history
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs/{sync-id}/runs
 
 # Run sync now
-curl -X POST http://localhost:8080/syncs/{sync-id}/run
+curl -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs/{sync-id}/execute
 
-# View metrics
+# View metrics (no auth, port 9090)
 curl http://localhost:9090/metrics | grep sync
 
 # Check logs
-docker logs akv-sync
+docker logs vaults-syncer
 docker compose logs -f sync-daemon
 ```
 
@@ -162,17 +169,18 @@ Before running in production:
 ### Application won't start
 ```bash
 # Check logs
-docker logs akv-sync
+docker logs vaults-syncer
 
-# Validate config
-./sync-daemon -validate-config config.yaml
+# Validate database connection
+./sync-daemon -dry-run
 ```
 
 ### Sync not running
-1. Check health: `curl http://localhost:8080/health`
-2. Verify vaults are accessible
-3. Check schedule syntax (must be valid cron)
-4. Review logs: `docker logs akv-sync`
+1. Get a token: `TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' -d '{"username":"admin","password":"pass"}' | jq -r .token)`
+2. Check health: `curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/health`
+3. Verify vaults are accessible
+4. Check schedule syntax (must be valid cron)
+5. Review logs: `docker logs vaults-syncer`
 
 ### Authentication failed
 1. Verify credentials/tokens
@@ -249,15 +257,23 @@ syncs:
 
 ## 📊 API Quick Ref
 
+All endpoints under `/api/` (except login and setup) require `Authorization: Bearer <token>`.
+
 ```
-GET /health              - Health check
-GET /vaults              - List vaults
-GET /vaults/health       - Vault health status
-GET /syncs               - List all syncs
-GET /syncs/{id}          - Get sync details
-GET /syncs/{id}/history  - Sync history
-POST /syncs/{id}/run     - Run sync now
-GET /metrics             - Prometheus metrics
+POST /api/auth/login          - Login and get token (no auth)
+GET  /api/setup               - Check setup status (no auth)
+POST /api/setup               - Complete first-time setup (no auth)
+GET  /api/health              - Health check
+GET  /api/vaults              - List vaults
+GET  /api/syncs               - List all syncs
+GET  /api/syncs/{id}/status   - Get sync status
+GET  /api/syncs/{id}/runs     - Sync run history
+POST /api/syncs/{id}/execute  - Run sync now
+GET  /api/metrics             - Prometheus metrics (also on :9090/metrics without auth)
+GET  /api/config/vaults       - List vault configs (admin)
+POST /api/config/vaults       - Create vault (admin)
+GET  /api/config/syncs        - List sync configs (admin)
+POST /api/config/syncs        - Create sync (admin)
 ```
 
 ## 🔗 Useful Links

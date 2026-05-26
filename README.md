@@ -4,7 +4,7 @@
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://pacorreia.github.io/vaults-syncer/badges/coverage.json)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/pacorreia/vaults-syncer?sort=semver)](https://github.com/pacorreia/vaults-syncer/releases)
-[![Go Version](https://img.shields.io/badge/Go-1.26.1-00ADD8?logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26.3-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](LICENSE)
 
 A containerized, highly customizable daemon for synchronizing secrets across multiple vaults and secret management systems.
@@ -24,7 +24,7 @@ A containerized, highly customizable daemon for synchronizing secrets across mul
 - **Secret Filtering**: Include/exclude patterns to control which secrets are synced
 - **Retry Logic**: Exponential backoff with configurable retry policies
 - **Audit Trail**: SQLite-based tracking of all sync operations and history
-- **Multiple Auth Methods**: OAuth 2.0, Bearer tokens, Basic auth, API keys, custom headers, mTLS support
+- **Multiple Auth Methods**: OAuth 2.0, Bearer tokens, Basic auth, API keys, custom headers
 - **Customizable Response Parsing**: JSONPath-based extraction for non-standard vault APIs
 - **Observable**: Prometheus-compatible metrics endpoint and structured JSON logging
 - **Health Checks**: Built-in health check endpoint for container orchestration
@@ -149,18 +149,18 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
   -d '{"username":"admin","password":"your-password"}' | jq -r .token)
 
 # List all syncs
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/syncs
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs
 
 # Trigger a sync
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/syncs/my-sync/execute
+  http://localhost:8080/api/syncs/my-sync/execute
 ```
 
 ## Configuration
 
-### Configuration File Format (YAML)
+### Configuration Data Format (YAML)
 
-The daemon uses a structured YAML configuration format with vault type awareness and flexible authentication options.
+All configuration is managed through the Web UI or the admin API (`/api/config/vaults` and `/api/config/syncs`). The underlying data format is YAML-compatible JSON, matching the field names below.
 
 #### Configuration Example
 
@@ -256,10 +256,13 @@ The daemon supports multiple vault types with smart defaults:
 | Vault Type | Authentication | Response Format | Notes |
 |------------|---------------|-----------------|-------|
 | **vaultwarden** | OAuth 2.0, Bearer | `{data: [{name, value}]}` | Full support with device params |
-| **vault** | Bearer, AppRole | `{data: {keys: []}}` for list, `{data: {data: {}}}` for get | HashiCorp Vault KV v2 |
+| **bitwarden** | OAuth 2.0, Bearer | `{data: [{name, value}]}` | Bitwarden-compatible API |
+| **vault** | Bearer (X-Vault-Token) | `{data: {keys: []}}` for list, `{data: {data: {}}}` for get | HashiCorp Vault KV v2 |
 | **azure** | Bearer (Azure AD) | `{value: [{id, ...}]}` | Azure Key Vault |
-| **aws** | IAM, Bearer | `{SecretList: [{Name}]}` | AWS Secrets Manager |
+| **aws** | Custom headers | `{SecretList: [{Name}]}` | AWS Secrets Manager |
+| **keeper** | Bearer | Configurable | Keeper Secrets Manager |
 | **generic** | Any | Configurable via `operations_override` | Custom HTTP APIs |
+| **tool** | N/A | Configured per CLI tool | CLI-backed vault (AWS CLI, Vault CLI, etc.) |
 
 **Smart Defaults**: When you specify a vault `type`, the daemon automatically configures appropriate:
 - OAuth token endpoints
@@ -370,35 +373,51 @@ syncs:
 
 ## API Endpoints
 
-### Health Check
-```bash
-GET /health
-```
-Returns daemon health status and configuration summary.
+All API endpoints under `/api/` (except login and setup) require a `Bearer` token obtained from `POST /api/auth/login`.
 
-### List All Syncs
-```bash
-GET /syncs
-```
-Returns all configured syncs with their settings.
+### Authentication
 
-### Get Sync Status
 ```bash
-GET /syncs/{sync_id}/status
+# Login and capture token
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
 ```
-Returns detailed status including:
-- Last run time
-- Total synced objects
-- Failed objects
-- Recent run history
 
-### Execute Sync Now
-```bash
-POST /syncs/{sync_id}/execute
-```
-Immediately executes a sync (bypasses schedule).
+### Runtime Endpoints (authenticated)
 
-### Metrics (Prometheus)
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/health` | Daemon health status |
+| `GET` | `/api/vaults` | List configured vaults |
+| `GET` | `/api/syncs` | List all syncs with status |
+| `GET` | `/api/syncs/{sync_id}/status` | Detailed sync status |
+| `GET` | `/api/syncs/{sync_id}/runs` | Sync run history |
+| `POST` | `/api/syncs/{sync_id}/execute` | Trigger immediate sync |
+| `GET` | `/api/metrics` | Prometheus-compatible metrics |
+
+### Admin Configuration Endpoints (authenticated + admin role)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET/POST` | `/api/config/vaults` | List or create vaults |
+| `GET/PUT/DELETE` | `/api/config/vaults/{vault_id}` | Read, update, or delete a vault |
+| `GET/POST` | `/api/config/syncs` | List or create syncs |
+| `GET/PUT/DELETE` | `/api/config/syncs/{sync_id}` | Read, update, or delete a sync |
+| `GET/POST` | `/api/users` | List or create users |
+| `PUT/DELETE` | `/api/users/{user_id}` | Update or delete a user |
+
+### Public Endpoints (no auth)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/setup` | Check setup status |
+| `POST` | `/api/setup` | Complete first-time setup |
+| `POST` | `/api/auth/login` | Login and obtain token |
+| `GET` | `/` | Web UI dashboard |
+
+### Metrics Server (port 9090, no auth)
+
 ```bash
 GET /metrics
 ```
@@ -408,6 +427,7 @@ Returns Prometheus-compatible metrics:
 - `runner_running`: Runner status (0/1)
 
 ### Web UI Dashboard
+
 ```
 GET /
 ```
@@ -501,31 +521,37 @@ targets:
 ## Building Locally
 
 ### Prerequisites
-- Go 1.21+
-- SQLite development libraries
+- Go 1.26+
+- SQLite development libraries (required for CGO build: `libsqlite3-dev` on Debian/Ubuntu, or `sqlite` on macOS via Homebrew)
 
 ### Build Binary
 ```bash
 # Download dependencies
 go mod download
 
-# Build
+# Build (CGO_ENABLED=1 is required for the sqlite3 driver)
 CGO_ENABLED=1 go build -o bin/sync-daemon .
 
 # Run
-./bin/sync-daemon -config config.yaml -db sync.db
+./bin/sync-daemon
 ```
 
 ### Flags
 ```
-  -config string
-        Path to configuration file (default "config.yaml")
-  -db string
-        Path to SQLite database file (default "sync.db")
-  -dry-run
-        Validate config and test connections without starting
-  -version
+  --version
         Print version information and exit
+  -dry-run
+        Validate database connection and exit (no scheduler is started)
+```
+
+Configuration is stored in the database. Use environment variables to configure the daemon:
+
+```bash
+export DB_TYPE=sqlite         # sqlite (default), postgres, or mssql
+export DB_PATH=sync.db        # SQLite file path (default: sync.db)
+export MASTER_ENCRYPTION_KEY= # Required after first start
+export SERVER_PORT=8080       # HTTP API port (default: 8080)
+export METRICS_PORT=9090      # Prometheus metrics port (default: 9090)
 ```
 
 ### Building with Version Information
@@ -538,17 +564,17 @@ VERSION=$(git describe --tags --always --dirty)
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(git rev-parse HEAD)
 
-go build -ldflags "\
+CGO_ENABLED=1 go build -ldflags "\
   -X main.Version=${VERSION} \
   -X main.BuildDate=${BUILD_DATE} \
   -X main.GitCommit=${GIT_COMMIT}" \
   -o sync-daemon .
 
 # Or using a simple version tag
-go build -ldflags "-X main.Version=1.2.3" -o sync-daemon .
+CGO_ENABLED=1 go build -ldflags "-X main.Version=1.2.3" -o sync-daemon .
 
 # Check version
-./sync-daemon -version
+./sync-daemon --version
 # Output:
 # vaults-syncer version v1.2.3
 # Build date: 2026-02-23T22:00:00Z
@@ -558,13 +584,8 @@ go build -ldflags "-X main.Version=1.2.3" -o sync-daemon .
 ### Development
 
 ```bash
-# Test configuration without running
-./bin/sync-daemon -config config.yaml -db sync.db -dry-run
-
-# Run with debug logging (edit config.yaml)
-logging:
-  level: debug
-  format: json
+# Validate database connection only (no scheduler)
+./bin/sync-daemon -dry-run
 
 # Watch logs
 docker compose logs -f sync-daemon
