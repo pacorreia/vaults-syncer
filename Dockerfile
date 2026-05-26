@@ -65,6 +65,5 @@ EXPOSE 8080 9090
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget -qO- http://localhost:8080/health || exit 1
 
-# Default command
+# All configuration is provided via environment variables (DB_TYPE, DB_PATH, MASTER_ENCRYPTION_KEY, etc.)
 ENTRYPOINT ["/app/sync-daemon"]
-CMD ["-config", "/etc/sync/config.yaml", "-db", "/app/data/sync.db"]

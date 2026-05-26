@@ -6,7 +6,7 @@ import (
 	"github.com/pacorreia/vaults-syncer/config"
 )
 
-// BackendCapabilities describes what operations a backend supports
+// BackendCapabilities describes what operations a backend supports.
 type BackendCapabilities struct {
 	CanList   bool // Can list all secret names
 	CanGet    bool // Can retrieve secret values
@@ -16,7 +16,7 @@ type BackendCapabilities struct {
 }
 
 // Backend is the interface that all vault implementations must satisfy.
-// This abstraction allows supporting multiple vault types (Vaultwarden, HashiCorp Vault, Azure, AWS, etc.)
+// This abstraction allows supporting multiple vault types (Vaultwarden, HashiCorp Vault, Azure, AWS, etc.).
 // with a consistent API for the sync engine.
 type Backend interface {
 	// ListSecrets returns a list of all secret names in the vault
@@ -47,44 +47,44 @@ type GenericBackend struct {
 	client *Client
 }
 
-// NewGenericBackend creates a new GenericBackend wrapping the given client
+// NewGenericBackend creates a new GenericBackend wrapping the given client.
 func NewGenericBackend(client *Client) *GenericBackend {
 	return &GenericBackend{
 		client: client,
 	}
 }
 
-// ListSecrets implements Backend.ListSecrets
+// ListSecrets implements Backend.ListSecrets.
 func (b *GenericBackend) ListSecrets() ([]string, error) {
 	return b.client.ListSecrets()
 }
 
-// GetSecret implements Backend.GetSecret
+// GetSecret implements Backend.GetSecret.
 func (b *GenericBackend) GetSecret(name string) (*Secret, error) {
 	return b.client.GetSecret(name)
 }
 
-// SetSecret implements Backend.SetSecret
+// SetSecret implements Backend.SetSecret.
 func (b *GenericBackend) SetSecret(name, value string) error {
 	return b.client.SetSecret(name, value)
 }
 
-// DeleteSecret implements Backend.DeleteSecret
+// DeleteSecret implements Backend.DeleteSecret.
 func (b *GenericBackend) DeleteSecret(name string) error {
 	return b.client.DeleteSecret(name)
 }
 
-// TestConnection implements Backend.TestConnection
+// TestConnection implements Backend.TestConnection.
 func (b *GenericBackend) TestConnection() error {
 	return b.client.TestConnection()
 }
 
-// Type implements Backend.Type
+// Type implements Backend.Type.
 func (b *GenericBackend) Type() string {
 	return b.client.cfg.GetVaultType()
 }
 
-// Capabilities implements Backend.Capabilities
+// Capabilities implements Backend.Capabilities.
 func (b *GenericBackend) Capabilities() BackendCapabilities {
 	// Generic HTTP-based backends support all operations
 	return BackendCapabilities{

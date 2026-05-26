@@ -4,6 +4,17 @@
   "bump-minor-pre-major": false,
   "bump-patch-for-minor-pre-major": false,
   "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "changelog-sections": [
+    {"type": "feat",     "section": "Features",           "hidden": false},
+    {"type": "fix",      "section": "Bug Fixes",           "hidden": false},
+    {"type": "perf",     "section": "Performance",         "hidden": false},
+    {"type": "refactor", "section": "Code Refactoring",    "hidden": true},
+    {"type": "docs",     "section": "Documentation",       "hidden": true},
+    {"type": "chore",    "section": "Miscellaneous",       "hidden": true},
+    {"type": "ci",       "section": "CI/CD",               "hidden": true},
+    {"type": "test",     "section": "Tests",               "hidden": true}
+  ],
   "packages": {
     ".": {}
   }

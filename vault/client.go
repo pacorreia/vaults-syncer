@@ -16,7 +16,7 @@ import (
 	"github.com/pacorreia/vaults-syncer/config"
 )
 
-// Client handles communication with a vault
+// Client handles communication with a vault.
 type Client struct {
 	cfg          *config.VaultConfig
 	client       *http.Client
@@ -25,13 +25,13 @@ type Client struct {
 	oauthExpires time.Time
 }
 
-// Secret represents a secret with name and value
+// Secret represents a secret with name and value.
 type Secret struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
-// NewClient creates a new vault client
+// NewClient creates a new vault client.
 func NewClient(cfg *config.VaultConfig) *Client {
 	// Initialize optional fields with defaults
 	cfg.PopulateDefaults()
@@ -283,7 +283,7 @@ func isSuccessStatus(status int, allowed []int) bool {
 	return false
 }
 
-// GetSecret retrieves a secret from the vault
+// GetSecret retrieves a secret from the vault.
 func (c *Client) GetSecret(name string) (*Secret, error) {
 	vaultType := strings.ToLower(c.cfg.GetVaultType())
 	if vaultType == "vaultwarden" || vaultType == "bitwarden" {
@@ -420,7 +420,7 @@ func (c *Client) getSecretByOperation(name string) (*Secret, error) {
 	return &Secret{Name: name, Value: value}, nil
 }
 
-// ListSecrets lists all secrets in the vault
+// ListSecrets lists all secrets in the vault.
 func (c *Client) ListSecrets() ([]string, error) {
 	endpoint := c.operationEndpoint("list", "")
 	method := c.operationMethod("list")
@@ -459,7 +459,7 @@ func (c *Client) ListSecrets() ([]string, error) {
 	return names, nil
 }
 
-// SetSecret sets a secret in the vault
+// SetSecret sets a secret in the vault.
 func (c *Client) SetSecret(name, value string) error {
 	endpoint := c.operationEndpoint("set", name)
 
@@ -516,7 +516,7 @@ func (c *Client) SetSecret(name, value string) error {
 	return nil
 }
 
-// DeleteSecret deletes a secret from the vault
+// DeleteSecret deletes a secret from the vault.
 func (c *Client) DeleteSecret(name string) error {
 	endpoint := c.operationEndpoint("delete", name)
 	method := c.operationMethod("delete")
@@ -544,7 +544,7 @@ func (c *Client) DeleteSecret(name string) error {
 	return nil
 }
 
-// TestConnection tests if the connection to the vault works
+// TestConnection tests if the connection to the vault works.
 func (c *Client) TestConnection() error {
 	url := strings.TrimSuffix(c.cfg.Endpoint, "/")
 
@@ -571,7 +571,7 @@ func (c *Client) TestConnection() error {
 	return nil
 }
 
-// getOAuthToken exchanges OAuth 2.0 credentials for an access token
+// getOAuthToken exchanges OAuth 2.0 credentials for an access token.
 func (c *Client) getOAuthToken() (string, error) {
 	// Return cached token if still valid
 	if c.oauthToken != "" && time.Now().Before(c.oauthExpires) {
@@ -663,7 +663,7 @@ func (c *Client) getOAuthToken() (string, error) {
 	return token, nil
 }
 
-// getDefaultTokenEndpoint returns the default OAuth token endpoint for the vault type
+// getDefaultTokenEndpoint returns the default OAuth token endpoint for the vault type.
 func (c *Client) getDefaultTokenEndpoint() string {
 	vaultType := c.cfg.GetVaultType()
 
@@ -707,7 +707,7 @@ func (c *Client) getDefaultTokenEndpoint() string {
 	}
 }
 
-// encodeParams encodes a map of parameters as application/x-www-form-urlencoded
+// encodeParams encodes a map of parameters as application/x-www-form-urlencoded.
 func encodeParams(params map[string]string) string {
 	var pairs []string
 	for k, v := range params {
@@ -717,8 +717,8 @@ func encodeParams(params map[string]string) string {
 	return strings.Join(pairs, "&")
 }
 
-// addAuthHeaders adds authentication headers based on the configured auth method
-// Returns an error if authentication setup fails
+// addAuthHeaders adds authentication headers based on the configured auth method.
+// Returns an error if authentication setup fails.
 func (c *Client) addAuthHeaders(req *http.Request) error {
 	authMethod := c.cfg.Auth.Method
 	authHeaders := c.cfg.Auth.Headers
@@ -754,7 +754,7 @@ func (c *Client) addAuthHeaders(req *http.Request) error {
 	return nil
 }
 
-// addCustomHeaders adds custom headers from config
+// addCustomHeaders adds custom headers from config.
 func (c *Client) addCustomHeaders(req *http.Request) {
 	for k, v := range c.cfg.Headers {
 		req.Header.Set(k, v)

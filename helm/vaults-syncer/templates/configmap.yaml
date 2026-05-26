@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vaults-syncer.fullname" . }}
+  labels:
+    {{- include "vaults-syncer.labels" . | nindent 4 }}
+data:
+  DB_TYPE: {{ .Values.config.dbType | quote }}
+  DB_PATH: {{ .Values.config.dbPath | quote }}
+  SERVER_PORT: {{ .Values.config.serverPort | quote }}
+  METRICS_PORT: {{ .Values.config.metricsPort | quote }}

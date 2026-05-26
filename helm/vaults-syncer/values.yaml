@@ -1,0 +1,118 @@
+# Default values for vaults-syncer.
+# Override these values in a custom values file:
+#   helm install vaults-syncer ./helm/vaults-syncer -f my-values.yaml
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/pacorreia/vaults-syncer
+  pullPolicy: IfNotPresent
+  # Overrides the image tag. Defaults to Chart.appVersion when not set.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Create a ServiceAccount for the pod.
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8080
+  metricsPort: 9090
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  # nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: vaults-syncer.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: vaults-syncer-tls
+  #   hosts:
+  #     - vaults-syncer.local
+
+resources: {}
+# requests:
+#   cpu: 100m
+#   memory: 64Mi
+# limits:
+#   cpu: 500m
+#   memory: 256Mi
+
+# Application configuration
+config:
+  # Database backend: sqlite | postgres | mssql
+  dbType: sqlite
+  # SQLite file path (used when dbType=sqlite)
+  dbPath: /app/data/sync.db
+  serverPort: "8080"
+  metricsPort: "9090"
+
+# Sensitive values – stored in a Kubernetes Secret
+secrets:
+  # REQUIRED: 32-byte base64url master encryption key.
+  # Generated on first start; set here for subsequent deployments.
+  masterEncryptionKey: ""
+  # PostgreSQL / MSSQL connection string (required when config.dbType != sqlite)
+  dbDsn: ""
+  # Optionally reference a pre-existing Secret instead of the chart-managed one.
+  # When set, masterEncryptionKey and dbDsn above are ignored.
+  existingSecret: ""
+
+# Persistent volume for SQLite data
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  # Mount path inside the container
+  mountPath: /app/data
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

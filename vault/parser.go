@@ -8,13 +8,13 @@ import (
 	"github.com/pacorreia/vaults-syncer/config"
 )
 
-// ResponseParser defines the interface for extracting data from vault responses
+// ResponseParser defines the interface for extracting data from vault responses.
 type ResponseParser interface {
 	ParseList(body []byte) ([]string, error)
 	ParseGetValue(body []byte) (string, error)
 }
 
-// JsonPathParser extracts fields from responses using simple JSONPath-like notation
+// JsonPathParser extracts fields from responses using simple JSONPath-like notation.
 type JsonPathParser struct {
 	ListPath   string // Path to array of items (e.g., "data" or "value.items")
 	NameField  string // Field containing secret name (e.g., "name" or "id")
@@ -22,7 +22,7 @@ type JsonPathParser struct {
 	ValueField string // Simple field name for value (alternative to ValuePath)
 }
 
-// ParseList extracts a list of secret names from a response
+// ParseList extracts a list of secret names from a response.
 func (p *JsonPathParser) ParseList(body []byte) ([]string, error) {
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
@@ -73,7 +73,7 @@ func (p *JsonPathParser) ParseList(body []byte) ([]string, error) {
 	return names, nil
 }
 
-// ParseGetValue extracts a single value from a response
+// ParseGetValue extracts a single value from a response.
 func (p *JsonPathParser) ParseGetValue(body []byte) (string, error) {
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
@@ -105,7 +105,7 @@ func (p *JsonPathParser) ParseGetValue(body []byte) (string, error) {
 	return "", fmt.Errorf("could not extract value from response")
 }
 
-// getValueAtPath navigates through nested JSON using dot notation
+// getValueAtPath navigates through nested JSON using dot notation.
 func (p *JsonPathParser) getValueAtPath(data interface{}, path string) (interface{}, error) {
 	parts := strings.Split(path, ".")
 	current := data
@@ -130,7 +130,7 @@ func (p *JsonPathParser) getValueAtPath(data interface{}, path string) (interfac
 	return current, nil
 }
 
-// valueToString converts various types to string
+// valueToString converts various types to string.
 func (p *JsonPathParser) valueToString(val interface{}) string {
 	switch v := val.(type) {
 	case string:
@@ -146,7 +146,7 @@ func (p *JsonPathParser) valueToString(val interface{}) string {
 	}
 }
 
-// GetParserForVaultType returns an appropriate parser based on vault type
+// GetParserForVaultType returns an appropriate parser based on vault type.
 func GetParserForVaultType(vaultType string) ResponseParser {
 	switch strings.ToLower(vaultType) {
 	case "vaultwarden":
@@ -201,7 +201,7 @@ func GetParserForVaultType(vaultType string) ResponseParser {
 	}
 }
 
-// NewParserFromConfig creates a parser from configuration
+// NewParserFromConfig creates a parser from configuration.
 func NewParserFromConfig(cfg *config.ResponseParserConfig) ResponseParser {
 	if cfg == nil {
 		// Use generic defaults

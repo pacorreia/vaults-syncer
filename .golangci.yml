@@ -1,0 +1,63 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - ineffassign
+    - misspell
+    - godot
+    - noctx
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+      exclude-functions:
+        # Encoding to http.ResponseWriter rarely fails once headers are written;
+        # the error cannot be surfaced to the client at that point.
+        - (*encoding/json.Encoder).Encode
+        - (net/http.ResponseWriter).Write
+        # Deferred Close on the application DB is best-effort cleanup.
+        - (*storage.Store).Close
+    misspell:
+      locale: US
+  exclusions:
+    rules:
+      # Test files: errcheck, noctx, and staticcheck violations are pervasive
+      # and acceptable in test helpers (defer cleanup, httptest.NewRequest, etc.).
+      - path: "_test\\.go"
+        linters:
+          - godot
+          - errcheck
+          - noctx
+          - staticcheck
+      # vault/client.go pre-dates context-aware DB/HTTP calls; tracked separately.
+      - path: "vault/client\\.go"
+        linters:
+          - noctx
+          - errcheck
+      # sync/engine.go: fire-and-forget storage calls are intentional (QF1003);
+      # pre-existing godot comment style not changed to avoid noise.
+      - path: "sync/engine\\.go"
+        linters:
+          - errcheck
+          - staticcheck
+          - godot
+      # storage layer: the whole package uses non-context DB calls consistently.
+      - path: "storage/"
+        linters:
+          - noctx
+          - errcheck
+
+formatters:
+  enable:
+    - goimports
+  exclusions:
+    paths:
+      - vendor
+      - testdata
+      - site
