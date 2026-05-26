@@ -16,6 +16,7 @@ on:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
+      - '.github/workflows/go-ci.yml'
 
 permissions:
   contents: write
