@@ -41,7 +41,8 @@ type UserStore struct {
 func (s *UserStore) CreateUser(username, passwordHash, role string) (*User, error) {
 	now := time.Now().Unix()
 	_, err := s.db.Exec(
-		`INSERT INTO users (username, password_hash, role, created_at, updated_at) VALUES (?,?,?,?,?)`,
+		fmt.Sprintf(`INSERT INTO users (username, password_hash, role, created_at, updated_at) VALUES (%s)`,
+			placeholders(s.dbType, 1, 5)),
 		username, passwordHash, role, now, now,
 	)
 	if err != nil {
@@ -54,7 +55,8 @@ func (s *UserStore) CreateUser(username, passwordHash, role string) (*User, erro
 func (s *UserStore) GetUserByUsername(username string) (*User, error) {
 	u := &User{}
 	err := s.db.QueryRow(
-		`SELECT id, username, password_hash, role, created_at, updated_at FROM users WHERE username=?`,
+		fmt.Sprintf(`SELECT id, username, password_hash, role, created_at, updated_at FROM users WHERE username=%s`,
+			placeholder(s.dbType, 1)),
 		username,
 	).Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.CreatedAt, &u.UpdatedAt)
 	if err == sql.ErrNoRows {
@@ -70,7 +72,8 @@ func (s *UserStore) GetUserByUsername(username string) (*User, error) {
 func (s *UserStore) GetUserByID(id int64) (*User, error) {
 	u := &User{}
 	err := s.db.QueryRow(
-		`SELECT id, username, password_hash, role, created_at, updated_at FROM users WHERE id=?`,
+		fmt.Sprintf(`SELECT id, username, password_hash, role, created_at, updated_at FROM users WHERE id=%s`,
+			placeholder(s.dbType, 1)),
 		id,
 	).Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.CreatedAt, &u.UpdatedAt)
 	if err == sql.ErrNoRows {
@@ -107,7 +110,8 @@ func (s *UserStore) ListUsers() ([]*User, error) {
 func (s *UserStore) UpdateUserPassword(userID int64, passwordHash string) error {
 	now := time.Now().Unix()
 	_, err := s.db.Exec(
-		`UPDATE users SET password_hash=?, updated_at=? WHERE id=?`,
+		fmt.Sprintf(`UPDATE users SET password_hash=%s, updated_at=%s WHERE id=%s`,
+			placeholder(s.dbType, 1), placeholder(s.dbType, 2), placeholder(s.dbType, 3)),
 		passwordHash, now, userID,
 	)
 	if err != nil {
@@ -120,7 +124,8 @@ func (s *UserStore) UpdateUserPassword(userID int64, passwordHash string) error 
 func (s *UserStore) UpdateUserRole(userID int64, role string) error {
 	now := time.Now().Unix()
 	_, err := s.db.Exec(
-		`UPDATE users SET role=?, updated_at=? WHERE id=?`,
+		fmt.Sprintf(`UPDATE users SET role=%s, updated_at=%s WHERE id=%s`,
+			placeholder(s.dbType, 1), placeholder(s.dbType, 2), placeholder(s.dbType, 3)),
 		role, now, userID,
 	)
 	if err != nil {
@@ -132,10 +137,16 @@ func (s *UserStore) UpdateUserRole(userID int64, role string) error {
 // DeleteUser removes a user and their sessions.
 func (s *UserStore) DeleteUser(userID int64) error {
 	// Sessions reference users; delete sessions first for DBs without CASCADE.
-	if _, err := s.db.Exec(`DELETE FROM sessions WHERE user_id=?`, userID); err != nil {
+	if _, err := s.db.Exec(
+		fmt.Sprintf(`DELETE FROM sessions WHERE user_id=%s`, placeholder(s.dbType, 1)),
+		userID,
+	); err != nil {
 		return fmt.Errorf("storage: DeleteUser sessions: %w", err)
 	}
-	if _, err := s.db.Exec(`DELETE FROM users WHERE id=?`, userID); err != nil {
+	if _, err := s.db.Exec(
+		fmt.Sprintf(`DELETE FROM users WHERE id=%s`, placeholder(s.dbType, 1)),
+		userID,
+	); err != nil {
 		return fmt.Errorf("storage: DeleteUser: %w", err)
 	}
 	return nil
@@ -158,7 +169,8 @@ func (s *UserStore) HasUsers() (bool, error) {
 func (s *UserStore) CreateSession(userID int64, token string, expiresAt int64) (*Session, error) {
 	now := time.Now().Unix()
 	_, err := s.db.Exec(
-		`INSERT INTO sessions (user_id, token, expires_at, created_at) VALUES (?,?,?,?)`,
+		fmt.Sprintf(`INSERT INTO sessions (user_id, token, expires_at, created_at) VALUES (%s)`,
+			placeholders(s.dbType, 1, 4)),
 		userID, token, expiresAt, now,
 	)
 	if err != nil {
@@ -172,7 +184,8 @@ func (s *UserStore) GetSessionByToken(token string) (*Session, error) {
 	now := time.Now().Unix()
 	sess := &Session{}
 	err := s.db.QueryRow(
-		`SELECT id, user_id, token, expires_at, created_at FROM sessions WHERE token=? AND expires_at>?`,
+		fmt.Sprintf(`SELECT id, user_id, token, expires_at, created_at FROM sessions WHERE token=%s AND expires_at>%s`,
+			placeholder(s.dbType, 1), placeholder(s.dbType, 2)),
 		token, now,
 	).Scan(&sess.ID, &sess.UserID, &sess.Token, &sess.ExpiresAt, &sess.CreatedAt)
 	if err == sql.ErrNoRows {
@@ -186,7 +199,10 @@ func (s *UserStore) GetSessionByToken(token string) (*Session, error) {
 
 // DeleteSession removes a session by token (logout).
 func (s *UserStore) DeleteSession(token string) error {
-	_, err := s.db.Exec(`DELETE FROM sessions WHERE token=?`, token)
+	_, err := s.db.Exec(
+		fmt.Sprintf(`DELETE FROM sessions WHERE token=%s`, placeholder(s.dbType, 1)),
+		token,
+	)
 	if err != nil {
 		return fmt.Errorf("storage: DeleteSession: %w", err)
 	}
@@ -196,7 +212,10 @@ func (s *UserStore) DeleteSession(token string) error {
 // DeleteExpiredSessions removes all sessions that have passed their expiry time.
 func (s *UserStore) DeleteExpiredSessions() error {
 	now := time.Now().Unix()
-	_, err := s.db.Exec(`DELETE FROM sessions WHERE expires_at<=?`, now)
+	_, err := s.db.Exec(
+		fmt.Sprintf(`DELETE FROM sessions WHERE expires_at<=%s`, placeholder(s.dbType, 1)),
+		now,
+	)
 	if err != nil {
 		return fmt.Errorf("storage: DeleteExpiredSessions: %w", err)
 	}

@@ -2,9 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
-	"strings"
 
 	"github.com/pacorreia/vaults-syncer/auth"
 )
@@ -41,7 +41,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.authSvc.Login(req.Username, req.Password)
 	if err != nil {
-		if strings.Contains(err.Error(), "invalid") {
+		if errors.Is(err, auth.ErrInvalidCredentials) {
 			jsonError(w, "invalid credentials", http.StatusUnauthorized)
 		} else {
 			h.logger.Error("login error", slog.String("error", err.Error()))

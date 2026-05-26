@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -73,8 +74,12 @@ func (h *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authSvc.CreateUser(req.Username, req.Password, role)
 	if err != nil {
-		h.logger.Error("create user failed", slog.String("error", err.Error()))
-		jsonError(w, "failed to create user", http.StatusInternalServerError)
+		if errors.Is(err, auth.ErrUserExists) {
+			jsonError(w, "username already exists", http.StatusConflict)
+		} else {
+			h.logger.Error("create user failed", slog.String("error", err.Error()))
+			jsonError(w, "failed to create user", http.StatusInternalServerError)
+		}
 		return
 	}
 

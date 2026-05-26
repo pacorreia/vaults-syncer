@@ -546,11 +546,25 @@ func (s *SyncObjectStore) GetSyncRuns(syncID string, limit int) ([]*SyncRun, err
 	if limit <= 0 {
 		limit = 100
 	}
-	rows, err := s.db.Query(
-		`SELECT id, sync_id, status, total_synced, total_failed, duration_ms, error_message, created_at
-FROM syncs_run WHERE sync_id=? ORDER BY created_at DESC LIMIT ?`,
-		syncID, limit,
-	)
+
+	var query string
+	var args []any
+	if s.dbType == DBTypeMSSQL {
+		// MSSQL does not support LIMIT; use TOP and @p placeholders.
+		query = fmt.Sprintf(
+			`SELECT TOP (%s) id, sync_id, status, total_synced, total_failed, duration_ms, error_message, created_at
+FROM syncs_run WHERE sync_id=%s ORDER BY created_at DESC`,
+			placeholder(s.dbType, 1), placeholder(s.dbType, 2))
+		args = []any{limit, syncID}
+	} else {
+		query = fmt.Sprintf(
+			`SELECT id, sync_id, status, total_synced, total_failed, duration_ms, error_message, created_at
+FROM syncs_run WHERE sync_id=%s ORDER BY created_at DESC LIMIT %s`,
+			placeholder(s.dbType, 1), placeholder(s.dbType, 2))
+		args = []any{syncID, limit}
+	}
+
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

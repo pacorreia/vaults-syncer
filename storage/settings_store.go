@@ -17,7 +17,8 @@ func (s *SettingsStore) SetSetting(key, value string) error {
 	now := time.Now().Unix()
 	// Portable upsert.
 	res, err := s.db.Exec(
-		`UPDATE app_settings SET value=?, updated_at=? WHERE key=?`,
+		fmt.Sprintf(`UPDATE app_settings SET value=%s, updated_at=%s WHERE key=%s`,
+			placeholder(s.dbType, 1), placeholder(s.dbType, 2), placeholder(s.dbType, 3)),
 		value, now, key,
 	)
 	if err != nil {
@@ -29,7 +30,8 @@ func (s *SettingsStore) SetSetting(key, value string) error {
 	}
 	if n == 0 {
 		_, err = s.db.Exec(
-			`INSERT INTO app_settings (key, value, created_at, updated_at) VALUES (?,?,?,?)`,
+			fmt.Sprintf(`INSERT INTO app_settings (key, value, created_at, updated_at) VALUES (%s)`,
+				placeholders(s.dbType, 1, 4)),
 			key, value, now, now,
 		)
 		if err != nil {
@@ -42,7 +44,10 @@ func (s *SettingsStore) SetSetting(key, value string) error {
 // GetSetting retrieves a setting value. Returns ("", false, nil) if the key does not exist.
 func (s *SettingsStore) GetSetting(key string) (string, bool, error) {
 	var value string
-	err := s.db.QueryRow(`SELECT value FROM app_settings WHERE key=?`, key).Scan(&value)
+	err := s.db.QueryRow(
+		fmt.Sprintf(`SELECT value FROM app_settings WHERE key=%s`, placeholder(s.dbType, 1)),
+		key,
+	).Scan(&value)
 	if err == sql.ErrNoRows {
 		return "", false, nil
 	}

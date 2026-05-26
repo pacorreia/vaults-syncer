@@ -182,11 +182,6 @@ func run(args []string, deps appDeps) error {
 			return
 		}
 
-		// Stop the old runner. cron.Stop() blocks until all running jobs complete,
-		// ensuring no goroutines are still holding a reference to the old config
-		// before we create the new engine and update the handler's view of the config.
-		runner.Stop()
-
 		newEngine, err := deps.newEngine(cfg, store, logger)
 		if err != nil {
 			logger.Error("engine reload failed", slog.String("error", err.Error()))
@@ -198,6 +193,13 @@ func run(args []string, deps appDeps) error {
 			logger.Error("runner restart failed", slog.String("error", err.Error()))
 			return
 		}
+
+		// New runner is running; stop the old one only after the new one has started
+		// successfully so the application is never left without a running runner.
+		// cron.Stop() blocks until all running jobs complete, ensuring no goroutines
+		// are still holding a reference to the old engine before we swap.
+		runner.Stop()
+		runner = newRunner
 
 		// Update the shared config atomically (mutex-protected inside SetConfig).
 		// In-flight HTTP requests reading the old config via apiHandler.getConfig()

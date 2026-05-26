@@ -98,7 +98,10 @@ func (s *ConfigStore) ListVaults() ([]config.VaultConfig, error) {
 
 // DeleteVault removes a vault configuration by ID.
 func (s *ConfigStore) DeleteVault(id string) error {
-	_, err := s.db.Exec(`DELETE FROM config_vaults WHERE id=?`, id)
+	_, err := s.db.Exec(
+		fmt.Sprintf(`DELETE FROM config_vaults WHERE id=%s`, placeholder(s.dbType, 1)),
+		id,
+	)
 	if err != nil {
 		return fmt.Errorf("storage: DeleteVault: %w", err)
 	}
@@ -159,7 +162,10 @@ func (s *ConfigStore) ListSyncs() ([]config.SyncConfig, error) {
 
 // DeleteSync removes a sync configuration by ID.
 func (s *ConfigStore) DeleteSync(id string) error {
-	_, err := s.db.Exec(`DELETE FROM config_syncs WHERE id=?`, id)
+	_, err := s.db.Exec(
+		fmt.Sprintf(`DELETE FROM config_syncs WHERE id=%s`, placeholder(s.dbType, 1)),
+		id,
+	)
 	if err != nil {
 		return fmt.Errorf("storage: DeleteSync: %w", err)
 	}
@@ -191,7 +197,8 @@ func (s *ConfigStore) LoadConfig(serverCfg config.ServerConfig, loggingCfg confi
 func (s *ConfigStore) upsertConfigRow(table, id, jsonValue string) error {
 	now := time.Now().Unix()
 	res, err := s.db.Exec(
-		fmt.Sprintf(`UPDATE %s SET config_json=?, updated_at=? WHERE id=?`, table),
+		fmt.Sprintf(`UPDATE %s SET config_json=%s, updated_at=%s WHERE id=%s`,
+			table, placeholder(s.dbType, 1), placeholder(s.dbType, 2), placeholder(s.dbType, 3)),
 		jsonValue, now, id,
 	)
 	if err != nil {
@@ -203,7 +210,8 @@ func (s *ConfigStore) upsertConfigRow(table, id, jsonValue string) error {
 	}
 	if n == 0 {
 		_, err = s.db.Exec(
-			fmt.Sprintf(`INSERT INTO %s (id, config_json, created_at, updated_at) VALUES (?,?,?,?)`, table),
+			fmt.Sprintf(`INSERT INTO %s (id, config_json, created_at, updated_at) VALUES (%s)`,
+				table, placeholders(s.dbType, 1, 4)),
 			id, jsonValue, now, now,
 		)
 		if err != nil {
@@ -216,7 +224,7 @@ func (s *ConfigStore) upsertConfigRow(table, id, jsonValue string) error {
 func (s *ConfigStore) getConfigJSON(table, id string) (string, error) {
 	var raw string
 	err := s.db.QueryRow(
-		fmt.Sprintf(`SELECT config_json FROM %s WHERE id=?`, table), id,
+		fmt.Sprintf(`SELECT config_json FROM %s WHERE id=%s`, table, placeholder(s.dbType, 1)), id,
 	).Scan(&raw)
 	if err == sql.ErrNoRows {
 		return "", nil

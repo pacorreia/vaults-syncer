@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -82,8 +83,12 @@ func (h *SetupHandler) CompleteSetup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.authSvc.SetupAdmin(req.AdminUsername, req.AdminPassword); err != nil {
-		h.logger.Error("setup admin creation failed", slog.String("error", err.Error()))
-		jsonError(w, "failed to create admin account", http.StatusInternalServerError)
+		if errors.Is(err, auth.ErrUserExists) {
+			jsonError(w, "username already exists", http.StatusConflict)
+		} else {
+			h.logger.Error("setup admin creation failed", slog.String("error", err.Error()))
+			jsonError(w, "failed to create admin account", http.StatusInternalServerError)
+		}
 		return
 	}
 

@@ -101,7 +101,7 @@ All configuration is stored in a database. Select a backend by setting environme
 | `DB_TYPE` | `sqlite` \| `postgres` \| `mssql` | `sqlite` |
 | `DB_PATH` | SQLite file path | `sync.db` |
 | `DB_DSN` | PostgreSQL/MSSQL connection string | — |
-| `MASTER_ENCRYPTION_KEY` | 32-byte hex key for encrypting vault credentials | generated on first start |
+| `MASTER_ENCRYPTION_KEY` | URL-safe base64-encoded 32-byte key for encrypting vault credentials | generated on first start |
 | `SERVER_PORT` | HTTP listen port | `8080` |
 | `METRICS_PORT` | Prometheus metrics port | `9090` |
 
