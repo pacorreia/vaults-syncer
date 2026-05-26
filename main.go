@@ -201,11 +201,10 @@ func run(args []string, deps appDeps) error {
 		runner.Stop()
 		runner = newRunner
 
-		// Update the shared config atomically (mutex-protected inside SetConfig).
-		// In-flight HTTP requests reading the old config via apiHandler.getConfig()
-		// will see either the old or new config atomically; this is acceptable for
-		// read-only status/list endpoints that do not mutate state.
+		// Update the shared config and runner atomically so that in-flight API
+		// requests (e.g. ExecuteSync) use the new engine with the latest vault backends.
 		apiHandler.SetConfig(cfg)
+		apiHandler.SetRunner(newRunner)
 		logger.Info("configuration reloaded from database",
 			slog.Int("vaults", len(cfg.Vaults)),
 			slog.Int("syncs", len(cfg.Syncs)),
@@ -226,13 +225,13 @@ func run(args []string, deps appDeps) error {
 	authedAPIMux := http.NewServeMux()
 	authedAPIMux.HandleFunc("POST /api/auth/logout", authApiHandler.Logout)
 	authedAPIMux.HandleFunc("GET /api/auth/me", authApiHandler.Me)
-	authedAPIMux.HandleFunc("GET /health", apiHandler.Health)
-	authedAPIMux.HandleFunc("GET /vaults", apiHandler.ListVaults)
-	authedAPIMux.HandleFunc("GET /syncs", apiHandler.ListSyncs)
-	authedAPIMux.HandleFunc("GET /syncs/{sync_id}/status", apiHandler.GetSyncStatus)
-	authedAPIMux.HandleFunc("GET /syncs/{sync_id}/runs", apiHandler.GetSyncRuns)
-	authedAPIMux.HandleFunc("POST /syncs/{sync_id}/execute", apiHandler.ExecuteSync)
-	authedAPIMux.HandleFunc("GET /metrics", apiHandler.GetMetrics)
+	authedAPIMux.HandleFunc("GET /api/health", apiHandler.Health)
+	authedAPIMux.HandleFunc("GET /api/vaults", apiHandler.ListVaults)
+	authedAPIMux.HandleFunc("GET /api/syncs", apiHandler.ListSyncs)
+	authedAPIMux.HandleFunc("GET /api/syncs/{sync_id}/status", apiHandler.GetSyncStatus)
+	authedAPIMux.HandleFunc("GET /api/syncs/{sync_id}/runs", apiHandler.GetSyncRuns)
+	authedAPIMux.HandleFunc("POST /api/syncs/{sync_id}/execute", apiHandler.ExecuteSync)
+	authedAPIMux.HandleFunc("GET /api/metrics", apiHandler.GetMetrics)
 
 	// Admin-only API sub-mux.
 	adminMux := http.NewServeMux()

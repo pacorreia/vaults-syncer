@@ -14,11 +14,11 @@ import (
 
 // Handler manages HTTP handlers
 type Handler struct {
-	runner Runner
-	store  *storage.Store
-	cfg    *config.Config
-	cfgMu  sync.RWMutex
-	logger *slog.Logger
+	runner  Runner
+	store   *storage.Store
+	cfg     *config.Config
+	cfgMu   sync.RWMutex
+	logger  *slog.Logger
 }
 
 // Runner defines the runner behaviors required by the API handler.
@@ -46,11 +46,27 @@ func (h *Handler) SetConfig(cfg *config.Config) {
 	h.cfg = cfg
 }
 
+// SetRunner atomically replaces the active runner. It must be called after
+// reloadConfig so that ExecuteSync uses the engine that knows about the latest
+// vault backends.
+func (h *Handler) SetRunner(r Runner) {
+	h.cfgMu.Lock()
+	defer h.cfgMu.Unlock()
+	h.runner = r
+}
+
 // getConfig returns the current configuration (thread-safe).
 func (h *Handler) getConfig() *config.Config {
 	h.cfgMu.RLock()
 	defer h.cfgMu.RUnlock()
 	return h.cfg
+}
+
+// getRunner returns the current runner (thread-safe).
+func (h *Handler) getRunner() Runner {
+	h.cfgMu.RLock()
+	defer h.cfgMu.RUnlock()
+	return h.runner
 }
 
 // Health handles health check requests
@@ -61,7 +77,7 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string]interface{}{
 		"status":  "healthy",
-		"running": h.runner.IsRunning(),
+		"running": h.getRunner().IsRunning(),
 		"syncs":   len(cfg.Syncs),
 		"vaults":  len(cfg.Vaults),
 	}
@@ -77,7 +93,7 @@ func (h *Handler) GetSyncStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	status, err := h.runner.GetSyncStatus(syncID, h.store)
+	status, err := h.getRunner().GetSyncStatus(syncID, h.store)
 	if err != nil {
 		h.logger.Error("failed to get sync status",
 			slog.String("sync_id", syncID),
@@ -128,9 +144,10 @@ func (h *Handler) ExecuteSync(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cfg := h.getConfig()
+	runner := h.getRunner()
 	// Execute sync asynchronously
 	go func() {
-		if err := h.runner.ExecuteSyncNow(syncID, cfg); err != nil {
+		if err := runner.ExecuteSyncNow(syncID, cfg); err != nil {
 			h.logger.Error("manual sync execution failed",
 				slog.String("sync_id", syncID),
 				slog.String("error", err.Error()),
