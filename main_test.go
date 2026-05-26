@@ -37,15 +37,6 @@ func setTestMasterKey(t *testing.T) {
 	t.Cleanup(func() { os.Setenv("MASTER_ENCRYPTION_KEY", old) })
 }
 
-// markDBReady sets the master_key_initialised flag so the run function doesn't
-// print the first-start banner.
-func markDBReady(t *testing.T, store *storage.Store) {
-	t.Helper()
-	if err := store.SetSetting("master_key_initialised", "true"); err != nil {
-		t.Fatalf("markDBReady: %v", err)
-	}
-}
-
 type fakeEngine struct{}
 
 func (f *fakeEngine) ExecuteSync(cfg *config.SyncConfig) error { return nil }

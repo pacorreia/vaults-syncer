@@ -12,7 +12,7 @@ import (
 	"github.com/pacorreia/vaults-syncer/storage"
 )
 
-// Runner manages scheduled and manual sync execution
+// Runner manages scheduled and manual sync execution.
 type Runner struct {
 	engine  EngineRunner
 	cron    *cron.Cron
@@ -27,7 +27,7 @@ type EngineRunner interface {
 	ExecuteSync(syncCfg *config.SyncConfig) error
 }
 
-// NewRunner creates a new sync runner
+// NewRunner creates a new sync runner.
 func NewRunner(engine EngineRunner, logger *slog.Logger) *Runner {
 	return &Runner{
 		engine:  engine,
@@ -37,7 +37,7 @@ func NewRunner(engine EngineRunner, logger *slog.Logger) *Runner {
 	}
 }
 
-// Start starts the runner and schedules all enabled syncs
+// Start starts the runner and schedules all enabled syncs.
 func (r *Runner) Start(cfg *config.Config) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -91,7 +91,7 @@ func (r *Runner) Start(cfg *config.Config) error {
 	return nil
 }
 
-// Stop stops the runner
+// Stop stops the runner.
 func (r *Runner) Stop() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -105,7 +105,7 @@ func (r *Runner) Stop() {
 	r.logger.Info("sync runner stopped")
 }
 
-// ExecuteSyncNow immediately executes a sync, bypassing schedule
+// ExecuteSyncNow immediately executes a sync, bypassing schedule.
 func (r *Runner) ExecuteSyncNow(syncID string, cfg *config.Config) error {
 	var syncCfg *config.SyncConfig
 	for i := range cfg.Syncs {
@@ -122,7 +122,7 @@ func (r *Runner) ExecuteSyncNow(syncID string, cfg *config.Config) error {
 	return r.engine.ExecuteSync(syncCfg)
 }
 
-// GetSyncStatus returns the status of a sync
+// GetSyncStatus returns the status of a sync.
 func (r *Runner) GetSyncStatus(syncID string, store *storage.Store) (map[string]interface{}, error) {
 	runs, err := store.GetSyncRuns(syncID, 10)
 	if err != nil {
@@ -184,14 +184,14 @@ func (r *Runner) GetNextRun(syncID string) *time.Time {
 	return &next
 }
 
-// IsRunning returns whether the runner is actively running
+// IsRunning returns whether the runner is actively running.
 func (r *Runner) IsRunning() bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.running
 }
 
-// GetEntries returns all scheduled sync entries
+// GetEntries returns all scheduled sync entries.
 func (r *Runner) GetEntries() map[string]cron.Entry {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

@@ -42,7 +42,6 @@ type setupRequest struct {
 }
 
 // GetSetupStatus reports whether first-run setup has been completed.
-// GET /api/setup
 func (h *SetupHandler) GetSetupStatus(w http.ResponseWriter, r *http.Request) {
 	complete, err := h.store.IsSetupComplete()
 	if err != nil {
@@ -55,7 +54,6 @@ func (h *SetupHandler) GetSetupStatus(w http.ResponseWriter, r *http.Request) {
 
 // CompleteSetup performs the first-run setup: creates the admin account and
 // marks setup as complete.
-// POST /api/setup
 func (h *SetupHandler) CompleteSetup(w http.ResponseWriter, r *http.Request) {
 	complete, err := h.store.IsSetupComplete()
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 	"github.com/pacorreia/vaults-syncer/storage"
 )
 
-// Handler manages HTTP handlers
+// Handler manages HTTP handlers.
 type Handler struct {
 	runner Runner
 	store  *storage.Store
@@ -28,7 +28,7 @@ type Runner interface {
 	ExecuteSyncNow(syncID string, cfg *config.Config) error
 }
 
-// NewHandler creates a new handler
+// NewHandler creates a new handler.
 func NewHandler(runner Runner, store *storage.Store, cfg *config.Config, logger *slog.Logger) *Handler {
 	return &Handler{
 		runner: runner,
@@ -77,7 +77,7 @@ func (h *Handler) getState() (Runner, *config.Config) {
 	return h.runner, h.cfg
 }
 
-// Health handles health check requests
+// Health handles health check requests.
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	cfg := h.getConfig()
 	w.Header().Set("Content-Type", "application/json")
@@ -93,7 +93,7 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// GetSyncStatus handles status requests for a specific sync
+// GetSyncStatus handles status requests for a specific sync.
 func (h *Handler) GetSyncStatus(w http.ResponseWriter, r *http.Request) {
 	syncID := r.PathValue("sync_id")
 	if syncID == "" {
@@ -116,7 +116,7 @@ func (h *Handler) GetSyncStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(status)
 }
 
-// ListSyncs handles listing all syncs
+// ListSyncs handles listing all syncs.
 func (h *Handler) ListSyncs(w http.ResponseWriter, r *http.Request) {
 	cfg := h.getConfig()
 	syncs := make([]map[string]interface{}, 0)
@@ -138,7 +138,7 @@ func (h *Handler) ListSyncs(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{"syncs": syncs})
 }
 
-// ExecuteSync handles manual sync execution
+// ExecuteSync handles manual sync execution.
 func (h *Handler) ExecuteSync(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -170,7 +170,7 @@ func (h *Handler) ExecuteSync(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetMetrics handles Prometheus-style metrics requests
+// GetMetrics handles Prometheus-style metrics requests.
 func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
 	cfg := h.getConfig()
 	w.Header().Set("Content-Type", "text/plain")
@@ -201,7 +201,7 @@ func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(metrics))
 }
 
-// ListVaults handles listing all configured vaults (without sensitive auth data)
+// ListVaults handles listing all configured vaults (without sensitive auth data).
 func (h *Handler) ListVaults(w http.ResponseWriter, r *http.Request) {
 	cfg := h.getConfig()
 	vaults := make([]map[string]interface{}, 0, len(cfg.Vaults))
@@ -217,7 +217,7 @@ func (h *Handler) ListVaults(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{"vaults": vaults})
 }
 
-// GetSyncRuns handles retrieving the run history for a specific sync
+// GetSyncRuns handles retrieving the run history for a specific sync.
 func (h *Handler) GetSyncRuns(w http.ResponseWriter, r *http.Request) {
 	syncID := r.PathValue("sync_id")
 	if syncID == "" {

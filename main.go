@@ -23,8 +23,8 @@ import (
 	syncp "github.com/pacorreia/vaults-syncer/sync"
 )
 
-// Version information. Set via ldflags at build time:
-// go build -ldflags "-X main.Version=1.0.0 -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=$(git rev-parse HEAD)"
+// Version information. Set at build time with ldflags
+// (e.g. -X main.Version=1.0.0 -X main.BuildDate=... -X main.GitCommit=...).
 var (
 	Version   = "dev"
 	BuildDate = "unknown"
@@ -128,14 +128,14 @@ func run(args []string, deps appDeps) error {
 		logger.Error("failed to initialize database", slog.String("error", err.Error()))
 		return err
 	}
-	defer store.Close()
+	defer store.Close() //nolint:errcheck
 
 	// Resolve or generate the master encryption key.
 	encryptor, err := resolveEncryptor(store, logger)
 	if err != nil {
 		return err
 	}
-	store.ConfigStore.SetEncryptor(encryptor)
+	store.SetEncryptor(encryptor)
 
 	// Dry-run mode: validate DB connection only.
 	if *dryRun {
@@ -343,16 +343,16 @@ func run(args []string, deps appDeps) error {
 func resolveEncryptor(store *storage.Store, logger *slog.Logger) (*security.AESEncryptor, error) {
 	keyStr := os.Getenv("MASTER_ENCRYPTION_KEY")
 	if keyStr == "" {
-		// Check if a key has been initialised before (marker in DB).
-		_, keyExists, err := store.GetSetting("master_key_initialised")
+		// Check if a key has been initialized before (marker in DB).
+		_, keyExists, err := store.GetSetting("master_key_initialized")
 		if err != nil {
 			return nil, fmt.Errorf("failed to check master key status: %w", err)
 		}
 		if keyExists {
 			return nil, fmt.Errorf(
-				"MASTER_ENCRYPTION_KEY environment variable is required but not set.\n" +
-					"Set it to the key that was generated and printed on first start.\n" +
-					"If you have lost the key, you must reset the database.",
+				"MASTER_ENCRYPTION_KEY environment variable is required but not set\n" +
+					"Set it to the key that was generated and printed on first start\n" +
+					"If you have lost the key, you must reset the database",
 			)
 		}
 
@@ -371,7 +371,7 @@ func resolveEncryptor(store *storage.Store, logger *slog.Logger) (*security.AESE
 		fmt.Println("║  Losing this key means losing access to encrypted secrets.  ║")
 		fmt.Println("╚══════════════════════════════════════════════════════════════╝")
 
-		if err := store.SetSetting("master_key_initialised", "true"); err != nil {
+		if err := store.SetSetting("master_key_initialized", "true"); err != nil {
 			return nil, fmt.Errorf("failed to persist key marker: %w", err)
 		}
 		keyStr = generated

@@ -27,7 +27,6 @@ type loginRequest struct {
 }
 
 // Login authenticates a user and returns a session token.
-// POST /api/auth/login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -55,7 +54,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout invalidates the current session.
-// POST /api/auth/logout
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	token := auth.ExtractBearerToken(r)
 	if token != "" {
@@ -67,7 +65,6 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 // Me returns the current authenticated user's info.
-// GET /api/auth/me
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	user := auth.UserFromContext(r.Context())
 	if user == nil {

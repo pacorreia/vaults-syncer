@@ -217,7 +217,7 @@ func setPathValue(r *http.Request, key, value string) *http.Request {
 	mux.ServeHTTP(fakeW, fakeReq)
 
 	if captured == nil {
-		// Fallback for unrecognised keys.
+		// Fallback for unrecognized keys.
 		return r
 	}
 	// Transfer original headers.

@@ -35,12 +35,6 @@ func setupAdmin(t *testing.T, svc *auth.Service) string {
 	return token
 }
 
-func authHeader(token string) http.Header {
-	h := http.Header{}
-	h.Set("Authorization", "Bearer "+token)
-	return h
-}
-
 func TestGetSetupStatus_NotComplete(t *testing.T) {
 	store := openTestStore(t)
 	svc := auth.NewService(store)

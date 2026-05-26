@@ -36,7 +36,6 @@ type updateUserRequest struct {
 }
 
 // ListUsers returns all users.
-// GET /api/users
 func (h *UsersHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.authSvc.ListUsers()
 	if err != nil {
@@ -48,7 +47,6 @@ func (h *UsersHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateUser adds a new user account.
-// POST /api/users
 func (h *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req createUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -89,7 +87,6 @@ func (h *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateUser modifies an existing user.
-// PUT /api/users/{user_id}
 func (h *UsersHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	userID, err := parseUserID(r)
 	if err != nil {
@@ -132,7 +129,6 @@ func (h *UsersHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteUserAccount removes a user account.
-// DELETE /api/users/{user_id}
 func (h *UsersHandler) DeleteUserAccount(w http.ResponseWriter, r *http.Request) {
 	userID, err := parseUserID(r)
 	if err != nil {

@@ -28,7 +28,6 @@ func NewConfigHandler(store *storage.Store, logger *slog.Logger, onConfigChanged
 // ---------------------------------------------------------------------------
 
 // ListVaultsConfig lists all stored vault configurations.
-// GET /api/config/vaults
 func (h *ConfigHandler) ListVaultsConfig(w http.ResponseWriter, r *http.Request) {
 	vaults, err := h.store.ListVaults()
 	if err != nil {
@@ -40,7 +39,6 @@ func (h *ConfigHandler) ListVaultsConfig(w http.ResponseWriter, r *http.Request)
 }
 
 // CreateVault stores a new vault configuration.
-// POST /api/config/vaults
 func (h *ConfigHandler) CreateVault(w http.ResponseWriter, r *http.Request) {
 	var v config.VaultConfig
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
@@ -77,7 +75,6 @@ func (h *ConfigHandler) CreateVault(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetVaultConfig retrieves a single vault configuration.
-// GET /api/config/vaults/{vault_id}
 func (h *ConfigHandler) GetVaultConfig(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("vault_id")
 	if id == "" {
@@ -98,7 +95,6 @@ func (h *ConfigHandler) GetVaultConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateVault replaces a vault configuration.
-// PUT /api/config/vaults/{vault_id}
 func (h *ConfigHandler) UpdateVault(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("vault_id")
 	if id == "" {
@@ -135,7 +131,6 @@ func (h *ConfigHandler) UpdateVault(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteVaultConfig removes a vault configuration.
-// DELETE /api/config/vaults/{vault_id}
 func (h *ConfigHandler) DeleteVaultConfig(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("vault_id")
 	if id == "" {
@@ -159,7 +154,6 @@ func (h *ConfigHandler) DeleteVaultConfig(w http.ResponseWriter, r *http.Request
 // ---------------------------------------------------------------------------
 
 // ListSyncsConfig lists all stored sync configurations.
-// GET /api/config/syncs
 func (h *ConfigHandler) ListSyncsConfig(w http.ResponseWriter, r *http.Request) {
 	syncs, err := h.store.ListSyncs()
 	if err != nil {
@@ -171,7 +165,6 @@ func (h *ConfigHandler) ListSyncsConfig(w http.ResponseWriter, r *http.Request) 
 }
 
 // CreateSync stores a new sync configuration.
-// POST /api/config/syncs
 func (h *ConfigHandler) CreateSync(w http.ResponseWriter, r *http.Request) {
 	var sc config.SyncConfig
 	if err := json.NewDecoder(r.Body).Decode(&sc); err != nil {
@@ -207,7 +200,6 @@ func (h *ConfigHandler) CreateSync(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetSyncConfig retrieves a single sync configuration.
-// GET /api/config/syncs/{sync_id}
 func (h *ConfigHandler) GetSyncConfig(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("sync_id")
 	if id == "" {
@@ -228,7 +220,6 @@ func (h *ConfigHandler) GetSyncConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateSync replaces a sync configuration.
-// PUT /api/config/syncs/{sync_id}
 func (h *ConfigHandler) UpdateSync(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("sync_id")
 	if id == "" {
@@ -265,7 +256,6 @@ func (h *ConfigHandler) UpdateSync(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteSyncConfig removes a sync configuration.
-// DELETE /api/config/syncs/{sync_id}
 func (h *ConfigHandler) DeleteSyncConfig(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("sync_id")
 	if id == "" {

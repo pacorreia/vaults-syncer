@@ -58,7 +58,7 @@ func (s *SettingsStore) GetSetting(key string) (string, bool, error) {
 }
 
 // IsSetupComplete reports whether the application has been set up (admin account created,
-// master key initialised).
+// master key initialized).
 func (s *SettingsStore) IsSetupComplete() (bool, error) {
 	_, exists, err := s.GetSetting("setup_complete")
 	return exists && err == nil, err

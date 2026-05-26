@@ -1,6 +1,6 @@
 package config
 
-// Config represents the top-level configuration
+// Config represents the top-level configuration.
 type Config struct {
 	Vaults  []VaultConfig `yaml:"vaults"`
 	Syncs   []SyncConfig  `yaml:"syncs"`
@@ -8,7 +8,7 @@ type Config struct {
 	Logging LoggingConfig `yaml:"logging"`
 }
 
-// OAuthConfig defines OAuth 2.0 authentication
+// OAuthConfig defines OAuth 2.0 authentication.
 type OAuthConfig struct {
 	TokenEndpoint string            `yaml:"token_endpoint"` // Token exchange endpoint
 	ClientID      string            `yaml:"client_id"`
@@ -17,21 +17,21 @@ type OAuthConfig struct {
 	ExtraParams   map[string]string `yaml:"extra_params"` // Device ID, custom params, etc.
 }
 
-// AuthConfig defines authentication method and credentials
+// AuthConfig defines authentication method and credentials.
 type AuthConfig struct {
 	Method  string            `yaml:"method"`  // bearer, basic, oauth2, api_key, custom
 	Headers map[string]string `yaml:"headers"` // Auth-specific headers
 	OAuth   *OAuthConfig      `yaml:"oauth"`   // OAuth 2.0 config
 }
 
-// ResponseParserConfig defines how to extract data from responses
+// ResponseParserConfig defines how to extract data from responses.
 type ResponseParserConfig struct {
 	ListPath  string `yaml:"path"`       // JSONPath to array of items (e.g., "data" or "value")
 	NameField string `yaml:"name_field"` // Field containing secret name
 	ValuePath string `yaml:"value_path"` // JSONPath to extract value
 }
 
-// OperationConfig defines vault-specific behavior for an operation
+// OperationConfig defines vault-specific behavior for an operation.
 type OperationConfig struct {
 	Method         string                `yaml:"method"`       // GET, POST, PUT, DELETE
 	Endpoint       string                `yaml:"endpoint"`     // Optional: override endpoint
@@ -77,7 +77,7 @@ type ToolOutputConfig struct {
 	NameField string `yaml:"name_field"`
 }
 
-// VaultConfig represents a vault definition
+// VaultConfig represents a vault definition.
 type VaultConfig struct {
 	ID   string `yaml:"id"`
 	Name string `yaml:"name"`
@@ -103,13 +103,13 @@ type VaultConfig struct {
 	LegacyAuthHeaders map[string]string `yaml:"auth_headers,omitempty" json:"-"`
 }
 
-// FieldNamesConfig defines how secrets are structured in requests
+// FieldNamesConfig defines how secrets are structured in requests.
 type FieldNamesConfig struct {
 	NameField  string `yaml:"name_field"`
 	ValueField string `yaml:"value_field"`
 }
 
-// SyncConfig defines a sync relationship between vaults
+// SyncConfig defines a sync relationship between vaults.
 type SyncConfig struct {
 	ID                string       `yaml:"id"`
 	Source            string       `yaml:"source"`    // vault ID
@@ -126,26 +126,26 @@ type SyncConfig struct {
 	Enabled *bool `yaml:"enabled"`
 }
 
-// IsEnabled reports whether the sync is enabled. Returns true when the field
+// IsEnabled reports whether the sync is enabled. Returns true when the field.
 // is omitted from YAML (nil pointer) so that syncs are active by default.
 func (s *SyncConfig) IsEnabled() bool {
 	return s.Enabled == nil || *s.Enabled
 }
 
-// FilterConfig allows filtering which secrets to sync
+// FilterConfig allows filtering which secrets to sync.
 type FilterConfig struct {
 	Patterns []string `yaml:"patterns"` // glob patterns for secret names
 	Exclude  []string `yaml:"exclude"`
 }
 
-// Transform applies transformations to secret values during sync
+// Transform applies transformations to secret values during sync.
 type Transform struct {
 	Field string `yaml:"field"`
 	Type  string `yaml:"type"` // base64_encode, base64_decode, etc.
 	Value string `yaml:"value"`
 }
 
-// RetryPolicy defines retry behavior for failed syncs
+// RetryPolicy defines retry behavior for failed syncs.
 type RetryPolicy struct {
 	MaxRetries     int     `yaml:"max_retries"`
 	InitialBackoff int     `yaml:"initial_backoff"` // milliseconds
@@ -153,7 +153,7 @@ type RetryPolicy struct {
 	Multiplier     float64 `yaml:"multiplier"`
 }
 
-// ServerConfig defines HTTP server settings
+// ServerConfig defines HTTP server settings.
 type ServerConfig struct {
 	Port           int    `yaml:"port"`
 	Address        string `yaml:"address"`
@@ -161,13 +161,13 @@ type ServerConfig struct {
 	MetricsAddress string `yaml:"metrics_address"`
 }
 
-// LoggingConfig defines logging settings
+// LoggingConfig defines logging settings.
 type LoggingConfig struct {
 	Level  string `yaml:"level"`  // debug, info, warn, error
 	Format string `yaml:"format"` // json or text
 }
 
-// SyncObject represents a secret object in the sync database
+// SyncObject represents a secret object in the sync database.
 type SyncObject struct {
 	ID             int64
 	SyncID         string
@@ -185,9 +185,9 @@ type SyncObject struct {
 	DirectionLast  string // source_to_target or target_to_source
 }
 
-// Helper methods for VaultConfig
+// Helper methods for VaultConfig.
 
-// GetVaultType returns the vault type, defaulting to "generic"
+// GetVaultType returns the vault type, defaulting to "generic".
 func (vc *VaultConfig) GetVaultType() string {
 	if vc.Type != "" {
 		return vc.Type
@@ -195,7 +195,7 @@ func (vc *VaultConfig) GetVaultType() string {
 	return "generic"
 }
 
-// PopulateDefaults initializes optional fields with sensible defaults
+// PopulateDefaults initializes optional fields with sensible defaults.
 func (vc *VaultConfig) PopulateDefaults() {
 	// Initialize optional maps if nil
 	if vc.Auth != nil && vc.Auth.Headers == nil {
