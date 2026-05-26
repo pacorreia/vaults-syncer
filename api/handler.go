@@ -14,11 +14,11 @@ import (
 
 // Handler manages HTTP handlers
 type Handler struct {
-	runner  Runner
-	store   *storage.Store
-	cfg     *config.Config
-	cfgMu   sync.RWMutex
-	logger  *slog.Logger
+	runner Runner
+	store  *storage.Store
+	cfg    *config.Config
+	mu     sync.RWMutex // protects runner and cfg
+	logger *slog.Logger
 }
 
 // Runner defines the runner behaviors required by the API handler.
@@ -41,8 +41,8 @@ func NewHandler(runner Runner, store *storage.Store, cfg *config.Config, logger 
 // SetConfig atomically updates the handler's active configuration. It is safe
 // to call concurrently with in-flight requests.
 func (h *Handler) SetConfig(cfg *config.Config) {
-	h.cfgMu.Lock()
-	defer h.cfgMu.Unlock()
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	h.cfg = cfg
 }
 
@@ -50,23 +50,31 @@ func (h *Handler) SetConfig(cfg *config.Config) {
 // reloadConfig so that ExecuteSync uses the engine that knows about the latest
 // vault backends.
 func (h *Handler) SetRunner(r Runner) {
-	h.cfgMu.Lock()
-	defer h.cfgMu.Unlock()
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	h.runner = r
 }
 
 // getConfig returns the current configuration (thread-safe).
 func (h *Handler) getConfig() *config.Config {
-	h.cfgMu.RLock()
-	defer h.cfgMu.RUnlock()
+	h.mu.RLock()
+	defer h.mu.RUnlock()
 	return h.cfg
 }
 
 // getRunner returns the current runner (thread-safe).
 func (h *Handler) getRunner() Runner {
-	h.cfgMu.RLock()
-	defer h.cfgMu.RUnlock()
+	h.mu.RLock()
+	defer h.mu.RUnlock()
 	return h.runner
+}
+
+// getState returns the current runner and config together under a single lock,
+// ensuring both values are consistent with the same reload cycle.
+func (h *Handler) getState() (Runner, *config.Config) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return h.runner, h.cfg
 }
 
 // Health handles health check requests
@@ -143,8 +151,7 @@ func (h *Handler) ExecuteSync(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg := h.getConfig()
-	runner := h.getRunner()
+	runner, cfg := h.getState()
 	// Execute sync asynchronously
 	go func() {
 		if err := runner.ExecuteSyncNow(syncID, cfg); err != nil {
