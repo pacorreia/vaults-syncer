@@ -528,7 +528,7 @@ vaults:
 # Linux/macOS
 export BITWARDEN_CLIENT_ID="..."
 export BITWARDEN_CLIENT_SECRET="..."
-./sync-daemon -config config.yaml
+./sync-daemon
 
 # Docker with env file
 echo 'BITWARDEN_CLIENT_ID=...' > .env

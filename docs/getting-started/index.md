@@ -19,7 +19,7 @@ It supports:
 
 ## Prerequisites
 
-- Docker or Go 1.22+ (for source builds)
+- Docker or Go 1.26+ (for source builds; requires `CGO_ENABLED=1`)
 - A source vault with configuration access
 - At least one target vault to sync to
 - Basic understanding of YAML configuration

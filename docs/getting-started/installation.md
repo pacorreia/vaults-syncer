@@ -11,10 +11,10 @@ Quick start with a single command:
 ```bash
 docker run -d \
   --name vaults-syncer \
-  -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
   -v sync-data:/app/data \
   -p 8080:8080 \
   -p 9090:9090 \
+  -e MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY} \
   ghcr.io/pacorreia/vaults-syncer:latest
 ```
 
@@ -29,13 +29,15 @@ services:
     container_name: vaults-syncer
     restart: unless-stopped
     volumes:
-      - ./config.yaml:/etc/sync/config.yaml:ro
       - sync-data:/app/data          # use a named volume, not a host path
     ports:
       - "8080:8080"  # HTTP API + Web UI
       - "9090:9090"  # Prometheus metrics
+    environment:
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
+      - DB_TYPE=sqlite               # or postgres / mssql
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/setup"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -67,31 +69,19 @@ helm install akv-sync akv-sync/akv-sync \
 Or with kubectl directly:
 
 ```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: akv-sync-config
-data:
-  config.yaml: |
-    vaults:
-      - id: source
-        endpoint: https://vault.example.com/api/ciphers
-        auth:
-          method: oauth2
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: akv-sync
+  name: vaults-syncer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: akv-sync
+      app: vaults-syncer
   template:
     metadata:
       labels:
-        app: akv-sync
+        app: vaults-syncer
     spec:
       containers:
       - name: sync-daemon
@@ -99,24 +89,25 @@ spec:
         ports:
         - containerPort: 8080
         - containerPort: 9090
+        env:
+        - name: MASTER_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: vaults-syncer-secret
+              key: master-encryption-key
         volumeMounts:
-        - name: config
-          mountPath: /etc/sync
-          readOnly: true
         - name: data
           mountPath: /app/data
         livenessProbe:
           httpGet:
-            path: /health
+            path: /api/setup
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
       volumes:
-      - name: config
-        configMap:
-          name: akv-sync-config
       - name: data
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: vaults-syncer-data
 ```
 
 ## Binary Release
@@ -128,7 +119,8 @@ Download precompiled binaries for your platform:
 ```bash
 wget https://github.com/pacorreia/vaults-syncer/releases/download/v$(VERSION)/sync-daemon-linux-amd64
 chmod +x sync-daemon-linux-amd64
-./sync-daemon-linux-amd64 -config config.yaml
+export MASTER_ENCRYPTION_KEY=<your-key>
+./sync-daemon-linux-amd64
 ```
 
 ### macOS (arm64)
@@ -136,7 +128,8 @@ chmod +x sync-daemon-linux-amd64
 ```bash
 wget https://github.com/pacorreia/vaults-syncer/releases/download/v$(VERSION)/sync-daemon-darwin-arm64
 chmod +x sync-daemon-darwin-arm64
-./sync-daemon-darwin-arm64 -config config.yaml
+export MASTER_ENCRYPTION_KEY=<your-key>
+./sync-daemon-darwin-arm64
 ```
 
 ### Windows (amd64)
@@ -145,15 +138,16 @@ chmod +x sync-daemon-darwin-arm64
 # Download from releases page or use:
 Invoke-WebRequest -Uri "https://github.com/pacorreia/vaults-syncer/releases/download/v$(VERSION)/sync-daemon-windows-amd64.exe" -OutFile sync-daemon.exe
 
-# Run
-.\sync-daemon.exe -config config.yaml
+# Set env and run
+$env:MASTER_ENCRYPTION_KEY = "<your-key>"
+.\sync-daemon.exe
 ```
 
 ## Build from Source
 
 ### Prerequisites
 
-- Go 1.22 or later
+- Go 1.26 or later (with CGO support for sqlite3; requires `libsqlite3-dev` on Debian/Ubuntu or `sqlite` via Homebrew on macOS)
 - Git
 
 ### Clone Repository
@@ -166,13 +160,15 @@ cd vaults-syncer
 ### Build Binary
 
 ```bash
-go build -o sync-daemon .
+# CGO_ENABLED=1 is required for the sqlite3 driver
+CGO_ENABLED=1 go build -o sync-daemon .
 ```
 
 ### Run
 
 ```bash
-./sync-daemon -config config.yaml
+export MASTER_ENCRYPTION_KEY=<your-key>   # Required after first start
+./sync-daemon
 ```
 
 ### Build Docker Image
@@ -180,15 +176,15 @@ go build -o sync-daemon .
 ```bash
 docker build -t vaults-syncer:latest .
 docker run -d \
-  -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
   -v sync-data:/app/data \
   -p 8080:8080 \
+  -e MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY} \
   vaults-syncer:latest
 ```
 
 ## Systemd Service
 
-Create `/etc/systemd/system/akv-sync.service`:
+Create `/etc/systemd/system/vaults-syncer.service`:
 
 ```ini
 [Unit]
@@ -198,10 +194,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=akv-sync
-Group=akv-sync
-WorkingDirectory=/opt/akv-sync
-ExecStart=/opt/akv-sync/sync-daemon -config /etc/akv-sync/config.yaml
+User=vaults-syncer
+Group=vaults-syncer
+WorkingDirectory=/opt/vaults-syncer
+EnvironmentFile=/etc/vaults-syncer/env
+ExecStart=/opt/vaults-syncer/sync-daemon
 Restart=on-failure
 RestartSec=5s
 
@@ -215,44 +212,65 @@ ProtectHome=true
 WantedBy=multi-user.target
 ```
 
+Create `/etc/vaults-syncer/env`:
+
+```bash
+# Required after first start (see logs for generated key)
+MASTER_ENCRYPTION_KEY=<your-key>
+DB_TYPE=sqlite
+DB_PATH=/opt/vaults-syncer/data/sync.db
+SERVER_PORT=8080
+METRICS_PORT=9090
+```
+
 Setup:
 
 ```bash
 # Create user
-sudo useradd -r -s /bin/false akv-sync
+sudo useradd -r -s /bin/false vaults-syncer
 
 # Install binary
-sudo mkdir -p /opt/akv-sync
-sudo cp sync-daemon /opt/akv-sync/
-sudo chown -R akv-sync:akv-sync /opt/akv-sync
+sudo mkdir -p /opt/vaults-syncer/data
+sudo cp sync-daemon /opt/vaults-syncer/
+sudo chown -R vaults-syncer:vaults-syncer /opt/vaults-syncer
 
-# Install config
-sudo mkdir -p /etc/akv-sync
-sudo cp config.yaml /etc/akv-sync/
-sudo chown -R akv-sync:akv-sync /etc/akv-sync
-sudo chmod 600 /etc/akv-sync/config.yaml
+# Install env file (protect secrets)
+sudo mkdir -p /etc/vaults-syncer
+sudo cp env /etc/vaults-syncer/
+sudo chown root:vaults-syncer /etc/vaults-syncer/env
+sudo chmod 640 /etc/vaults-syncer/env
 
 # Enable service
 sudo systemctl daemon-reload
-sudo systemctl enable akv-sync
-sudo systemctl start akv-sync
+sudo systemctl enable vaults-syncer
+sudo systemctl start vaults-syncer
 
 # Check status
-sudo systemctl status akv-sync
+sudo systemctl status vaults-syncer
 ```
 
 ## Verify Installation
 
-### Health Check
+### Setup Check (no auth required)
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8080/api/setup
+```
+
+### Login and Check Health
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/health
 ```
 
 ### List Syncs
 
 ```bash
-curl http://localhost:8080/syncs
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs
 ```
 
 ### View Metrics

@@ -113,37 +113,33 @@ docker-compose -f e2e/docker-compose.test.yml up -d
 ### Wait for Services to Be Ready
 
 ```bash
-# Check Vaultwarden Source
+# Check Source mock vault
 curl http://localhost:8000/alive
 
-# Check Vaultwarden Target
+# Check Target mock vault
 curl http://localhost:8001/alive
 
-# Check Sync Daemon
-curl http://localhost:8080/health
+# Check Sync Daemon (no auth needed for setup endpoint)
+curl http://localhost:8080/api/setup
 ```
-
-### Access Vaultwarden Web UIs
-
-- **Source**: http://localhost:8000
-- **Target**: http://localhost:8001
-
-### Add Secrets Manually via Web UI
-
-1. Go to http://localhost:8000
-2. Create a new vault item (Login)
-3. Enter credentials as a test secret
 
 ### Manually Trigger Sync
 
 ```bash
-curl -X POST http://localhost:8080/syncs/vaultwarden_sync/execute
+# Get an auth token first
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"testpass"}' | jq -r .token)
+
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/execute
 ```
 
 ### Check Sync Status
 
 ```bash
-curl http://localhost:8080/syncs/vaultwarden_sync/status | jq
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/status | jq
 ```
 
 Example response:
@@ -300,8 +296,12 @@ docker logs vaultwarden-postgres
 # Check daemon logs
 docker logs secrets-sync-daemon
 
-# Verify sync status
-curl http://localhost:8080/syncs/vaultwarden_sync/status | jq
+# Verify sync status (requires auth)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"testpass"}' | jq -r .token)
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/status | jq
 
 # Check database
 docker exec -it secrets-sync-daemon sqlite3 /app/data/sync.db \
@@ -330,25 +330,20 @@ sleep 30 && ./e2e/test-integration.sh
 # Or manually verify health
 curl -v http://localhost:8000/alive
 curl -v http://localhost:8001/alive
-curl -v http://localhost:8080/health
+curl -v http://localhost:8080/api/setup
 ```
 
 ## Environment Variables
 
-### Vaultwarden Configuration
-
-Set in `e2e/docker-compose.test.yml`:
-- `ADMIN_TOKEN`: Admin authentication token
-- `SIGNUPS_ALLOWED`: Allow user registration
-- `LOG_LEVEL`: vaultwarden log level
-
 ### Sync Daemon Configuration
 
-Set in environment or `.env.test`:
-- `VAULTWARDEN_SOURCE_TOKEN`: Source vault admin token
-- `VAULTWARDEN_TARGET_TOKEN`: Target vault admin token
-- `CONFIG_PATH`: Configuration file location
-- `DATABASE_PATH`: SQLite database location
+Set in environment or `docker-compose.test.yml`:
+
+- `MASTER_ENCRYPTION_KEY`: Encryption key for vault credentials
+- `DB_TYPE`: Database backend (`sqlite`, `postgres`, `mssql`)
+- `DB_PATH`: SQLite database file path (default: `sync.db`)
+- `SERVER_PORT`: HTTP API port (default: `8080`)
+- `METRICS_PORT`: Prometheus metrics port (default: `9090`)
 
 ## Advanced Testing
 
@@ -357,7 +352,7 @@ Set in environment or `.env.test`:
 Measure sync performance with large secret counts:
 
 ```bash
-# Inject 100 secrets
+# Inject 100 secrets into the source mock vault
 for i in {1..100}; do
   curl -X POST http://localhost:8000/api/ciphers \
     -H "Authorization: Bearer source_admin_token_12345" \
@@ -365,11 +360,17 @@ for i in {1..100}; do
     -d "{\"type\":1,\"name\":\"secret-$i\",\"login\":{\"username\":\"user\",\"password\":\"pass\"}}"
 done
 
-# Measure sync time
-time curl -X POST http://localhost:8080/syncs/vaultwarden_sync/execute
+# Get a token and measure sync time
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"testpass"}' | jq -r .token)
 
-# Check status
-curl http://localhost:8080/syncs/vaultwarden_sync/status | jq '.last_run.duration_ms'
+time curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/execute
+
+# Check duration
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/status | jq '.last_run.duration_ms'
 ```
 
 ### Network Failure Simulation
@@ -379,7 +380,8 @@ curl http://localhost:8080/syncs/vaultwarden_sync/status | jq '.last_run.duratio
 docker exec vaultwarden-target tc qdisc add dev eth0 root netem loss 10%
 
 # Run sync (will retry and eventually succeed)
-curl -X POST http://localhost:8080/syncs/vaultwarden_sync/execute
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/vaultwarden_sync/execute
 
 # Check retry behavior in logs
 docker logs secrets-sync-daemon | grep retry
@@ -388,10 +390,8 @@ docker logs secrets-sync-daemon | grep retry
 ### Config Validation
 
 ```bash
-# Test config without running daemon
-./bin/sync-daemon -config e2e/config.test.yaml -dry-run
-
-# Should output connection test results
+# Test database connection only (no scheduler started)
+./bin/sync-daemon -dry-run
 ```
 
 ## CI/CD Integration

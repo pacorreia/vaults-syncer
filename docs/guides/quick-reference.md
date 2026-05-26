@@ -132,7 +132,7 @@ docker compose logs -f sync-daemon
 
 1. **Create config file** → `config.yaml`
 2. **Run with Docker** → `docker run ...`
-3. **Verify** → `curl http://localhost:8080/health`
+3. **Verify** → `curl http://localhost:8080/api/setup` (public, no auth)
 4. **Check status** → `curl http://localhost:8080/syncs`
 
 ## 📚 Documentation Map
