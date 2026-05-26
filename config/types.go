@@ -126,7 +126,7 @@ type SyncConfig struct {
 	Enabled *bool `yaml:"enabled"`
 }
 
-// IsEnabled reports whether the sync is enabled. Returns true when the field.
+// IsEnabled reports whether the sync is enabled. Returns true when the field
 // is omitted from YAML (nil pointer) so that syncs are active by default.
 func (s *SyncConfig) IsEnabled() bool {
 	return s.Enabled == nil || *s.Enabled
