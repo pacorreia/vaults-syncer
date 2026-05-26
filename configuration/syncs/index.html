@@ -1216,10 +1216,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#view-sync-history" class="md-nav__link">
+  <a href="#view-sync-run-history" class="md-nav__link">
     <span class="md-ellipsis">
       
-        View Sync History
+        View Sync Run History
       
     </span>
   </a>
@@ -1714,11 +1714,10 @@
 <h2 id="basic-configuration">Basic Configuration<a class="headerlink" href="#basic-configuration" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="nt">syncs</span><span class="p">:</span>
 </span><span id="__span-0-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-first-sync</span>
-</span><span id="__span-0-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;My</span><span class="nv"> </span><span class="s">First</span><span class="nv"> </span><span class="s">Sync&quot;</span>
-</span><span id="__span-0-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-1</span>
-</span><span id="__span-0-5"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-2</span><span class="p p-Indicator">]</span>
-</span><span id="__span-0-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">        </span><span class="c1"># Every hour</span>
-</span><span id="__span-0-7"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span><span class="w">       </span><span class="c1"># or bidirectional</span>
+</span><span id="__span-0-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-1</span>
+</span><span id="__span-0-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-2</span><span class="p p-Indicator">]</span>
+</span><span id="__span-0-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">        </span><span class="c1"># Every hour</span>
+</span><span id="__span-0-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span><span class="w">       </span><span class="c1"># or bidirectional</span>
 </span></code></pre></div>
 <h2 id="sync-configuration-reference">Sync Configuration Reference<a class="headerlink" href="#sync-configuration-reference" title="Permanent link">&para;</a></h2>
 <h3 id="essential-options">Essential Options<a class="headerlink" href="#essential-options" title="Permanent link">&para;</a></h3>
@@ -1739,13 +1738,6 @@
 <td>Yes</td>
 <td>Unique sync identifier</td>
 <td><code>sync-prod-to-staging</code></td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td>string</td>
-<td>No</td>
-<td>Human-readable name</td>
-<td><code>Prod to Staging Sync</code></td>
 </tr>
 <tr>
 <td><code>source</code></td>
@@ -1771,7 +1763,7 @@
 <tr>
 <td><code>sync_type</code></td>
 <td>string</td>
-<td>No</td>
+<td>Yes</td>
 <td><code>unidirectional</code> or <code>bidirectional</code></td>
 <td><code>unidirectional</code></td>
 </tr>
@@ -1795,28 +1787,16 @@
 <td>Enable/disable this sync</td>
 </tr>
 <tr>
-<td><code>timeout</code></td>
+<td><code>concurrent_workers</code></td>
 <td>integer</td>
-<td><code>300</code></td>
-<td>Sync timeout in seconds</td>
+<td><code>0</code> (sequential)</td>
+<td>Number of secrets processed in parallel</td>
 </tr>
 <tr>
-<td><code>max_retries</code></td>
-<td>integer</td>
-<td><code>3</code></td>
-<td>Maximum retry attempts</td>
-</tr>
-<tr>
-<td><code>description</code></td>
-<td>string</td>
-<td><code>""</code></td>
-<td>Sync description</td>
-</tr>
-<tr>
-<td><code>tags</code></td>
-<td>array</td>
-<td><code>[]</code></td>
-<td>Labels for organization</td>
+<td><code>retry_policy</code></td>
+<td>object</td>
+<td><code>{max_retries:3, initial_backoff:1000, max_backoff:60000, multiplier:2.0}</code></td>
+<td>Retry configuration for failed operations</td>
 </tr>
 </tbody>
 </table>
@@ -1887,33 +1867,8 @@
 </span><span id="__span-5-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-2</span><span class="p p-Indicator">]</span>
 </span><span id="__span-5-5"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
 </span></code></pre></div>
-<p><strong>Conflict Resolution Strategies</strong>:</p>
-<table>
-<thead>
-<tr>
-<th>Strategy</th>
-<th>Behavior</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>source-wins</code></td>
-<td>Source takes precedence on conflict</td>
-</tr>
-<tr>
-<td><code>target-wins</code></td>
-<td>Target takes precedence on conflict</td>
-</tr>
-<tr>
-<td><code>manual</code></td>
-<td>Conflicts require manual intervention</td>
-</tr>
-<tr>
-<td><code>newest</code></td>
-<td>Latest modified secret wins</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Conflict Resolution</strong>:</p>
+<p>When both vaults have a different value for the same secret, the daemon uses <strong>last write wins</strong>: whichever vault most recently wrote the secret (tracked in the sync database) is treated as the authority and its value is propagated to the other vault.</p>
 <p><strong>Use cases</strong>:
 - Multi-region synchronization
 - Cross-team access to shared credentials
@@ -1958,14 +1913,13 @@
 </span><span id="__span-9-3"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
 </span><span id="__span-9-4"><span class="w">  </span><span class="nt">exclude</span><span class="p">:</span>
 </span><span id="__span-9-5"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;secret-*&quot;</span>
-</span><span id="__span-9-6"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-master-key$&quot;</span>
-</span><span id="__span-9-7"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
-</span><span id="__span-9-8"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-admin-password$&quot;</span>
-</span><span id="__span-9-9"><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exclude</span>
+</span><span id="__span-9-6"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*-master-key&quot;</span>
+</span><span id="__span-9-7"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*-admin-password&quot;</span>
 </span></code></pre></div>
 <h2 id="transformations">Transformations<a class="headerlink" href="#transformations" title="Permanent link">&para;</a></h2>
 <p>Modify secret names and values during synchronization.</p>
 <h3 id="value-transformations">Value Transformations<a class="headerlink" href="#value-transformations" title="Permanent link">&para;</a></h3>
+<p>The <code>field</code> must be <code>value</code> (transforms currently apply to the secret value field). Supported types:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="nt">syncs</span><span class="p">:</span>
 </span><span id="__span-10-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transform-sync</span>
 </span><span id="__span-10-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
@@ -1976,161 +1930,145 @@
 </span><span id="__span-10-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
 </span><span id="__span-10-9"><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_encode</span>
 </span></code></pre></div>
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">transforms</span><span class="p">:</span>
-</span><span id="__span-11-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">script</span>
-</span><span id="__span-11-3"><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*connection.*&quot;</span>
-</span><span id="__span-11-4"><span class="w">    </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-11-5"><span class="w">      </span><span class="no">#!/bin/bash</span>
-</span><span id="__span-11-6"><span class="w">      </span><span class="no"># Input passed as $1</span>
-</span><span id="__span-11-7"><span class="w">      </span><span class="no"># Transform connection string</span>
-</span><span id="__span-11-8"><span class="w">      </span><span class="no">echo &quot;$1&quot; | sed &#39;s/;/\\n/g&#39;</span>
-</span></code></pre></div>
 <h3 id="transformation-examples">Transformation Examples<a class="headerlink" href="#transformation-examples" title="Permanent link">&para;</a></h3>
 <h4 id="base64-encode-values">Base64 encode values<a class="headerlink" href="#base64-encode-values" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span id="__span-12-1"><span class="nt">transforms</span><span class="p">:</span>
-</span><span id="__span-12-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
-</span><span id="__span-12-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_encode</span>
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-11-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+</span><span id="__span-11-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_encode</span>
 </span></code></pre></div>
 <h4 id="base64-decode-values">Base64 decode values<a class="headerlink" href="#base64-decode-values" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span id="__span-13-1"><span class="nt">transforms</span><span class="p">:</span>
-</span><span id="__span-13-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
-</span><span id="__span-13-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_decode</span>
+<div class="highlight"><pre><span></span><code><span id="__span-12-1"><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-12-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+</span><span id="__span-12-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_decode</span>
 </span></code></pre></div>
 <h2 id="advanced-options">Advanced Options<a class="headerlink" href="#advanced-options" title="Permanent link">&para;</a></h2>
 <h3 id="retry-policy-and-concurrency">Retry Policy and Concurrency<a class="headerlink" href="#retry-policy-and-concurrency" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-14-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-14-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tuned-sync</span>
-</span><span id="__span-14-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
-</span><span id="__span-14-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">target-vault</span><span class="p p-Indicator">]</span>
-</span><span id="__span-14-5"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-14-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
-</span><span id="__span-14-7"><span class="w">    </span><span class="nt">concurrent_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-</span><span id="__span-14-8"><span class="w">    </span><span class="nt">retry_policy</span><span class="p">:</span>
-</span><span id="__span-14-9"><span class="w">      </span><span class="nt">max_retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-</span><span id="__span-14-10"><span class="w">      </span><span class="nt">initial_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-</span><span id="__span-14-11"><span class="w">      </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60000</span>
-</span><span id="__span-14-12"><span class="w">      </span><span class="nt">multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<div class="highlight"><pre><span></span><code><span id="__span-13-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-13-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tuned-sync</span>
+</span><span id="__span-13-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source-vault</span>
+</span><span id="__span-13-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">target-vault</span><span class="p p-Indicator">]</span>
+</span><span id="__span-13-5"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+</span><span id="__span-13-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-13-7"><span class="w">    </span><span class="nt">concurrent_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</span><span id="__span-13-8"><span class="w">    </span><span class="nt">retry_policy</span><span class="p">:</span>
+</span><span id="__span-13-9"><span class="w">      </span><span class="nt">max_retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</span><span id="__span-13-10"><span class="w">      </span><span class="nt">initial_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+</span><span id="__span-13-11"><span class="w">      </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60000</span>
+</span><span id="__span-13-12"><span class="w">      </span><span class="nt">multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
 </span></code></pre></div>
 <h2 id="complete-sync-examples">Complete Sync Examples<a class="headerlink" href="#complete-sync-examples" title="Permanent link">&para;</a></h2>
 <h3 id="example-1-simple-one-way-sync">Example 1: Simple One-Way Sync<a class="headerlink" href="#example-1-simple-one-way-sync" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-15-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-sync</span>
-</span><span id="__span-15-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Azure</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">Bitwarden&quot;</span>
-</span><span id="__span-15-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-prod</span>
-</span><span id="__span-15-5"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bitwarden</span><span class="p p-Indicator">]</span>
-</span><span id="__span-15-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
-</span><span id="__span-15-7"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+<div class="highlight"><pre><span></span><code><span id="__span-14-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-14-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-sync</span>
+</span><span id="__span-14-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-prod</span>
+</span><span id="__span-14-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bitwarden</span><span class="p p-Indicator">]</span>
+</span><span id="__span-14-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</span><span id="__span-14-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
 </span></code></pre></div>
 <h3 id="example-2-filtered-production-sync">Example 2: Filtered Production Sync<a class="headerlink" href="#example-2-filtered-production-sync" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-16-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-sync</span>
-</span><span id="__span-16-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-prod</span>
-</span><span id="__span-16-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bitwarden-prod</span><span class="p p-Indicator">]</span>
-</span><span id="__span-16-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
-</span><span id="__span-16-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-16-7"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-16-8"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-16-9"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;prod-*&quot;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-15-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-sync</span>
+</span><span id="__span-15-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-prod</span>
+</span><span id="__span-15-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bitwarden-prod</span><span class="p p-Indicator">]</span>
+</span><span id="__span-15-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
+</span><span id="__span-15-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+</span><span id="__span-15-7"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
+</span><span id="__span-15-8"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
+</span><span id="__span-15-9"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;prod-*&quot;</span>
 </span></code></pre></div>
 <h3 id="example-3-bidirectional-sync-with-transformations">Example 3: Bidirectional Sync with Transformations<a class="headerlink" href="#example-3-bidirectional-sync-with-transformations" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-17-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bi-sync</span>
-</span><span id="__span-17-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary-vault</span>
-</span><span id="__span-17-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secondary-vault</span><span class="p p-Indicator">]</span>
-</span><span id="__span-17-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*/30</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">   </span><span class="c1"># Every 30 minutes</span>
-</span><span id="__span-17-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
-</span><span id="__span-17-7"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-17-8"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-17-9"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;shared-*&quot;</span>
-</span><span id="__span-17-10">
-</span><span id="__span-17-11"><span class="w">    </span><span class="nt">transforms</span><span class="p">:</span>
-</span><span id="__span-17-12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^shared-&quot;</span>
-</span><span id="__span-17-13"><span class="w">        </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;synced/{source_name}&quot;</span>
-</span><span id="__span-17-14">
-</span><span id="__span-17-15"><span class="w">    </span><span class="nt">options</span><span class="p">:</span>
-</span><span id="__span-17-16"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
-</span><span id="__span-17-17"><span class="w">      </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-16-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bi-sync</span>
+</span><span id="__span-16-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary-vault</span>
+</span><span id="__span-16-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secondary-vault</span><span class="p p-Indicator">]</span>
+</span><span id="__span-16-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*/30</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">   </span><span class="c1"># Every 30 minutes</span>
+</span><span id="__span-16-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
+</span><span id="__span-16-7"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
+</span><span id="__span-16-8"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
+</span><span id="__span-16-9"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;shared-*&quot;</span>
+</span><span id="__span-16-10"><span class="w">    </span><span class="nt">transforms</span><span class="p">:</span>
+</span><span id="__span-16-11"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+</span><span id="__span-16-12"><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base64_encode</span>
 </span></code></pre></div>
 <h3 id="example-4-multi-environment-cascade">Example 4: Multi-Environment Cascade<a class="headerlink" href="#example-4-multi-environment-cascade" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-18-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-18-2"><span class="w">  </span><span class="c1"># Dev → Staging</span>
-</span><span id="__span-18-3"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-to-staging</span>
-</span><span id="__span-18-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-dev</span>
-</span><span id="__span-18-5"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-staging</span><span class="p p-Indicator">]</span>
-</span><span id="__span-18-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">6</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 6 AM daily</span>
-</span><span id="__span-18-7"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-18-8"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-18-9"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-18-10"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;app-*&quot;</span>
-</span><span id="__span-18-11"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;db-*&quot;</span>
-</span><span id="__span-18-12"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;api-*&quot;</span>
-</span><span id="__span-18-13">
-</span><span id="__span-18-14"><span class="w">  </span><span class="c1"># Staging → Production</span>
-</span><span id="__span-18-15"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging-to-prod</span>
-</span><span id="__span-18-16"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-staging</span>
-</span><span id="__span-18-17"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-prod</span><span class="p p-Indicator">]</span>
-</span><span id="__span-18-18"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">8</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">0&quot;</span><span class="w">      </span><span class="c1"># 8 AM Sundays</span>
-</span><span id="__span-18-19"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-18-20"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-18-21"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-18-22"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;app-*&quot;</span>
-</span><span id="__span-18-23"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;db-*&quot;</span>
-</span><span id="__span-18-24"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;api-*&quot;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-17-2"><span class="w">  </span><span class="c1"># Dev → Staging</span>
+</span><span id="__span-17-3"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-to-staging</span>
+</span><span id="__span-17-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-dev</span>
+</span><span id="__span-17-5"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-staging</span><span class="p p-Indicator">]</span>
+</span><span id="__span-17-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">6</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 6 AM daily</span>
+</span><span id="__span-17-7"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+</span><span id="__span-17-8"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
+</span><span id="__span-17-9"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
+</span><span id="__span-17-10"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;app-*&quot;</span>
+</span><span id="__span-17-11"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;db-*&quot;</span>
+</span><span id="__span-17-12"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;api-*&quot;</span>
+</span><span id="__span-17-13">
+</span><span id="__span-17-14"><span class="w">  </span><span class="c1"># Staging → Production</span>
+</span><span id="__span-17-15"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging-to-prod</span>
+</span><span id="__span-17-16"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-staging</span>
+</span><span id="__span-17-17"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-prod</span><span class="p p-Indicator">]</span>
+</span><span id="__span-17-18"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">8</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">0&quot;</span><span class="w">      </span><span class="c1"># 8 AM Sundays</span>
+</span><span id="__span-17-19"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+</span><span id="__span-17-20"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
+</span><span id="__span-17-21"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
+</span><span id="__span-17-22"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;app-*&quot;</span>
+</span><span id="__span-17-23"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;db-*&quot;</span>
+</span><span id="__span-17-24"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;api-*&quot;</span>
 </span></code></pre></div>
 <h3 id="example-5-selective-backup-sync">Example 5: Selective Backup Sync<a class="headerlink" href="#example-5-selective-backup-sync" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-19-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-sync</span>
-</span><span id="__span-19-3"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Production</span><span class="nv"> </span><span class="s">Backup&quot;</span>
-</span><span id="__span-19-4"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-prod</span>
-</span><span id="__span-19-5"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-backup</span><span class="p p-Indicator">]</span>
-</span><span id="__span-19-6"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">1</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 1 AM daily</span>
-</span><span id="__span-19-7"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-19-8">
-</span><span id="__span-19-9"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-19-10"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-19-11"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-</span><span id="__span-19-12"><span class="w">      </span><span class="nt">exclude</span><span class="p">:</span>
-</span><span id="__span-19-13"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;test-*&quot;</span>
-</span><span id="__span-19-14"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;temp-*&quot;</span>
-</span><span id="__span-19-15"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;debug-*&quot;</span>
-</span><span id="__span-19-16">
-</span><span id="__span-19-17"><span class="w">    </span><span class="nt">retry_policy</span><span class="p">:</span>
-</span><span id="__span-19-18"><span class="w">      </span><span class="nt">max_retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-</span><span id="__span-19-19"><span class="w">      </span><span class="nt">initial_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-</span><span id="__span-19-20"><span class="w">      </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60000</span>
-</span><span id="__span-19-21"><span class="w">      </span><span class="nt">multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<div class="highlight"><pre><span></span><code><span id="__span-18-1"><span class="nt">syncs</span><span class="p">:</span>
+</span><span id="__span-18-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-sync</span>
+</span><span id="__span-18-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-prod</span>
+</span><span id="__span-18-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">vault-backup</span><span class="p p-Indicator">]</span>
+</span><span id="__span-18-5"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">1</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 1 AM daily</span>
+</span><span id="__span-18-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
+</span><span id="__span-18-7">
+</span><span id="__span-18-8"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
+</span><span id="__span-18-9"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
+</span><span id="__span-18-10"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+</span><span id="__span-18-11"><span class="w">      </span><span class="nt">exclude</span><span class="p">:</span>
+</span><span id="__span-18-12"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;test-*&quot;</span>
+</span><span id="__span-18-13"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;temp-*&quot;</span>
+</span><span id="__span-18-14"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;debug-*&quot;</span>
+</span><span id="__span-18-15">
+</span><span id="__span-18-16"><span class="w">    </span><span class="nt">retry_policy</span><span class="p">:</span>
+</span><span id="__span-18-17"><span class="w">      </span><span class="nt">max_retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</span><span id="__span-18-18"><span class="w">      </span><span class="nt">initial_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+</span><span id="__span-18-19"><span class="w">      </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60000</span>
+</span><span id="__span-18-20"><span class="w">      </span><span class="nt">multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
 </span></code></pre></div>
 <h2 id="monitoring-syncs">Monitoring Syncs<a class="headerlink" href="#monitoring-syncs" title="Permanent link">&para;</a></h2>
 <h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-20-1">curl<span class="w"> </span>http://localhost:8080/syncs/my-sync
+<div class="highlight"><pre><span></span><code><span id="__span-19-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>http://localhost:8080/api/syncs/<span class="o">{</span>sync_id<span class="o">}</span>/status
 </span></code></pre></div>
 <p>Response:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="p">{</span>
-</span><span id="__span-21-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-sync&quot;</span><span class="p">,</span>
-</span><span id="__span-21-3"><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Sync&quot;</span><span class="p">,</span>
-</span><span id="__span-21-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-21-5"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vault-1&quot;</span><span class="p">,</span>
-</span><span id="__span-21-6"><span class="w">  </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;vault-2&quot;</span><span class="p">],</span>
-</span><span id="__span-21-7"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 * * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-21-8"><span class="w">  </span><span class="nt">&quot;sync_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unidirectional&quot;</span><span class="p">,</span>
-</span><span id="__span-21-9"><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idle&quot;</span><span class="p">,</span>
-</span><span id="__span-21-10"><span class="w">  </span><span class="nt">&quot;last_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:00:00Z&quot;</span><span class="p">,</span>
-</span><span id="__span-21-11"><span class="w">  </span><span class="nt">&quot;last_run_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
-</span><span id="__span-21-12"><span class="w">  </span><span class="nt">&quot;last_run_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.345</span><span class="p">,</span>
-</span><span id="__span-21-13"><span class="w">  </span><span class="nt">&quot;next_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T11:00:00Z&quot;</span><span class="p">,</span>
-</span><span id="__span-21-14"><span class="w">  </span><span class="nt">&quot;stats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-21-15"><span class="w">    </span><span class="nt">&quot;total_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
-</span><span id="__span-21-16"><span class="w">    </span><span class="nt">&quot;synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
-</span><span id="__span-21-17"><span class="w">    </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-21-18"><span class="w">    </span><span class="nt">&quot;skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
-</span><span id="__span-21-19"><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-21-20"><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span id="__span-20-1"><span class="p">{</span>
+</span><span id="__span-20-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-sync&quot;</span><span class="p">,</span>
+</span><span id="__span-20-3"><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Sync&quot;</span><span class="p">,</span>
+</span><span id="__span-20-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-20-5"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vault-1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-6"><span class="w">  </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;vault-2&quot;</span><span class="p">],</span>
+</span><span id="__span-20-7"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 * * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-20-8"><span class="w">  </span><span class="nt">&quot;sync_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unidirectional&quot;</span><span class="p">,</span>
+</span><span id="__span-20-9"><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idle&quot;</span><span class="p">,</span>
+</span><span id="__span-20-10"><span class="w">  </span><span class="nt">&quot;last_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-20-11"><span class="w">  </span><span class="nt">&quot;last_run_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
+</span><span id="__span-20-12"><span class="w">  </span><span class="nt">&quot;last_run_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.345</span><span class="p">,</span>
+</span><span id="__span-20-13"><span class="w">  </span><span class="nt">&quot;next_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T11:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-20-14"><span class="w">  </span><span class="nt">&quot;stats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-20-15"><span class="w">    </span><span class="nt">&quot;total_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+</span><span id="__span-20-16"><span class="w">    </span><span class="nt">&quot;synced&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span id="__span-20-17"><span class="w">    </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-20-18"><span class="w">    </span><span class="nt">&quot;skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+</span><span id="__span-20-19"><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-20-20"><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="view-sync-history">View Sync History<a class="headerlink" href="#view-sync-history" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-22-1">curl<span class="w"> </span>http://localhost:8080/syncs/my-sync/history
+<h3 id="view-sync-run-history">View Sync Run History<a class="headerlink" href="#view-sync-run-history" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-21-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>http://localhost:8080/api/syncs/<span class="o">{</span>sync_id<span class="o">}</span>/runs
 </span></code></pre></div>
 <h3 id="manually-trigger-sync">Manually Trigger Sync<a class="headerlink" href="#manually-trigger-sync" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-23-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/my-sync/run
+<div class="highlight"><pre><span></span><code><span id="__span-22-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>http://localhost:8080/api/syncs/<span class="o">{</span>sync_id<span class="o">}</span>/execute
 </span></code></pre></div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <h3 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h3>
@@ -2183,7 +2121,7 @@
 </ol>
 <h3 id="sync-takes-too-long">Sync Takes Too Long<a class="headerlink" href="#sync-takes-too-long" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Reduce <code>batch_size</code></li>
+<li>Increase <code>concurrent_workers</code> for parallel processing</li>
 <li>Check network connectivity</li>
 <li>Review vault API latency</li>
 <li>Consider splitting into multiple syncs</li>

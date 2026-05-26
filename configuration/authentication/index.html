@@ -1957,10 +1957,15 @@
 <div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-15-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-token</span>
 </span><span id="__span-15-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
-</span><span id="__span-15-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com:8200&quot;</span>
-</span><span id="__span-15-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-15-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
-</span><span id="__span-15-7"><span class="w">      </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_TOKEN}&quot;</span>
+</span><span id="__span-15-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com:8200/v1/secret/data&quot;</span>
+</span><span id="__span-15-5"><span class="w">    </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
+</span><span id="__span-15-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
+</span><span id="__span-15-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
+</span><span id="__span-15-8"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
+</span><span id="__span-15-9"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_TOKEN}&quot;</span>
+</span><span id="__span-15-10"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
+</span><span id="__span-15-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
+</span><span id="__span-15-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
 </span></code></pre></div>
 <h3 id="approle-authentication">AppRole Authentication<a class="headerlink" href="#approle-authentication" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="nt">vaults</span><span class="p">:</span>
@@ -2107,7 +2112,7 @@
 <div class="highlight"><pre><span></span><code><span id="__span-26-1"><span class="c1"># Linux/macOS</span>
 </span><span id="__span-26-2"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_ID</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
 </span><span id="__span-26-3"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_SECRET</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
-</span><span id="__span-26-4">./sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml
+</span><span id="__span-26-4">./sync-daemon
 </span><span id="__span-26-5">
 </span><span id="__span-26-6"><span class="c1"># Docker with env file</span>
 </span><span id="__span-26-7"><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;BITWARDEN_CLIENT_ID=...&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>.env
@@ -2131,34 +2136,35 @@
 </span><span id="__span-27-8"><span class="c1"># See advanced documentation for details</span>
 </span></code></pre></div>
 <h3 id="using-hashicorp-vault">Using HashiCorp Vault<a class="headerlink" href="#using-hashicorp-vault" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-28-1"><span class="c1"># Store in HashiCorp Vault</span>
-</span><span id="__span-28-2">vault<span class="w"> </span>kv<span class="w"> </span>put<span class="w"> </span>secret/sync/bitwarden<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-28-3"><span class="w">  </span><span class="nv">client_id</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-28-4"><span class="w">  </span><span class="nv">client_secret</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
-</span><span id="__span-28-5">
-</span><span id="__span-28-6"><span class="c1"># Reference in config</span>
-</span><span id="__span-28-7">auth:
-</span><span id="__span-28-8"><span class="w">  </span>method:<span class="w"> </span>oauth2
-</span><span id="__span-28-9"><span class="w">  </span>client_id:<span class="w"> </span>vault://secret/sync/bitwarden:client_id
-</span><span id="__span-28-10"><span class="w">  </span>client_secret:<span class="w"> </span>vault://secret/sync/bitwarden:client_secret
+<p>Retrieve secrets from HashiCorp Vault and set them as environment variables before starting the daemon:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-28-1"><span class="c1"># Retrieve credentials and export as environment variables</span>
+</span><span id="__span-28-2"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_ID</span><span class="o">=</span><span class="k">$(</span>vault<span class="w"> </span>kv<span class="w"> </span>get<span class="w"> </span>-field<span class="o">=</span>client_id<span class="w"> </span>secret/sync/bitwarden<span class="k">)</span>
+</span><span id="__span-28-3"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_SECRET</span><span class="o">=</span><span class="k">$(</span>vault<span class="w"> </span>kv<span class="w"> </span>get<span class="w"> </span>-field<span class="o">=</span>client_secret<span class="w"> </span>secret/sync/bitwarden<span class="k">)</span>
+</span></code></pre></div>
+<p>Then reference them normally in vault configuration:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-29-1"><span class="nt">auth</span><span class="p">:</span>
+</span><span id="__span-29-2"><span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
+</span><span id="__span-29-3"><span class="w">  </span><span class="nt">oauth</span><span class="p">:</span>
+</span><span id="__span-29-4"><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_CLIENT_ID}&quot;</span>
+</span><span id="__span-29-5"><span class="w">    </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_CLIENT_SECRET}&quot;</span>
 </span></code></pre></div>
 <h2 id="certificate-and-key-rotation">Certificate and Key Rotation<a class="headerlink" href="#certificate-and-key-rotation" title="Permanent link">&para;</a></h2>
 <h3 id="azure-service-principal">Azure Service Principal<a class="headerlink" href="#azure-service-principal" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-29-1"><span class="c1"># Replace expiring credential</span>
-</span><span id="__span-29-2">az<span class="w"> </span>ad<span class="w"> </span>sp<span class="w"> </span>credential<span class="w"> </span>reset<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-29-3"><span class="w">  </span>--name<span class="w"> </span>akv-sync-sp<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-29-4"><span class="w">  </span>--credential-description<span class="w"> </span><span class="s2">&quot;new-key&quot;</span>
-</span><span id="__span-29-5">
-</span><span id="__span-29-6"><span class="c1"># Update environment variables</span>
-</span><span id="__span-29-7"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span><span class="s2">&quot;new-secret&quot;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-30-1"><span class="c1"># Replace expiring credential</span>
+</span><span id="__span-30-2">az<span class="w"> </span>ad<span class="w"> </span>sp<span class="w"> </span>credential<span class="w"> </span>reset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-30-3"><span class="w">  </span>--name<span class="w"> </span>akv-sync-sp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-30-4"><span class="w">  </span>--credential-description<span class="w"> </span><span class="s2">&quot;new-key&quot;</span>
+</span><span id="__span-30-5">
+</span><span id="__span-30-6"><span class="c1"># Update environment variables</span>
+</span><span id="__span-30-7"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span><span class="s2">&quot;new-secret&quot;</span>
 </span></code></pre></div>
 <h3 id="api-tokens">API Tokens<a class="headerlink" href="#api-tokens" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-30-1"><span class="c1"># Generate new token</span>
-</span><span id="__span-30-2"><span class="nv">BITWARDEN_CLIENT_ID</span><span class="o">=</span>new-id
-</span><span id="__span-30-3"><span class="nv">BITWARDEN_CLIENT_SECRET</span><span class="o">=</span>new-secret
-</span><span id="__span-30-4">
-</span><span id="__span-30-5"><span class="c1"># Update without downtime (rolling deployment)</span>
-</span><span id="__span-30-6">docker-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w">  </span><span class="c1"># Pulls new config</span>
+<div class="highlight"><pre><span></span><code><span id="__span-31-1"><span class="c1"># Generate new token</span>
+</span><span id="__span-31-2"><span class="nv">BITWARDEN_CLIENT_ID</span><span class="o">=</span>new-id
+</span><span id="__span-31-3"><span class="nv">BITWARDEN_CLIENT_SECRET</span><span class="o">=</span>new-secret
+</span><span id="__span-31-4">
+</span><span id="__span-31-5"><span class="c1"># Update without downtime (rolling deployment)</span>
+</span><span id="__span-31-6">docker-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w">  </span><span class="c1"># Pulls new config</span>
 </span></code></pre></div>
 <h2 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Permanent link">&para;</a></h2>
 <p>✅ <strong>Do</strong>:

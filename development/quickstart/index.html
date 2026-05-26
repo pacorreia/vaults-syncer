@@ -1369,7 +1369,12 @@
 </ul>
 <p>(No password required for test setup)</p>
 <h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;testpass&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-3-4">
+</span><span id="__span-3-5">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-6"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
 </span></code></pre></div>
 <h3 id="view-metrics">View Metrics<a class="headerlink" href="#view-metrics" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-4-1">curl<span class="w"> </span>http://localhost:9090/metrics
@@ -1397,7 +1402,9 @@
 </span><span id="__span-8-4"><span class="c1"># Or manually check services</span>
 </span><span id="__span-8-5">curl<span class="w"> </span>http://localhost:8000/alive
 </span><span id="__span-8-6">curl<span class="w"> </span>http://localhost:8001/alive
-</span><span id="__span-8-7">curl<span class="w"> </span>http://localhost:8080/health
+</span><span id="__span-8-7">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-8"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-9"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;testpass&quot;}&#39;</span>
 </span></code></pre></div>
 <h3 id="build-fails">Build Fails<a class="headerlink" href="#build-fails" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># Force rebuild</span>

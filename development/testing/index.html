@@ -544,24 +544,6 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#access-vaultwarden-web-uis">
-<span class="md-ellipsis">
-      
-        Access Vaultwarden Web UIs
-      
-    </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#add-secrets-manually-via-web-ui">
-<span class="md-ellipsis">
-      
-        Add Secrets Manually via Web UI
-      
-    </span>
-</a>
-</li>
-<li class="md-nav__item">
 <a class="md-nav__link" href="#manually-trigger-sync">
 <span class="md-ellipsis">
       
@@ -766,15 +748,6 @@
 </a>
 <nav aria-label="Environment Variables" class="md-nav">
 <ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#vaultwarden-configuration">
-<span class="md-ellipsis">
-      
-        Vaultwarden Configuration
-      
-    </span>
-</a>
-</li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#sync-daemon-configuration">
 <span class="md-ellipsis">
@@ -990,31 +963,27 @@
 <div class="highlight"><pre><span></span><code><span id="__span-2-1">docker-compose<span class="w"> </span>-f<span class="w"> </span>e2e/docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div>
 <h3 id="wait-for-services-to-be-ready">Wait for Services to Be Ready<a class="headerlink" href="#wait-for-services-to-be-ready" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="c1"># Check Vaultwarden Source</span>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="c1"># Check Source mock vault</span>
 </span><span id="__span-3-2">curl<span class="w"> </span>http://localhost:8000/alive
 </span><span id="__span-3-3">
-</span><span id="__span-3-4"><span class="c1"># Check Vaultwarden Target</span>
+</span><span id="__span-3-4"><span class="c1"># Check Target mock vault</span>
 </span><span id="__span-3-5">curl<span class="w"> </span>http://localhost:8001/alive
 </span><span id="__span-3-6">
-</span><span id="__span-3-7"><span class="c1"># Check Sync Daemon</span>
-</span><span id="__span-3-8">curl<span class="w"> </span>http://localhost:8080/health
+</span><span id="__span-3-7"><span class="c1"># Check Sync Daemon (no auth needed for setup endpoint)</span>
+</span><span id="__span-3-8">curl<span class="w"> </span>http://localhost:8080/api/setup
 </span></code></pre></div>
-<h3 id="access-vaultwarden-web-uis">Access Vaultwarden Web UIs<a class="headerlink" href="#access-vaultwarden-web-uis" title="Permanent link">¶</a></h3>
-<ul>
-<li><strong>Source</strong>: http://localhost:8000</li>
-<li><strong>Target</strong>: http://localhost:8001</li>
-</ul>
-<h3 id="add-secrets-manually-via-web-ui">Add Secrets Manually via Web UI<a class="headerlink" href="#add-secrets-manually-via-web-ui" title="Permanent link">¶</a></h3>
-<ol>
-<li>Go to http://localhost:8000</li>
-<li>Create a new vault item (Login)</li>
-<li>Enter credentials as a test secret</li>
-</ol>
 <h3 id="manually-trigger-sync">Manually Trigger Sync<a class="headerlink" href="#manually-trigger-sync" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><span class="c1"># Get an auth token first</span>
+</span><span id="__span-4-2"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"testpass"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-4-5">
+</span><span id="__span-4-6">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-7"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/execute
 </span></code></pre></div>
 <h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+<div class="highlight"><pre><span></span><code><span id="__span-5-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-2"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
 </span></code></pre></div>
 <p>Example response:
 <div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
@@ -1125,12 +1094,16 @@
 <div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="c1"># Check daemon logs</span>
 </span><span id="__span-16-2">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon
 </span><span id="__span-16-3">
-</span><span id="__span-16-4"><span class="c1"># Verify sync status</span>
-</span><span id="__span-16-5">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
-</span><span id="__span-16-6">
-</span><span id="__span-16-7"><span class="c1"># Check database</span>
-</span><span id="__span-16-8">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-16-9"><span class="w">  </span><span class="s2">"SELECT * FROM syncs_run ORDER BY created_at DESC LIMIT 1;"</span>
+</span><span id="__span-16-4"><span class="c1"># Verify sync status (requires auth)</span>
+</span><span id="__span-16-5"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-6"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-7"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"testpass"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-16-8">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-9"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</span><span id="__span-16-10">
+</span><span id="__span-16-11"><span class="c1"># Check database</span>
+</span><span id="__span-16-12">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>secrets-sync-daemon<span class="w"> </span>sqlite3<span class="w"> </span>/app/data/sync.db<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-13"><span class="w">  </span><span class="s2">"SELECT * FROM syncs_run ORDER BY created_at DESC LIMIT 1;"</span>
 </span></code></pre></div>
 <h3 id="high-memory-usage">High Memory Usage<a class="headerlink" href="#high-memory-usage" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="c1"># Reduce max concurrent operations in config</span>
@@ -1149,24 +1122,22 @@
 </span><span id="__span-18-4"><span class="c1"># Or manually verify health</span>
 </span><span id="__span-18-5">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8000/alive
 </span><span id="__span-18-6">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8001/alive
-</span><span id="__span-18-7">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8080/health
+</span><span id="__span-18-7">curl<span class="w"> </span>-v<span class="w"> </span>http://localhost:8080/api/setup
 </span></code></pre></div>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">¶</a></h2>
-<h3 id="vaultwarden-configuration">Vaultwarden Configuration<a class="headerlink" href="#vaultwarden-configuration" title="Permanent link">¶</a></h3>
-<p>Set in <code>e2e/docker-compose.test.yml</code>:
-- <code>ADMIN_TOKEN</code>: Admin authentication token
-- <code>SIGNUPS_ALLOWED</code>: Allow user registration
-- <code>LOG_LEVEL</code>: vaultwarden log level</p>
 <h3 id="sync-daemon-configuration">Sync Daemon Configuration<a class="headerlink" href="#sync-daemon-configuration" title="Permanent link">¶</a></h3>
-<p>Set in environment or <code>.env.test</code>:
-- <code>VAULTWARDEN_SOURCE_TOKEN</code>: Source vault admin token
-- <code>VAULTWARDEN_TARGET_TOKEN</code>: Target vault admin token
-- <code>CONFIG_PATH</code>: Configuration file location
-- <code>DATABASE_PATH</code>: SQLite database location</p>
+<p>Set in environment or <code>docker-compose.test.yml</code>:</p>
+<ul>
+<li><code>MASTER_ENCRYPTION_KEY</code>: Encryption key for vault credentials</li>
+<li><code>DB_TYPE</code>: Database backend (<code>sqlite</code>, <code>postgres</code>, <code>mssql</code>)</li>
+<li><code>DB_PATH</code>: SQLite database file path (default: <code>sync.db</code>)</li>
+<li><code>SERVER_PORT</code>: HTTP API port (default: <code>8080</code>)</li>
+<li><code>METRICS_PORT</code>: Prometheus metrics port (default: <code>9090</code>)</li>
+</ul>
 <h2 id="advanced-testing">Advanced Testing<a class="headerlink" href="#advanced-testing" title="Permanent link">¶</a></h2>
 <h3 id="performance-testing">Performance Testing<a class="headerlink" href="#performance-testing" title="Permanent link">¶</a></h3>
 <p>Measure sync performance with large secret counts:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="c1"># Inject 100 secrets</span>
+<div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="c1"># Inject 100 secrets into the source mock vault</span>
 </span><span id="__span-19-2"><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..100<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
 </span><span id="__span-19-3"><span class="w">  </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/api/ciphers<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-19-4"><span class="w">    </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer source_admin_token_12345"</span><span class="w"> </span><span class="se">\</span>
@@ -1174,27 +1145,32 @@
 </span><span id="__span-19-6"><span class="w">    </span>-d<span class="w"> </span><span class="s2">"{\"type\":1,\"name\":\"secret-</span><span class="nv">$i</span><span class="s2">\",\"login\":{\"username\":\"user\",\"password\":\"pass\"}}"</span>
 </span><span id="__span-19-7"><span class="k">done</span>
 </span><span id="__span-19-8">
-</span><span id="__span-19-9"><span class="c1"># Measure sync time</span>
-</span><span id="__span-19-10"><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
-</span><span id="__span-19-11">
-</span><span id="__span-19-12"><span class="c1"># Check status</span>
-</span><span id="__span-19-13">curl<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.last_run.duration_ms'</span>
+</span><span id="__span-19-9"><span class="c1"># Get a token and measure sync time</span>
+</span><span id="__span-19-10"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-11"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-12"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"testpass"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-19-13">
+</span><span id="__span-19-14"><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-15"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/execute
+</span><span id="__span-19-16">
+</span><span id="__span-19-17"><span class="c1"># Check duration</span>
+</span><span id="__span-19-18">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-19"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.last_run.duration_ms'</span>
 </span></code></pre></div>
 <h3 id="network-failure-simulation">Network Failure Simulation<a class="headerlink" href="#network-failure-simulation" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-20-1"><span class="c1"># Simulate network issues with tc (traffic control)</span>
 </span><span id="__span-20-2">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>vaultwarden-target<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">10</span>%
 </span><span id="__span-20-3">
 </span><span id="__span-20-4"><span class="c1"># Run sync (will retry and eventually succeed)</span>
-</span><span id="__span-20-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/vaultwarden_sync/execute
-</span><span id="__span-20-6">
-</span><span id="__span-20-7"><span class="c1"># Check retry behavior in logs</span>
-</span><span id="__span-20-8">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>retry
+</span><span id="__span-20-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-6"><span class="w">  </span>http://localhost:8080/api/syncs/vaultwarden_sync/execute
+</span><span id="__span-20-7">
+</span><span id="__span-20-8"><span class="c1"># Check retry behavior in logs</span>
+</span><span id="__span-20-9">docker<span class="w"> </span>logs<span class="w"> </span>secrets-sync-daemon<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>retry
 </span></code></pre></div>
 <h3 id="config-validation">Config Validation<a class="headerlink" href="#config-validation" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="c1"># Test config without running daemon</span>
-</span><span id="__span-21-2">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>e2e/config.test.yaml<span class="w"> </span>-dry-run
-</span><span id="__span-21-3">
-</span><span id="__span-21-4"><span class="c1"># Should output connection test results</span>
+<div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="c1"># Test database connection only (no scheduler started)</span>
+</span><span id="__span-21-2">./bin/sync-daemon<span class="w"> </span>-dry-run
 </span></code></pre></div>
 <h2 id="cicd-integration">CI/CD Integration<a class="headerlink" href="#cicd-integration" title="Permanent link">¶</a></h2>
 <p>Example GitHub Actions workflow:</p>

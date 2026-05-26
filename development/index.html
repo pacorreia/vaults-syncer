@@ -1537,15 +1537,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#future-enhancements" class="md-nav__link">
+  <a href="#possible-future-enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Future Enhancements
+        Possible Future Enhancements
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Future Enhancements">
+    <nav class="md-nav" aria-label="Possible Future Enhancements">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1778,49 +1778,62 @@
 
 <h1 id="development-guide">Development Guide<a class="headerlink" href="#development-guide" title="Permanent link">&para;</a></h1>
 <h2 id="project-overview">Project Overview<a class="headerlink" href="#project-overview" title="Permanent link">&para;</a></h2>
-<p>This is a containerized secrets vault synchronization daemon written in Go. It enables syncing secrets between multiple vault backends including Azure Key Vault, Vaultwarden, HashiCorp Vault, and generic HTTP-based APIs.</p>
+<p>This is a containerized secrets vault synchronization daemon written in Go. It enables syncing secrets between multiple vault backends including Azure Key Vault, Bitwarden, Vaultwarden, HashiCorp Vault, AWS Secrets Manager (via CLI tool backend), Keeper Secrets Manager, and generic HTTP-based APIs.</p>
 <h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1">akv-vaultwarden-sync/
+<div class="highlight"><pre><span></span><code><span id="__span-0-1">vaults-syncer/
 </span><span id="__span-0-2">├── .dockerignore              # Docker build exclusions
-</span><span id="__span-0-3">├── .env.example               # Environment variable template
-</span><span id="__span-0-4">├── .gitignore                 # Git exclusions
-</span><span id="__span-0-5">├── Dockerfile                 # Multi-stage Docker build
-</span><span id="__span-0-6">├── Makefile                   # Build tasks (optional)
-</span><span id="__span-0-7">├── README.md                  # Main documentation
-</span><span id="__span-0-8">├── DEVELOPMENT.md             # This file
-</span><span id="__span-0-9">├── examples/                  # Example configurations
-</span><span id="__span-0-10">│   └── config.example.yaml    # Example configuration
-</span><span id="__span-0-11">├── docker-compose.yml         # Docker Compose setup
-</span><span id="__span-0-12">├── go.mod                     # Go module definition
-</span><span id="__span-0-13">├── go.sum                     # Go dependency checksums
-</span><span id="__span-0-14">├── main.go                    # Application entry point
-</span><span id="__span-0-15">│
-</span><span id="__span-0-16">├── api/                       # REST API handlers
-</span><span id="__span-0-17">│   └── handler.go            # HTTP endpoint handlers
-</span><span id="__span-0-18">│
-</span><span id="__span-0-19">├── config/                    # Configuration management
-</span><span id="__span-0-20">│   ├── loader.go             # YAML config loading &amp; validation
-</span><span id="__span-0-21">│   └── types.go              # Configuration data structures
-</span><span id="__span-0-22">│
-</span><span id="__span-0-23">├── sync/                      # Core sync logic
-</span><span id="__span-0-24">│   ├── engine.go             # Main sync engine
-</span><span id="__span-0-25">│   └── runner.go             # Scheduler and execution runner
-</span><span id="__span-0-26">│
-</span><span id="__span-0-27">├── storage/                   # Persistence layer
-</span><span id="__span-0-28">│   └── store.go              # SQLite database operations
+</span><span id="__span-0-3">├── .gitignore                 # Git exclusions
+</span><span id="__span-0-4">├── Dockerfile                 # Multi-stage Docker build
+</span><span id="__span-0-5">├── README.md                  # Main documentation
+</span><span id="__span-0-6">├── examples/                  # Example configurations
+</span><span id="__span-0-7">│   ├── config.example.yaml    # Example configuration
+</span><span id="__span-0-8">│   └── tools/                 # Tool backend config examples
+</span><span id="__span-0-9">├── docker-compose.yml         # Docker Compose setup
+</span><span id="__span-0-10">├── go.mod                     # Go module definition
+</span><span id="__span-0-11">├── go.sum                     # Go dependency checksums
+</span><span id="__span-0-12">├── main.go                    # Application entry point
+</span><span id="__span-0-13">│
+</span><span id="__span-0-14">├── api/                       # REST API handlers
+</span><span id="__span-0-15">│   ├── handler.go            # Runtime HTTP endpoint handlers
+</span><span id="__span-0-16">│   ├── handler_auth.go       # Auth handlers (login/logout/me)
+</span><span id="__span-0-17">│   ├── handler_config.go     # Admin config CRUD handlers
+</span><span id="__span-0-18">│   ├── handler_setup.go      # First-run setup handler
+</span><span id="__span-0-19">│   ├── handler_users.go      # User management handlers
+</span><span id="__span-0-20">│   └── ui.go                 # Embedded Web UI serving
+</span><span id="__span-0-21">│
+</span><span id="__span-0-22">├── auth/                      # Authentication middleware
+</span><span id="__span-0-23">│
+</span><span id="__span-0-24">├── config/                    # Configuration management
+</span><span id="__span-0-25">│   ├── loader.go             # YAML config loading &amp; validation
+</span><span id="__span-0-26">│   ├── defaults.go           # Default value application
+</span><span id="__span-0-27">│   ├── types.go              # Configuration data structures
+</span><span id="__span-0-28">│   └── validate.go           # Configuration validation
 </span><span id="__span-0-29">│
-</span><span id="__span-0-30">├── vault/                     # Vault client abstraction
-</span><span id="__span-0-31">│   └── client.go             # HTTP vault client
-</span><span id="__span-0-32">│
-</span><span id="__span-0-33">└── bin/
-</span><span id="__span-0-34">    └── sync-daemon           # Compiled binary (after build)
+</span><span id="__span-0-30">├── security/                  # Encryption utilities
+</span><span id="__span-0-31">│
+</span><span id="__span-0-32">├── sync/                      # Core sync logic
+</span><span id="__span-0-33">│   ├── engine.go             # Main sync engine
+</span><span id="__span-0-34">│   └── runner.go             # Scheduler and execution runner
+</span><span id="__span-0-35">│
+</span><span id="__span-0-36">├── storage/                   # Persistence layer
+</span><span id="__span-0-37">│   ├── db.go                 # Database connection (SQLite/PostgreSQL/MSSQL)
+</span><span id="__span-0-38">│   ├── store.go              # Core sync state storage
+</span><span id="__span-0-39">│   ├── config_store.go       # Vault/sync config persistence
+</span><span id="__span-0-40">│   ├── settings_store.go     # Key-value settings storage
+</span><span id="__span-0-41">│   └── user_store.go         # User management
+</span><span id="__span-0-42">│
+</span><span id="__span-0-43">└── vault/                     # Vault client abstraction
+</span><span id="__span-0-44">    ├── backend.go            # Backend interface and GenericBackend
+</span><span id="__span-0-45">    ├── client.go             # HTTP vault client
+</span><span id="__span-0-46">    ├── parser.go             # Response parsing
+</span><span id="__span-0-47">    └── tool_backend.go       # CLI-backed vault backend
 </span></code></pre></div>
 <h2 id="building-the-project">Building the Project<a class="headerlink" href="#building-the-project" title="Permanent link">&para;</a></h2>
 <h3 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><span class="c1"># Install dependencies</span>
 </span><span id="__span-1-2">go<span class="w"> </span>mod<span class="w"> </span>download
 </span><span id="__span-1-3">
-</span><span id="__span-1-4"><span class="c1"># Build binary</span>
+</span><span id="__span-1-4"><span class="c1"># Build binary (CGO_ENABLED=1 required for sqlite3)</span>
 </span><span id="__span-1-5"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>bin/sync-daemon<span class="w"> </span>.
 </span><span id="__span-1-6">
 </span><span id="__span-1-7"><span class="c1"># Build with complete version information</span>
@@ -1847,38 +1860,43 @@
 <h3 id="example-vault-definitions">Example Vault Definitions<a class="headerlink" href="#example-vault-definitions" title="Permanent link">&para;</a></h3>
 <p>The <code>examples/config.example.yaml</code> includes examples for:</p>
 <ol>
-<li><strong>Azure Key Vault</strong></li>
+<li><strong>Azure Key Vault</strong> (type <code>azure</code>)</li>
 <li>Bearer token authentication</li>
 <li>
 <p>REST API endpoints</p>
 </li>
 <li>
-<p><strong>Vaultwarden</strong></p>
+<p><strong>Vaultwarden</strong> (type <code>vaultwarden</code>)</p>
 </li>
-<li>Bitwarden-compatible vault</li>
+<li>OAuth2 authentication with device parameters</li>
 <li>
-<p>Bearer token auth</p>
-</li>
-<li>
-<p><strong>HashiCorp Vault</strong></p>
-</li>
-<li>Generic vault platform</li>
-<li>
-<p>Bearer token auth</p>
+<p>Self-hosted Bitwarden-compatible API</p>
 </li>
 <li>
-<p><strong>Custom HTTP API</strong></p>
+<p><strong>HashiCorp Vault</strong> (type <code>vault</code>)</p>
+</li>
+<li>Custom header authentication (X-Vault-Token)</li>
+<li>
+<p>KV v2 API</p>
+</li>
+<li>
+<p><strong>AWS Secrets Manager</strong> (type <code>tool</code>)</p>
+</li>
+<li>CLI-backed via the AWS CLI</li>
+<li>
+<p>No HTTP credentials needed in config</p>
+</li>
+<li>
+<p><strong>Generic REST API</strong> (type <code>generic</code>)</p>
 </li>
 <li>API key authentication</li>
 <li>Flexible field mapping</li>
 </ol>
 <h3 id="creating-a-production-config">Creating a Production Config<a class="headerlink" href="#creating-a-production-config" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Copy the example: <code>cp examples/config.example.yaml config.yaml</code></li>
-<li>Define your vaults with actual endpoints</li>
-<li>Set authentication via environment variables (recommended)</li>
-<li>Define sync relationships</li>
-<li>Validate with dry-run: <code>./bin/sync-daemon -config config.yaml -dry-run</code></li>
+<li>Configure vaults via the Web UI at <code>http://localhost:8080</code></li>
+<li>Alternatively, use the admin API: <code>POST /api/config/vaults</code></li>
+<li>Validate by triggering a sync: <code>POST /api/syncs/{id}/execute</code></li>
 </ol>
 <h2 id="architecture-decisions">Architecture Decisions<a class="headerlink" href="#architecture-decisions" title="Permanent link">&para;</a></h2>
 <h3 id="language-go">Language: Go<a class="headerlink" href="#language-go" title="Permanent link">&para;</a></h3>
@@ -1972,23 +1990,28 @@
 <tbody>
 <tr>
 <td>Bearer Token</td>
-<td>Authorization header</td>
-<td>APIs, Azure, Vault</td>
+<td><code>Authorization: Bearer &lt;token&gt;</code> header</td>
+<td>APIs, Azure AD, generic tokens</td>
 </tr>
 <tr>
 <td>Basic Auth</td>
-<td>Base64 encoded credentials</td>
+<td>Base64 encoded <code>username:password</code></td>
 <td>Legacy systems</td>
 </tr>
 <tr>
+<td>OAuth 2.0</td>
+<td>Client credentials flow, automatic token refresh</td>
+<td>Bitwarden, Vaultwarden, Azure SP</td>
+</tr>
+<tr>
 <td>API Key</td>
-<td>Custom header (X-API-Key)</td>
+<td>Custom header (e.g. <code>api_key</code>, <code>X-API-Key</code>)</td>
 <td>Third-party APIs</td>
 </tr>
 <tr>
 <td>Custom</td>
-<td>Arbitrary headers</td>
-<td>Proprietary systems</td>
+<td>Arbitrary headers (e.g. <code>X-Vault-Token</code>)</td>
+<td>HashiCorp Vault, proprietary systems</td>
 </tr>
 </tbody>
 </table>
@@ -2016,20 +2039,24 @@
 </ul>
 <h2 id="testing-configuration">Testing Configuration<a class="headerlink" href="#testing-configuration" title="Permanent link">&para;</a></h2>
 <h3 id="dry-run-mode">Dry-Run Mode<a class="headerlink" href="#dry-run-mode" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-5-1">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml<span class="w"> </span>-dry-run
+<p><div class="highlight"><pre><span></span><code><span id="__span-5-1">./bin/sync-daemon<span class="w"> </span>-dry-run
 </span></code></pre></div>
-- Validates configuration
-- Tests connections to all vaults
-- Initializes database schema
-- Exits without starting scheduler</p>
+- Validates database connection
+- Exits without starting the scheduler</p>
 <h3 id="manual-sync-execution">Manual Sync Execution<a class="headerlink" href="#manual-sync-execution" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-6-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/sync_id/execute
+<p><div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="c1"># Requires authentication (Bearer token)</span>
+</span><span id="__span-6-2"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;pass&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-6-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-6"><span class="w">  </span>http://localhost:8080/api/syncs/sync_id/execute
 </span></code></pre></div>
 - Triggers immediate sync
 - Bypasses cron schedule
 - Useful for testing changes</p>
 <h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>http://localhost:8080/syncs/sync_id/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+<p><div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-2"><span class="w">  </span>http://localhost:8080/api/syncs/sync_id/status
 </span></code></pre></div>
 - View last run results
 - Inspect failed objects
@@ -2062,14 +2089,14 @@
 - Network utilization</p>
 <h2 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">&para;</a></h2>
 <h3 id="health-endpoint">Health Endpoint<a class="headerlink" href="#health-endpoint" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-10-1">GET<span class="w"> </span>/health
+<p><div class="highlight"><pre><span></span><code><span id="__span-10-1">GET<span class="w"> </span>/api/health<span class="w">  </span><span class="o">(</span>requires<span class="w"> </span>auth<span class="o">)</span>
 </span></code></pre></div>
 Returns:
 - Status (healthy/unhealthy)
 - Runner state (enabled/disabled)
 - Configuration summary</p>
 <h3 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-11-1">GET<span class="w"> </span>/metrics
+<p><div class="highlight"><pre><span></span><code><span id="__span-11-1">GET<span class="w"> </span>/metrics<span class="w">  </span><span class="o">(</span>port<span class="w"> </span><span class="m">9090</span>,<span class="w"> </span>no<span class="w"> </span>auth<span class="o">)</span>
 </span></code></pre></div>
 Prometheus-compatible format:
 - <code>syncs_configured</code>
@@ -2112,30 +2139,25 @@ Prometheus-compatible format:
 <li>Immutable once written</li>
 <li>Helps detect unauthorized changes</li>
 </ul>
-<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
+<h2 id="possible-future-enhancements">Possible Future Enhancements<a class="headerlink" href="#possible-future-enhancements" title="Permanent link">&para;</a></h2>
 <h3 id="vault-backends">Vault Backends<a class="headerlink" href="#vault-backends" title="Permanent link">&para;</a></h3>
 <ul>
-<li>AWS Secrets Manager</li>
-<li>Google Secret Manager</li>
-<li>Kubernetes Secrets</li>
-<li>CyberArk</li>
-<li>Thycotic Secret Server</li>
+<li>Google Secret Manager native adapter</li>
+<li>Kubernetes Secrets native adapter</li>
+<li>CyberArk PAM integration</li>
 </ul>
 <h3 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Webhook-based triggers for event-driven sync</li>
-<li>Secret transformation/encryption during transit</li>
-<li>Field-level filtering and mapping</li>
+<li>Field-level filtering and value mapping</li>
 <li>Backup/snapshot functionality</li>
 <li>Multi-tenant support</li>
 </ul>
 <h3 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Web UI for configuration</li>
-<li>Metrics dashboard (Grafana integration)</li>
 <li>Advanced search in audit trail</li>
 <li>Scheduled reports</li>
-<li>API versioning and stability</li>
+<li>API versioning and stability guarantees</li>
 </ul>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="build-issues">Build Issues<a class="headerlink" href="#build-issues" title="Permanent link">&para;</a></h3>
@@ -2147,11 +2169,11 @@ Prometheus-compatible format:
 <p><strong>Error</strong>: <code>CGO_ENABLED=1 not set</code>
 - <strong>Solution</strong>: Use <code>CGO_ENABLED=1</code> when building</p>
 <h3 id="runtime-issues">Runtime Issues<a class="headerlink" href="#runtime-issues" title="Permanent link">&para;</a></h3>
-<p><strong>Error</strong>: Configuration validation failed
+<p><strong>Error</strong>: <code>Configuration validation failed</code>
 - <strong>Solution</strong>: Run dry-run mode for detailed errors
-  <div class="highlight"><pre><span></span><code><span id="__span-14-1">./bin/sync-daemon<span class="w"> </span>-config<span class="w"> </span>config.yaml<span class="w"> </span>-dry-run
+  <div class="highlight"><pre><span></span><code><span id="__span-14-1">./bin/sync-daemon<span class="w"> </span>-dry-run
 </span></code></pre></div></p>
-<p><strong>Error</strong>: Connection to vault failed
+<p><strong>Error</strong>: <code>Connection to vault failed</code>
 - <strong>Solution</strong>: Check endpoint, verify token expiration, test endpoint
   <div class="highlight"><pre><span></span><code><span id="__span-15-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="nv">$ENDPOINT</span>
 </span></code></pre></div></p>

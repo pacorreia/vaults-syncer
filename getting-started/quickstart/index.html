@@ -569,10 +569,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-create-configuration" class="md-nav__link">
+  <a href="#1-run-with-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Create Configuration
+        1. Run with Docker
       
     </span>
   </a>
@@ -580,10 +580,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-run-with-docker" class="md-nav__link">
+  <a href="#2-complete-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Run with Docker
+        2. Complete Setup
       
     </span>
   </a>
@@ -591,10 +591,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-verify-its-working" class="md-nav__link">
+  <a href="#3-add-vaults" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Verify It's Working
+        3. Add Vaults
       
     </span>
   </a>
@@ -602,10 +602,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-trigger-first-sync" class="md-nav__link">
+  <a href="#4-create-a-sync" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Trigger First Sync
+        4. Create a Sync
       
     </span>
   </a>
@@ -613,10 +613,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-view-logs" class="md-nav__link">
+  <a href="#5-trigger-and-monitor" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. View Logs
+        5. Trigger and Monitor
       
     </span>
   </a>
@@ -647,21 +647,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#multi-cloud" class="md-nav__link">
+  <a href="#multi-environment-sync" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Multi-Cloud
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#development-sync" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development Sync
+        Multi-Environment Sync
       
     </span>
   </a>
@@ -1272,158 +1261,116 @@
 
 <h1 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h1>
 <p>Get Secrets Vault Sync running in 5 minutes!</p>
-<h2 id="1-create-configuration">1. Create Configuration<a class="headerlink" href="#1-create-configuration" title="Permanent link">&para;</a></h2>
-<p>Save this as <code>config.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="nt">vaults</span><span class="p">:</span>
-</span><span id="__span-0-2"><span class="w">  </span><span class="c1"># Source vault (where secrets are read from)</span>
-</span><span id="__span-0-3"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-prod</span>
-</span><span id="__span-0-4"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Production Vault</span>
-</span><span id="__span-0-5"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaultwarden</span>
-</span><span id="__span-0-6"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://vault.example.com/api/ciphers</span>
-</span><span id="__span-0-7"><span class="w">    </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
-</span><span id="__span-0-8"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-0-9"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
-</span><span id="__span-0-10"><span class="w">      </span><span class="nt">oauth</span><span class="p">:</span>
-</span><span id="__span-0-11"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://vault.example.com/identity/connect/token</span>
-</span><span id="__span-0-12"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-client-id</span>
-</span><span id="__span-0-13"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-secret</span>
-</span><span id="__span-0-14"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api</span>
-</span><span id="__span-0-15"><span class="w">        </span><span class="nt">extra_params</span><span class="p">:</span>
-</span><span id="__span-0-16"><span class="w">          </span><span class="nt">deviceIdentifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv-sync</span>
-</span><span id="__span-0-17"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-0-18"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">name</span>
-</span><span id="__span-0-19"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">name</span>
-</span><span id="__span-0-20"><span class="w">    </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-0-21"><span class="w">      </span><span class="nt">Accept</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">application/json</span>
-</span><span id="__span-0-22"><span class="w">      </span><span class="nt">Content-Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">application/json</span>
-</span><span id="__span-0-23">
-</span><span id="__span-0-24"><span class="w">  </span><span class="c1"># Target vault (where secrets are written)</span>
-</span><span id="__span-0-25"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-backup</span>
-</span><span id="__span-0-26"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Backup Vault</span>
-</span><span id="__span-0-27"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vaultwarden</span>
-</span><span id="__span-0-28"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://backup.example.com/api/ciphers</span>
-</span><span id="__span-0-29"><span class="w">    </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
-</span><span id="__span-0-30"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
-</span><span id="__span-0-31"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
-</span><span id="__span-0-32"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-0-33"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-bearer-token</span>
-</span><span id="__span-0-34"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-0-35"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">name</span>
-</span><span id="__span-0-36"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">name</span>
-</span><span id="__span-0-37"><span class="w">    </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-0-38"><span class="w">      </span><span class="nt">Accept</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">application/json</span>
-</span><span id="__span-0-39"><span class="w">      </span><span class="nt">Content-Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">application/json</span>
-</span><span id="__span-0-40">
-</span><span id="__span-0-41"><span class="c1"># Define sync relationships</span>
-</span><span id="__span-0-42"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-0-43"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-sync</span>
-</span><span id="__span-0-44"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-prod</span>
-</span><span id="__span-0-45"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-0-46"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-backup</span>
-</span><span id="__span-0-47"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-0-48"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
-</span><span id="__span-0-49"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-0-50"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-0-51"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w">  </span><span class="c1"># Sync all secrets</span>
-</span><span id="__span-0-52">
-</span><span id="__span-0-53"><span class="c1"># Server configuration</span>
-</span><span id="__span-0-54"><span class="nt">server</span><span class="p">:</span>
-</span><span id="__span-0-55"><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
-</span><span id="__span-0-56"><span class="w">  </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
-</span><span id="__span-0-57">
-</span><span id="__span-0-58"><span class="c1"># Logging</span>
-</span><span id="__span-0-59"><span class="nt">logging</span><span class="p">:</span>
-</span><span id="__span-0-60"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span>
-</span><span id="__span-0-61"><span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
+<h2 id="1-run-with-docker">1. Run with Docker<a class="headerlink" href="#1-run-with-docker" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-2"><span class="w">  </span>--name<span class="w"> </span>vaults-syncer<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-3"><span class="w">  </span>-v<span class="w"> </span>sync-data:/app/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-4"><span class="w">  </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><span class="w">  </span>-p<span class="w"> </span><span class="m">9090</span>:9090<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-6"><span class="w">  </span>ghcr.io/pacorreia/vaults-syncer:latest
 </span></code></pre></div>
-<h2 id="2-run-with-docker">2. Run with Docker<a class="headerlink" href="#2-run-with-docker" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-2"><span class="w">  </span>--name<span class="w"> </span>akv-sync<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-3"><span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/config.yaml:/etc/sync/config.yaml:ro<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-4"><span class="w">  </span>-v<span class="w"> </span>sync-data:/app/data<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-5"><span class="w">  </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-6"><span class="w">  </span>ghcr.io/pacorreia/vaults-syncer:latest
+<p>Check the logs for the generated encryption key on first start:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1">docker<span class="w"> </span>logs<span class="w"> </span>vaults-syncer
 </span></code></pre></div>
-<p>Or with Docker Compose:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.8&#39;</span>
-</span><span id="__span-2-2">
-</span><span id="__span-2-3"><span class="nt">services</span><span class="p">:</span>
-</span><span id="__span-2-4"><span class="w">  </span><span class="nt">sync-daemon</span><span class="p">:</span>
-</span><span id="__span-2-5"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/pacorreia/vaults-syncer:latest</span>
-</span><span id="__span-2-6"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-</span><span id="__span-2-7"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./config.yaml:/etc/sync/config.yaml:ro</span>
-</span><span id="__span-2-8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sync-data:/app/data</span>
-</span><span id="__span-2-9"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-</span><span id="__span-2-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span>
-</span><span id="__span-2-11"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;9090:9090&quot;</span>
-</span><span id="__span-2-12"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-</span><span id="__span-2-13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOG_LEVEL=info</span>
-</span><span id="__span-2-14">
-</span><span id="__span-2-15"><span class="nt">volumes</span><span class="p">:</span>
-</span><span id="__span-2-16"><span class="w">  </span><span class="nt">sync-data</span><span class="p">:</span>
+<p>Look for a banner with <code>MASTER ENCRYPTION KEY – SAVE THIS NOW</code> and copy the printed key. Set it before the next restart:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_ENCRYPTION_KEY</span><span class="o">=</span>&lt;printed-value&gt;
 </span></code></pre></div>
-<p>Run it:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1">docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<h2 id="2-complete-setup">2. Complete Setup<a class="headerlink" href="#2-complete-setup" title="Permanent link">&para;</a></h2>
+<p>Open <code>http://localhost:8080</code> and follow the Setup Wizard to create an admin account.</p>
+<h2 id="3-add-vaults">3. Add Vaults<a class="headerlink" href="#3-add-vaults" title="Permanent link">&para;</a></h2>
+<p>Via the Web UI, navigate to <strong>Vaults Config</strong>, or use the API:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="c1"># Get auth token</span>
+</span><span id="__span-3-2"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;your-password&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-3-5">
+</span><span id="__span-3-6"><span class="c1"># Add source vault (Vaultwarden)</span>
+</span><span id="__span-3-7">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/vaults<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-8"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-9"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-10"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-3-11"><span class="s1">    &quot;id&quot;: &quot;vault-prod&quot;,</span>
+</span><span id="__span-3-12"><span class="s1">    &quot;type&quot;: &quot;vaultwarden&quot;,</span>
+</span><span id="__span-3-13"><span class="s1">    &quot;endpoint&quot;: &quot;https://vault.example.com/api/ciphers&quot;,</span>
+</span><span id="__span-3-14"><span class="s1">    &quot;method&quot;: &quot;POST&quot;,</span>
+</span><span id="__span-3-15"><span class="s1">    &quot;auth&quot;: {</span>
+</span><span id="__span-3-16"><span class="s1">      &quot;method&quot;: &quot;oauth2&quot;,</span>
+</span><span id="__span-3-17"><span class="s1">      &quot;oauth&quot;: {</span>
+</span><span id="__span-3-18"><span class="s1">        &quot;token_endpoint&quot;: &quot;https://vault.example.com/identity/connect/token&quot;,</span>
+</span><span id="__span-3-19"><span class="s1">        &quot;client_id&quot;: &quot;your-client-id&quot;,</span>
+</span><span id="__span-3-20"><span class="s1">        &quot;client_secret&quot;: &quot;your-secret&quot;,</span>
+</span><span id="__span-3-21"><span class="s1">        &quot;scope&quot;: &quot;api&quot;,</span>
+</span><span id="__span-3-22"><span class="s1">        &quot;extra_params&quot;: {&quot;deviceIdentifier&quot;: &quot;sync-daemon&quot;}</span>
+</span><span id="__span-3-23"><span class="s1">      }</span>
+</span><span id="__span-3-24"><span class="s1">    },</span>
+</span><span id="__span-3-25"><span class="s1">    &quot;field_names&quot;: {&quot;name_field&quot;: &quot;name&quot;, &quot;value_field&quot;: &quot;login&quot;}</span>
+</span><span id="__span-3-26"><span class="s1">  }&#39;</span>
+</span><span id="__span-3-27">
+</span><span id="__span-3-28"><span class="c1"># Add target vault (backup Vaultwarden)</span>
+</span><span id="__span-3-29">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/vaults<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-30"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-31"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-32"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-3-33"><span class="s1">    &quot;id&quot;: &quot;vault-backup&quot;,</span>
+</span><span id="__span-3-34"><span class="s1">    &quot;type&quot;: &quot;vaultwarden&quot;,</span>
+</span><span id="__span-3-35"><span class="s1">    &quot;endpoint&quot;: &quot;https://backup.example.com/api/ciphers&quot;,</span>
+</span><span id="__span-3-36"><span class="s1">    &quot;method&quot;: &quot;POST&quot;,</span>
+</span><span id="__span-3-37"><span class="s1">    &quot;auth&quot;: {&quot;method&quot;: &quot;bearer&quot;, &quot;headers&quot;: {&quot;token&quot;: &quot;your-bearer-token&quot;}},</span>
+</span><span id="__span-3-38"><span class="s1">    &quot;field_names&quot;: {&quot;name_field&quot;: &quot;name&quot;, &quot;value_field&quot;: &quot;login&quot;}</span>
+</span><span id="__span-3-39"><span class="s1">  }&#39;</span>
 </span></code></pre></div>
-<h2 id="3-verify-its-working">3. Verify It's Working<a class="headerlink" href="#3-verify-its-working" title="Permanent link">&para;</a></h2>
-<p>Check daemon health:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1">curl<span class="w"> </span>http://localhost:8080/health
+<h2 id="4-create-a-sync">4. Create a Sync<a class="headerlink" href="#4-create-a-sync" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/syncs<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-2"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-4-5"><span class="s1">    &quot;id&quot;: &quot;backup-sync&quot;,</span>
+</span><span id="__span-4-6"><span class="s1">    &quot;source&quot;: &quot;vault-prod&quot;,</span>
+</span><span id="__span-4-7"><span class="s1">    &quot;targets&quot;: [&quot;vault-backup&quot;],</span>
+</span><span id="__span-4-8"><span class="s1">    &quot;sync_type&quot;: &quot;unidirectional&quot;,</span>
+</span><span id="__span-4-9"><span class="s1">    &quot;schedule&quot;: &quot;0 */4 * * *&quot;,</span>
+</span><span id="__span-4-10"><span class="s1">    &quot;enabled&quot;: true</span>
+</span><span id="__span-4-11"><span class="s1">  }&#39;</span>
 </span></code></pre></div>
-<p>Expected response:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="p">{</span>
-</span><span id="__span-5-2"><span class="w">  </span><span class="nt">&quot;running&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-5-3"><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
-</span><span id="__span-5-4"><span class="w">  </span><span class="nt">&quot;syncs&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-5-5"><span class="w">  </span><span class="nt">&quot;vaults&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
-</span><span id="__span-5-6"><span class="p">}</span>
-</span></code></pre></div>
-<h2 id="4-trigger-first-sync">4. Trigger First Sync<a class="headerlink" href="#4-trigger-first-sync" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/syncs/backup-sync/execute
-</span></code></pre></div>
-<p>Monitor progress:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>http://localhost:8080/syncs/backup-sync/status
-</span></code></pre></div>
-<h2 id="5-view-logs">5. View Logs<a class="headerlink" href="#5-view-logs" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><span class="c1"># Docker</span>
-</span><span id="__span-8-2">docker<span class="w"> </span>logs<span class="w"> </span>akv-sync<span class="w"> </span>-f
-</span><span id="__span-8-3">
-</span><span id="__span-8-4"><span class="c1"># Or view directly</span>
-</span><span id="__span-8-5">tail<span class="w"> </span>-f<span class="w"> </span>/path/to/logs.json
+<h2 id="5-trigger-and-monitor">5. Trigger and Monitor<a class="headerlink" href="#5-trigger-and-monitor" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Trigger sync immediately</span>
+</span><span id="__span-5-2">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-3"><span class="w">  </span>http://localhost:8080/api/syncs/backup-sync/execute
+</span><span id="__span-5-4">
+</span><span id="__span-5-5"><span class="c1"># Check status</span>
+</span><span id="__span-5-6">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-7"><span class="w">  </span>http://localhost:8080/api/syncs/backup-sync/status
+</span><span id="__span-5-8">
+</span><span id="__span-5-9"><span class="c1"># View run history</span>
+</span><span id="__span-5-10">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-11"><span class="w">  </span>http://localhost:8080/api/syncs/backup-sync/runs
 </span></code></pre></div>
 <h2 id="common-configuration-patterns">Common Configuration Patterns<a class="headerlink" href="#common-configuration-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="backup-strategy">Backup Strategy<a class="headerlink" href="#backup-strategy" title="Permanent link">&para;</a></h3>
 <p>Sync all secrets from production to backup every 4 hours:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-9-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-to-backup</span>
-</span><span id="__span-9-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
-</span><span id="__span-9-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-9-5"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup</span>
-</span><span id="__span-9-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-9-7"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
+</span><span id="__span-6-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod-to-backup&quot;</span><span class="p">,</span>
+</span><span id="__span-6-3"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-6-4"><span class="w">  </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;backup&quot;</span><span class="p">],</span>
+</span><span id="__span-6-5"><span class="w">  </span><span class="nt">&quot;sync_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unidirectional&quot;</span><span class="p">,</span>
+</span><span id="__span-6-6"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 */4 * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-6-7"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-6-8"><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="multi-cloud">Multi-Cloud<a class="headerlink" href="#multi-cloud" title="Permanent link">&para;</a></h3>
-<p>Sync between Azure and AWS:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-10-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">az-to-aws</span>
-</span><span id="__span-10-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-vault</span>
-</span><span id="__span-10-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-10-5"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws-vault</span>
-</span><span id="__span-10-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
-</span></code></pre></div>
-<h3 id="development-sync">Development Sync<a class="headerlink" href="#development-sync" title="Permanent link">&para;</a></h3>
-<p>Keep dev and staging in sync with production non-prod secrets:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-11-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-to-dev</span>
-</span><span id="__span-11-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
-</span><span id="__span-11-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-11-5"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
-</span><span id="__span-11-6"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
-</span><span id="__span-11-7"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-11-8"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-11-9"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;dev-*&quot;</span>
-</span><span id="__span-11-10"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;shared-*&quot;</span>
-</span><span id="__span-11-11"><span class="w">      </span><span class="nt">exclude</span><span class="p">:</span>
-</span><span id="__span-11-12"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*-prod&quot;</span>
+<h3 id="multi-environment-sync">Multi-Environment Sync<a class="headerlink" href="#multi-environment-sync" title="Permanent link">&para;</a></h3>
+<p>Keep dev and staging in sync with filtered production secrets:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="p">{</span>
+</span><span id="__span-7-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod-to-dev&quot;</span><span class="p">,</span>
+</span><span id="__span-7-3"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-7-4"><span class="w">  </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;development&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;staging&quot;</span><span class="p">],</span>
+</span><span id="__span-7-5"><span class="w">  </span><span class="nt">&quot;sync_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unidirectional&quot;</span><span class="p">,</span>
+</span><span id="__span-7-6"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 6 * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-7-7"><span class="w">  </span><span class="nt">&quot;filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-8"><span class="w">    </span><span class="nt">&quot;patterns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;dev-*&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;shared-*&quot;</span><span class="p">],</span>
+</span><span id="__span-7-9"><span class="w">    </span><span class="nt">&quot;exclude&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*-prod&quot;</span><span class="p">]</span>
+</span><span id="__span-7-10"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-7-11"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-7-12"><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>

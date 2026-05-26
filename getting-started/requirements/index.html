@@ -815,10 +815,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#database-optional" class="md-nav__link">
+  <a href="#database" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Database (Optional)
+        Database
       
     </span>
   </a>
@@ -994,17 +994,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#python-integration-optional" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python Integration (Optional)
-      
-    </span>
-  </a>
   
 </li>
       
@@ -1718,7 +1707,7 @@
 <h2 id="dependency-requirements">Dependency Requirements<a class="headerlink" href="#dependency-requirements" title="Permanent link">&para;</a></h2>
 <h3 id="runtime">Runtime<a class="headerlink" href="#runtime" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Go 1.22+</strong> (if building from source)</li>
+<li><strong>Go 1.26+</strong> (if building from source; <code>CGO_ENABLED=1</code> required for the sqlite3 driver)</li>
 <li><strong>Docker 20.10+</strong> (for containerized deployment)</li>
 <li><strong>Docker Compose 2.0+</strong> (for Compose deployments)</li>
 <li><strong>Kubernetes 1.24+</strong> (for Kubernetes deployment)</li>
@@ -1800,12 +1789,12 @@
 <li><strong>Logs</strong>: 10-100 MB (depends on log retention)</li>
 <li><strong>Total</strong>: Minimum 50 MB free space</li>
 </ul>
-<h3 id="database-optional">Database (Optional)<a class="headerlink" href="#database-optional" title="Permanent link">&para;</a></h3>
-<p>For advanced deployments:</p>
+<h3 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h3>
+<p>The daemon supports three database backends (configured via <code>DB_TYPE</code>):</p>
 <ul>
-<li><strong>PostgreSQL 12+</strong></li>
-<li><strong>MySQL 5.7+</strong></li>
-<li><strong>SQLite</strong> (embedded, no setup needed)</li>
+<li><strong>SQLite</strong> (embedded, default — no extra setup needed; file path via <code>DB_PATH</code>)</li>
+<li><strong>PostgreSQL 12+</strong> (<code>DB_TYPE=postgres</code>, connection string via <code>DB_DSN</code>)</li>
+<li><strong>Microsoft SQL Server 2019+</strong> (<code>DB_TYPE=mssql</code>, connection string via <code>DB_DSN</code>)</li>
 </ul>
 <h2 id="monitoring-observability-requirements">Monitoring &amp; Observability Requirements<a class="headerlink" href="#monitoring-observability-requirements" title="Permanent link">&para;</a></h2>
 <h3 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h3>
@@ -1873,22 +1862,16 @@
 </thead>
 <tbody>
 <tr>
-<td>API Server</td>
+<td>API Server + Web UI</td>
 <td>8080</td>
 <td>HTTP</td>
-<td>REST endpoints</td>
+<td>REST API endpoints and Web UI</td>
 </tr>
 <tr>
 <td>Metrics</td>
 <td>9090</td>
 <td>HTTP</td>
-<td>Prometheus metrics</td>
-</tr>
-<tr>
-<td>Webhook</td>
-<td>8081</td>
-<td>HTTP</td>
-<td>Event webhooks (optional)</td>
+<td>Prometheus metrics (separate server)</td>
 </tr>
 </tbody>
 </table>
@@ -1901,13 +1884,6 @@
 </span><span id="__span-4-6">-<span class="w"> </span><span class="m">443</span>/TCP<span class="w"> </span><span class="o">(</span>HTTPS<span class="w"> </span>to<span class="w"> </span>vaults<span class="o">)</span>
 </span><span id="__span-4-7">-<span class="w"> </span><span class="m">53</span>/UDP<span class="w"> </span><span class="o">(</span>DNS<span class="o">)</span>
 </span></code></pre></div>
-<h2 id="python-integration-optional">Python Integration (Optional)<a class="headerlink" href="#python-integration-optional" title="Permanent link">&para;</a></h2>
-<p>If using Python SDK:</p>
-<ul>
-<li><strong>Python 3.8+</strong></li>
-<li><strong>pip</strong> or <strong>poetry</strong></li>
-<li><strong>Dependencies</strong>: requests, pydantic, pyyaml</li>
-</ul>
 <h2 id="telemetry-analytics">Telemetry &amp; Analytics<a class="headerlink" href="#telemetry-analytics" title="Permanent link">&para;</a></h2>
 <h3 id="optional-services">Optional Services<a class="headerlink" href="#optional-services" title="Permanent link">&para;</a></h3>
 <ul>
