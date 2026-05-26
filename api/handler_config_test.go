@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/pacorreia/vaults-syncer/auth"
 	"github.com/pacorreia/vaults-syncer/config"
@@ -36,8 +37,8 @@ func TestListVaultsConfig_Empty(t *testing.T) {
 
 func TestCreateAndGetVault(t *testing.T) {
 	store := openTestStore(t)
-	reloadCalled := false
-	h := NewConfigHandler(store, testLogger(t), func() { reloadCalled = true })
+	reloadDone := make(chan struct{}, 1)
+	h := NewConfigHandler(store, testLogger(t), func() { reloadDone <- struct{}{} })
 
 	v := config.VaultConfig{
 		ID:       "vault1",
@@ -55,8 +56,11 @@ func TestCreateAndGetVault(t *testing.T) {
 		t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
 	}
 
-	// Reload should be triggered.
-	for i := 0; i < 10 && !reloadCalled; i++ {
+	// onConfigChanged must be called; wait with a timeout to avoid a data race.
+	select {
+	case <-reloadDone:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("onConfigChanged callback not called within timeout")
 	}
 
 	// Get.

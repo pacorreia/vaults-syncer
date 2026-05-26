@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/pacorreia/vaults-syncer/auth"
 	"github.com/pacorreia/vaults-syncer/storage"
@@ -62,8 +63,8 @@ func TestGetSetupStatus_NotComplete(t *testing.T) {
 func TestCompleteSetup(t *testing.T) {
 	store := openTestStore(t)
 	svc := auth.NewService(store)
-	called := false
-	h := NewSetupHandler(store, svc, testLogger(t), func() { called = true })
+	done := make(chan struct{}, 1)
+	h := NewSetupHandler(store, svc, testLogger(t), func() { done <- struct{}{} })
 
 	body, _ := json.Marshal(map[string]string{
 		"admin_username": "admin",
@@ -83,9 +84,11 @@ func TestCompleteSetup(t *testing.T) {
 		t.Error("expected setup to be marked complete")
 	}
 
-	// onSetupComplete should be called.
-	// Give the goroutine a moment.
-	for i := 0; i < 10 && !called; i++ {
+	// onSetupComplete should be called; wait with a timeout to avoid a data race.
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Error("onSetupComplete callback not called within timeout")
 	}
 }
 
