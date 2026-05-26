@@ -42,7 +42,7 @@ syncs:
 |--------|------|---------|-------------|
 | `enabled` | boolean | `true` | Enable/disable this sync |
 | `concurrent_workers` | integer | `0` (sequential) | Number of secrets processed in parallel |
-| `retry_policy` | object | see defaults | Retry configuration for failed operations |
+| `retry_policy` | object | `{max_retries:3, initial_backoff:1000, max_backoff:60000, multiplier:2.0}` | Retry configuration for failed operations |
 
 ## Schedule (Cron Expressions)
 

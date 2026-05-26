@@ -22,7 +22,7 @@ It supports:
 - Docker or Go 1.26+ (for source builds; requires `CGO_ENABLED=1`)
 - A source vault with configuration access
 - At least one target vault to sync to
-- Basic understanding of YAML configuration
+- Basic understanding of REST APIs or the Web UI
 
 ## Next Steps
 

@@ -109,7 +109,7 @@ docker-compose -f e2e/docker-compose.test.yml down -v
 lsof -i :8000 :8001 :8080 :9090 :5432
 
 # Or manually check services
-curl http://localhost:8080/alive
+curl http://localhost:8000/alive
 curl http://localhost:8001/alive
 curl -X POST http://localhost:8080/api/auth/login \
   -H 'Content-Type: application/json' \

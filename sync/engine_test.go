@@ -287,7 +287,8 @@ func TestSyncSecretUnidirectional_Success(t *testing.T) {
 	engine, store, _, target := setupEngine(t)
 	defer store.Close()
 
-	if err := engine.syncSecretUnidirectional("sync1", "source", "target", "secret1", engine.backends["source"]); err != nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "unidirectional"}
+	if err := engine.syncSecretUnidirectional(syncCfg, "target", "secret1", engine.backends["source"]); err != nil {
 		t.Fatalf("failed to sync secret: %v", err)
 	}
 
@@ -310,7 +311,8 @@ func TestSyncSecretUnidirectional_GetError(t *testing.T) {
 
 	source.getError = fmt.Errorf("get error")
 
-	if err := engine.syncSecretUnidirectional("sync1", "source", "target", "secret1", engine.backends["source"]); err == nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "unidirectional"}
+	if err := engine.syncSecretUnidirectional(syncCfg, "target", "secret1", engine.backends["source"]); err == nil {
 		t.Fatal("expected get error")
 	}
 }
@@ -321,7 +323,18 @@ func TestSyncSecretUnidirectional_SetError(t *testing.T) {
 
 	target.setError = fmt.Errorf("set error")
 
-	if err := engine.syncSecretUnidirectional("sync1", "source", "target", "secret1", engine.backends["source"]); err == nil {
+	syncCfg := &config.SyncConfig{
+		ID:      "sync1",
+		Source:  "source",
+		Targets: []string{"target"},
+		RetryPolicy: config.RetryPolicy{
+			MaxRetries:     1,
+			InitialBackoff: 1,
+			MaxBackoff:     2,
+			Multiplier:     1.0,
+		},
+	}
+	if err := engine.syncSecretUnidirectional(syncCfg, "target", "secret1", engine.backends["source"]); err == nil {
 		t.Fatal("expected set error")
 	}
 
@@ -338,7 +351,8 @@ func TestSyncSecretUnidirectional_TargetMissing(t *testing.T) {
 	engine, store, _, _ := setupEngine(t)
 	defer store.Close()
 
-	if err := engine.syncSecretUnidirectional("sync1", "source", "missing", "secret1", engine.backends["source"]); err == nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"missing"}, SyncType: "unidirectional"}
+	if err := engine.syncSecretUnidirectional(syncCfg, "missing", "secret1", engine.backends["source"]); err == nil {
 		t.Fatal("expected error for missing target backend")
 	}
 }
@@ -350,7 +364,8 @@ func TestSyncSecretBidirectional_InSync(t *testing.T) {
 	source.secrets["secret1"] = "same"
 	target.secrets["secret1"] = "same"
 
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "bidirectional"}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
 		t.Fatalf("failed to sync secret: %v", err)
 	}
 
@@ -367,7 +382,8 @@ func TestSyncSecretBidirectional_TargetMissing(t *testing.T) {
 	engine, store, _, target := setupEngine(t)
 	defer store.Close()
 
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "bidirectional"}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
 		t.Fatalf("failed to sync secret: %v", err)
 	}
 
@@ -394,7 +410,8 @@ func TestSyncSecretBidirectional_ExistingDirectionTargetToSource(t *testing.T) {
 		t.Fatalf("failed to insert sync object: %v", err)
 	}
 
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "bidirectional"}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
 		t.Fatalf("failed to sync secret: %v", err)
 	}
 
@@ -411,7 +428,8 @@ func TestSyncSecretBidirectional_GetSyncObjectError(t *testing.T) {
 	target.secrets["secret1"] = "target-value"
 
 	store.Close()
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err == nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "bidirectional"}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err == nil {
 		t.Fatal("expected error when store is closed")
 	}
 }
@@ -423,7 +441,8 @@ func TestSyncSecretBidirectional_SourceToTarget(t *testing.T) {
 	source.secrets["secret1"] = "source-value"
 	target.secrets["secret1"] = "target-value"
 
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "bidirectional"}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
 		t.Fatalf("failed to sync secret: %v", err)
 	}
 
@@ -459,7 +478,8 @@ func TestSyncSecretBidirectional_TargetToSource(t *testing.T) {
 		t.Fatalf("failed to insert sync object: %v", err)
 	}
 
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
+	syncCfg := &config.SyncConfig{ID: "sync1", Source: "source", Targets: []string{"target"}, SyncType: "bidirectional"}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err != nil {
 		t.Fatalf("failed to sync secret: %v", err)
 	}
 
@@ -476,7 +496,18 @@ func TestSyncSecretBidirectional_SetError(t *testing.T) {
 	target.secrets["secret1"] = "target-value"
 	target.setError = fmt.Errorf("set error")
 
-	if err := engine.syncSecretBidirectional("sync1", "source", "target", "secret1", engine.backends["source"], engine.backends["target"]); err == nil {
+	syncCfg := &config.SyncConfig{
+		ID:      "sync1",
+		Source:  "source",
+		Targets: []string{"target"},
+		RetryPolicy: config.RetryPolicy{
+			MaxRetries:     1,
+			InitialBackoff: 1,
+			MaxBackoff:     2,
+			Multiplier:     1.0,
+		},
+	}
+	if err := engine.syncSecretBidirectional(syncCfg, "target", "secret1", engine.backends["source"], engine.backends["target"]); err == nil {
 		t.Fatal("expected set error")
 	}
 

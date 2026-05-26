@@ -196,26 +196,31 @@ vaults:
 
 AWS managed secrets service integrated with IAM.
 
-### Basic Configuration
-
-```yaml
-vaults:
-  - id: aws-prod
-    name: "AWS Secrets Manager - Production"
-    type: aws
-    endpoint: "https://secretsmanager.us-east-1.amazonaws.com"
-    auth:
-      method: custom
-      headers:
-        X-Amz-Security-Token: "${AWS_SESSION_TOKEN}"
-    field_names:
-      name_field: "Name"
-      value_field: "SecretString"
-```
-
 ### Notes
 
-- The generic adapter does not implement AWS Signature V4 signing. Use the [Tool Backend](./tool-backend.md) (type `tool`) with the AWS CLI for full AWS Secrets Manager integration, or use a pre-authenticated proxy.
+- The generic adapter does not implement AWS Signature V4 signing, which is required for direct calls to the AWS Secrets Manager API. Use the [Tool Backend](./tool-backend.md) (type `tool`) with the AWS CLI for full AWS Secrets Manager integration, or use a pre-authenticated proxy that handles SigV4 signing.
+
+### Tool Backend (Recommended)
+
+See [Tool Backend](./tool-backend.md) for an example of using the AWS CLI as the vault backend. This is the recommended approach for AWS Secrets Manager.
+
+### Pre-authenticated Proxy
+
+If you operate a proxy that handles AWS SigV4 signing on your behalf, configure it as a generic vault:
+
+```json
+{
+  "id": "aws-prod",
+  "name": "AWS Secrets Manager (via proxy)",
+  "type": "aws",
+  "endpoint": "https://my-sigv4-proxy.internal/secretsmanager",
+  "auth": {
+    "method": "bearer",
+    "headers": {"token": "${PROXY_TOKEN}"}
+  },
+  "field_names": {"name_field": "Name", "value_field": "SecretString"}
+}
+```
 
 ## Generic REST API
 

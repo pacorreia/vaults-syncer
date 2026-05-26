@@ -158,95 +158,77 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
 
 ## Configuration
 
-### Configuration Data Format (YAML)
+### Configuration Data Format
 
-All configuration is managed through the Web UI or the admin API (`/api/config/vaults` and `/api/config/syncs`). The underlying data format is YAML-compatible JSON, matching the field names below.
+All configuration is managed through the Web UI or the admin API (`/api/config/vaults` and `/api/config/syncs`). The API accepts JSON with snake_case field names as shown below.
 
 #### Configuration Example
 
-```yaml
-vaults:
-  - id: vaultwarden_prod
-    name: "Production Vaultwarden"
-    type: vaultwarden              # Vault type (vaultwarden, vault, azure, aws, generic)
-    endpoint: "https://vault.example.com/api/ciphers"
-    method: POST
-    auth:                          # Structured authentication
-      method: oauth2               # bearer, basic, api_key, oauth2, custom
-      oauth:                       # OAuth 2.0 configuration
-        client_id: "${CLIENT_ID}"
-        client_secret: "${CLIENT_SECRET}"
-        scope: "api"
-        token_endpoint: "https://vault.example.com/identity/connect/token"  # Optional (auto-detected)
-        extra_params:              # Additional OAuth parameters
-          device_identifier: "sync-daemon"
-          device_type: "14"
-      headers:                     # Additional auth headers (non-OAuth)
-        X-Custom-Header: "value"
-    operations_override:           # Custom response parsing per operation
-      list:
-        response:
-          path: "data"             # JSONPath to secret list
-          name_field: "name"       # Field containing secret name
-      get:
-        response:
-          path: "data"             # JSONPath to secret data
-          value_field: "value"     # Field containing secret value
-    field_names:
-      name_field: "name"
-      value_field: "value"
-    headers:
-      Accept: "application/json"
-      Content-Type: "application/json"
-    timeout: 30
-    skip_ssl_verify: false
+```json
+// POST /api/config/vaults
+{
+  "id": "vaultwarden_prod",
+  "name": "Production Vaultwarden",
+  "type": "vaultwarden",
+  "endpoint": "https://vault.example.com/api/ciphers",
+  "method": "POST",
+  "auth": {
+    "method": "oauth2",
+    "oauth": {
+      "client_id": "${CLIENT_ID}",
+      "client_secret": "${CLIENT_SECRET}",
+      "scope": "api",
+      "token_endpoint": "https://vault.example.com/identity/connect/token",
+      "extra_params": {
+        "device_identifier": "sync-daemon",
+        "device_type": "14"
+      }
+    },
+    "headers": {"X-Custom-Header": "value"}
+  },
+  "operations_override": {
+    "list": {"response": {"path": "data", "name_field": "name"}},
+    "get":  {"response": {"path": "data", "value_path": "value"}}
+  },
+  "field_names": {"name_field": "name", "value_field": "value"},
+  "headers": {"Accept": "application/json", "Content-Type": "application/json"},
+  "timeout": 30,
+  "skip_ssl_verify": false
+}
 
-  - id: hashicorp_vault
-    name: "HashiCorp Vault"
-    type: vault                    # HashiCorp Vault KV v2
-    endpoint: "https://vault.internal.com/v1/secret/data"
-    method: POST
-    auth:
-      method: bearer
-      headers:
-        token: "${VAULT_TOKEN}"
-    # Custom response parsing for Vault KV v2 structure
-    operations_override:
-      list:
-        response:
-          path: "data.keys"        # Vault returns keys in data.keys array
-      get:
-        response:
-          path: "data.data"        # Vault wraps secrets in data.data
-          value_field: "value"
+// POST /api/config/vaults (HashiCorp Vault)
+{
+  "id": "hashicorp_vault",
+  "name": "HashiCorp Vault",
+  "type": "vault",
+  "endpoint": "https://vault.internal.com/v1/secret/data",
+  "auth": {
+    "method": "custom",
+    "headers": {"X-Vault-Token": "${VAULT_TOKEN}"}
+  },
+  "operations_override": {
+    "list": {"response": {"path": "data.keys"}},
+    "get":  {"response": {"path": "data.data", "value_path": "value"}}
+  }
+}
 
-syncs:
-  - id: vaultwarden_to_vault
-    source: vaultwarden_prod
-    targets:
-      - hashicorp_vault
-    sync_type: unidirectional
-    enabled: true
-    concurrent_workers: 10         # Parallel processing for faster syncs
-    schedule: "0 * * * *"          # Hourly
-    filter:
-      patterns: ["*"]
-      exclude: []
-    retry_policy:
-      max_retries: 3
-      initial_backoff: 500
-      max_backoff: 5000
-      multiplier: 2.0
-
-server:
-  port: 8080
-  address: 0.0.0.0
-  metrics_port: 9090
-  metrics_address: 0.0.0.0
-
-logging:
-  level: info                      # debug, info, warn, error
-  format: json                     # json or text
+// POST /api/config/syncs
+{
+  "id": "vaultwarden_to_vault",
+  "source": "vaultwarden_prod",
+  "targets": ["hashicorp_vault"],
+  "sync_type": "unidirectional",
+  "enabled": true,
+  "concurrent_workers": 10,
+  "schedule": "0 * * * *",
+  "filter": {"patterns": ["*"], "exclude": []},
+  "retry_policy": {
+    "max_retries": 3,
+    "initial_backoff": 500,
+    "max_backoff": 5000,
+    "multiplier": 2.0
+  }
+}
 ```
 
 ### Vault Type Support
@@ -257,7 +239,7 @@ The daemon supports multiple vault types with smart defaults:
 |------------|---------------|-----------------|-------|
 | **vaultwarden** | OAuth 2.0, Bearer | `{data: [{name, value}]}` | Full support with device params |
 | **bitwarden** | OAuth 2.0, Bearer | `{data: [{name, value}]}` | Bitwarden-compatible API |
-| **vault** | Bearer (X-Vault-Token) | `{data: {keys: []}}` for list, `{data: {data: {}}}` for get | HashiCorp Vault KV v2 |
+| **vault** | Custom (`X-Vault-Token` header) | `{data: {keys: []}}` for list, `{data: {data: {}}}` for get | HashiCorp Vault KV v2 |
 | **azure** | Bearer (Azure AD) | `{value: [{id, ...}]}` | Azure Key Vault |
 | **aws** | Custom headers | `{SecretList: [{Name}]}` | AWS Secrets Manager |
 | **keeper** | Bearer | Configurable | Keeper Secrets Manager |
