@@ -4,13 +4,14 @@ Learn how to configure vaults-syncer for your environment.
 
 ## Configuration Overview
 
-The application is configured through a YAML configuration file that defines:
+All vault and sync configuration is stored in the database and managed through the **Web UI** (`http://localhost:8080`) or the **admin API** (`/api/config/vaults`, `/api/config/syncs`). There is no configuration file loaded at startup.
 
-- **Global settings**: Logging, sync intervals, timeouts
+The configuration covers:
+
 - **Vaults**: Where secrets are stored and how to connect
-- **Syncs**: Which secrets to sync between vaults
+- **Syncs**: Which secrets to sync between vaults and when
 - **Filters**: Which secrets to include/exclude
-- **Transformations**: How to modify secret names and values
+- **Transformations**: How to modify secret values during sync
 
 ## Key Topics
 
@@ -19,9 +20,12 @@ The application is configured through a YAML configuration file that defines:
 Define and configure vault connections using the generic HTTP adapter:
 
 - **Azure Key Vault** (type `azure`)
-- **Bitwarden / Vaultwarden** (types `bitwarden`, `vaultwarden`)
+- **Bitwarden** (type `bitwarden`)
+- **Vaultwarden** (type `vaultwarden`)
 - **HashiCorp Vault** (type `vault`)
+- **AWS Secrets Manager** (type `aws`)
 - **Keeper Secrets Manager** (type `keeper`)
+- **CLI-backed vaults** (type `tool`) — see [Tool Backend](./tool-backend.md)
 - **Custom REST APIs** (type `generic`)
 
 Learn how to:
@@ -84,250 +88,169 @@ Configure global behavior:
   - Health checks
   - Alerting
 
-## Configuration File Structure
+## Admin API Payload Format
 
-```yaml
-logging:
-  level: info                 # Log level: debug, info, warn, error
-  format: json                # Format: json, text
+Vaults and syncs are configured via the admin API using JSON with snake_case field names. The examples below illustrate the expected payload structure for `POST /api/config/vaults` and `POST /api/config/syncs` calls.
 
-server:
-  port: 8080
-  address: 0.0.0.0
-  metrics_port: 9090
-  metrics_address: 0.0.0.0
+```json
+// POST /api/config/vaults
+{
+  "id": "vault-1",
+  "name": "Primary Vault",
+  "type": "azure",
+  "endpoint": "https://vault.example.com/secrets",
+  "auth": {
+    "method": "bearer",
+    "headers": {"token": "${AZURE_ACCESS_TOKEN}"}
+  },
+  "field_names": {
+    "name_field": "name",
+    "value_field": "value"
+  }
+}
+```
 
-# Define available vaults
-vaults:
-  - id: vault-1
-    name: "Primary Vault"
-    type: azure
-    endpoint: "https://vault.example.com/secrets"
-    auth:
-      method: bearer
-      headers:
-        token: ${AZURE_ACCESS_TOKEN}
-    field_names:
-      name_field: name
-      value_field: value
-    
-  - id: vault-2
-    name: "Secondary Vault"
-    type: bitwarden
-    endpoint: "https://vault2.example.com/api/ciphers"
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${CLIENT_ID}
-        client_secret: ${CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-
-# Define sync operations
-syncs:
-  - id: sync-1
-    name: "Primary Sync"
-    source: vault-1
-    targets: [vault-2]
-    schedule: "0 * * * *"     # Every hour
-    sync_type: unidirectional # or bidirectional
-    
-    # Optional: Filtering
-    filter:
-      patterns:
-        - "prod-*"
-      exclude:
-        - "*-dev"
+```json
+// POST /api/config/syncs
+{
+  "id": "sync-1",
+  "source": "vault-1",
+  "targets": ["vault-2"],
+  "schedule": "0 * * * *",
+  "sync_type": "unidirectional",
+  "filter": {
+    "patterns": ["prod-*"],
+    "exclude": ["*-dev"]
+  }
+}
 ```
 
 ## Quick Examples
 
+The examples below show the JSON payload sent to the admin API (`POST /api/config/vaults` or `POST /api/config/syncs`).
+
 ### Example 1: Basic One-Way Sync
 
-```yaml
-vaults:
-  - id: akv
-    type: azure
-    endpoint: https://myvault.vault.azure.net/secrets
-    auth:
-      method: bearer
-      headers:
-        token: ${AZURE_ACCESS_TOKEN}
-    field_names:
-      name_field: name
-      value_field: value
-  
-  - id: bitwarden
-    type: bitwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${BW_CLIENT_ID}
-        client_secret: ${BW_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
+```bash
+# Add source vault (Azure Key Vault)
+curl -s -X POST http://localhost:8080/api/config/vaults \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "akv",
+    "type": "azure",
+    "endpoint": "https://myvault.vault.azure.net/secrets",
+    "auth": {"method": "bearer", "headers": {"token": "${AZURE_ACCESS_TOKEN}"}},
+    "field_names": {"name_field": "name", "value_field": "value"}
+  }'
 
-syncs:
-  - id: main-sync
-    source: akv
-    targets: [bitwarden]
-    schedule: "0 * * * *"
-    sync_type: unidirectional
+# Add target vault (Bitwarden)
+curl -s -X POST http://localhost:8080/api/config/vaults \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "bitwarden",
+    "type": "bitwarden",
+    "endpoint": "https://vault.example.com/api/ciphers",
+    "auth": {
+      "method": "oauth2",
+      "oauth": {
+        "client_id": "${BW_CLIENT_ID}",
+        "client_secret": "${BW_CLIENT_SECRET}",
+        "scope": "api"
+      }
+    },
+    "field_names": {"name_field": "name", "value_field": "login"}
+  }'
+
+# Create sync
+curl -s -X POST http://localhost:8080/api/config/syncs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "main-sync",
+    "source": "akv",
+    "targets": ["bitwarden"],
+    "schedule": "0 * * * *",
+    "sync_type": "unidirectional"
+  }'
 ```
 
 ### Example 2: Multi-Vault Setup
 
-```yaml
-vaults:
-  - id: source-vault
-    type: azure
-    endpoint: https://source.vault.azure.net/secrets
-    auth:
-      method: bearer
-      headers:
-        token: ${AZURE_ACCESS_TOKEN}
-    field_names:
-      name_field: name
-      value_field: value
-  
-  - id: target-primary
-    type: bitwarden
-    endpoint: https://vault1.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${BW_PRIMARY_CLIENT_ID}
-        client_secret: ${BW_PRIMARY_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-  
-  - id: target-secondary
-    type: bitwarden
-    endpoint: https://vault2.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${BW_SECONDARY_CLIENT_ID}
-        client_secret: ${BW_SECONDARY_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
+```bash
+# Add vaults (repeat POST /api/config/vaults for each)
+# source-vault, target-primary, target-secondary ...
 
-syncs:
-  - id: sync-to-primary
-    source: source-vault
-    targets: [target-primary]
-    schedule: "0 */4 * * *"  # Every 4 hours
-    sync_type: unidirectional
-  
-  - id: sync-to-secondary
-    source: source-vault
-    targets: [target-secondary]
-    schedule: "0 */6 * * *"  # Every 6 hours
-    sync_type: unidirectional
+# Create syncs
+curl -s -X POST http://localhost:8080/api/config/syncs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"id": "sync-to-primary", "source": "source-vault", "targets": ["target-primary"], "schedule": "0 */4 * * *", "sync_type": "unidirectional"}'
+
+curl -s -X POST http://localhost:8080/api/config/syncs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"id": "sync-to-secondary", "source": "source-vault", "targets": ["target-secondary"], "schedule": "0 */6 * * *", "sync_type": "unidirectional"}'
 ```
 
 ### Example 3: Filtered Sync
 
-```yaml
-syncs:
-  - id: prod-only-sync
-    source: akv
-    targets: [bitwarden]
-    schedule: "0 2 * * *"
-    sync_type: unidirectional
-    filter:
-      patterns:
-        - "prod-*"
-        - "app-*"
+```bash
+curl -s -X POST http://localhost:8080/api/config/syncs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "prod-only-sync",
+    "source": "akv",
+    "targets": ["bitwarden"],
+    "schedule": "0 2 * * *",
+    "sync_type": "unidirectional",
+    "filter": {"patterns": ["prod-*", "app-*"]}
+  }'
 ```
 
-## Configuration File Locations
+## Configuration Storage
 
-The application looks for configuration in this order:
+All configuration (vaults and syncs) is stored in the database and managed through the Web UI or the admin API. There is no configuration file read at startup.
 
-1. **Command-line flag**: `-config /path/to/config.yaml`
-2. **Environment variable**: `CONFIG_PATH=/path/to/config.yaml`
-3. **Current directory**: `./config.yaml`
-4. **System directory**: `/etc/akv-sync/config.yaml`
+### Environment Variables
+
+The daemon reads environment variables at startup:
+
+```bash
+export DB_TYPE=sqlite             # sqlite (default), postgres, or mssql
+export DB_PATH=sync.db            # SQLite file path
+export DB_DSN=                    # PostgreSQL/MSSQL connection string
+export MASTER_ENCRYPTION_KEY=     # Required after first start (32-byte base64 key)
+export SERVER_PORT=8080           # HTTP API + Web UI port
+export SERVER_ADDRESS=0.0.0.0     # HTTP listen address
+export METRICS_PORT=9090          # Prometheus metrics port
+```
 
 ### Example Usage
 
 ```bash
-# Specify config file
-./sync-daemon -config /etc/sync/config.yaml
+# Run with custom database path
+DB_PATH=/data/sync.db ./sync-daemon
 
-# Use environment variable
-export CONFIG_PATH=/etc/sync/config.yaml
-./sync-daemon
+# Run with PostgreSQL
+DB_TYPE=postgres DB_DSN="host=db port=5432 user=sync password=secret dbname=sync sslmode=disable" ./sync-daemon
 
 # Docker
-docker run -v /path/to/config.yaml:/etc/sync/config.yaml:ro \
+docker run \
+  -e DB_TYPE=sqlite \
+  -e MASTER_ENCRYPTION_KEY=<key> \
+  -v sync-data:/app/data \
   ghcr.io/pacorreia/vaults-syncer:latest
-```
-
-## Environment Variables
-
-Use environment variables for sensitive values:
-
-```yaml
-vaults:
-  - id: bitwarden
-    type: bitwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${BITWARDEN_CLIENT_ID}
-        client_secret: ${BITWARDEN_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-```
-
-Set environment variables:
-
-```bash
-# Linux/macOS
-export BITWARDEN_CLIENT_ID=your-client-id
-export BITWARDEN_CLIENT_SECRET=your-client-secret
-
-# Windows PowerShell
-$env:BITWARDEN_CLIENT_ID = "your-client-id"
-$env:BITWARDEN_CLIENT_SECRET = "your-client-secret"
-
-# Docker
-docker run -e BITWARDEN_CLIENT_ID=... -e BITWARDEN_CLIENT_SECRET=... ...
-```
-
-## Configuration Validation
-
-### Validate Configuration
-
-```bash
-# Validate syntax
-./sync-daemon -validate-config config.yaml
-
-# Docker
-docker run --rm -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
-  ghcr.io/pacorreia/vaults-syncer:latest validate
 ```
 
 ### Common Configuration Errors
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `unknown vault type` | Invalid vault type | Check supported types: azure, bitwarden, vaultwarden, vault, keeper, aws, generic |
-| `endpoint required` | Missing endpoint | Add endpoint URL for vault |
+| `unknown vault type` | Invalid vault type | Check supported types: azure, bitwarden, vaultwarden, vault, aws, keeper, generic, tool |
+| `endpoint required` | Missing endpoint | Add endpoint URL for vault (not required for type `tool`) |
 | `invalid cron schedule` | Bad cron syntax | Use 5-field cron format: `minute hour day month weekday` |
 | `authentication failed` | Wrong credentials | Verify auth method and credentials |
 | `vault not found` | Unknown vault reference | Check sync source/target references existing vault IDs |

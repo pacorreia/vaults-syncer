@@ -4,7 +4,7 @@
 [![Integration Tests](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/pacorreia/vaults-syncer/actions/workflows/integration-tests.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://pacorreia.github.io/vaults-syncer/badges/coverage.json)](https://github.com/pacorreia/vaults-syncer/actions/workflows/go-ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/pacorreia/vaults-syncer?sort=semver)](https://github.com/pacorreia/vaults-syncer/releases)
-[![Go Version](https://img.shields.io/badge/Go-1.26.1-00ADD8?logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26.3-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/github/license/pacorreia/vaults-syncer)](https://github.com/pacorreia/vaults-syncer/blob/main/LICENSE)
 
 A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support for seamless integration between Vaultwarden, Azure Key Vault, HashiCorp Vault, AWS Secrets Manager, and custom vault backends.
@@ -13,10 +13,12 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 
 ✨ **Multi-Vault Support**
 
-- Vaultwarden
-- HashiCorp Vault
+- Vaultwarden (self-hosted Bitwarden-compatible)
+- Bitwarden (cloud or self-hosted)
+- HashiCorp Vault (KV v2)
 - Azure Key Vault
-- AWS Secrets Manager
+- AWS Secrets Manager (via CLI tool backend)
+- Keeper Secrets Manager
 - Generic HTTP-based vaults
 
 🔐 **Flexible Authentication**
@@ -44,7 +46,8 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 
 🏗️ **Production Ready**
 
-- SQLite state database
+- SQLite, PostgreSQL, or MSSQL state database
+- AES-256 encryption of vault credentials at rest
 - Transaction support
 - Error recovery and retry logic
 - Docker & Kubernetes ready
@@ -105,40 +108,29 @@ syncs:
 
 ```mermaid
 graph TB
-    subgraph daemon["AKV Sync Daemon"]
+    subgraph daemon["Secrets Vault Sync Daemon"]
         direction TB
         
-        subgraph vaults["Vaults"]
-            vw["Vaultwarden"]
-            akv["Azure KV"]
-            aws["AWS SM"]
-            hc["HashiCorp"]
+        subgraph vaults["Vault Backends"]
+            vw["Vaultwarden / Bitwarden"]
+            akv["Azure Key Vault"]
+            hc["HashiCorp Vault"]
+            tool["CLI Tool Backend"]
         end
-        
-        subgraph backends["Backends"]
-            http["Generic HTTP"]
-            vault["Vault"]
-            awsb["AWS"]
-            azure["Azure"]
-        end
-        
-        vaults -->|OAuth2| backends
         
         engine["Sync Engine<br/>• Scheduling<br/>• Filtering<br/>• Retries"]
         
         vaults --> engine
-        backends --> engine
         
-        db[("State Database<br/>(SQLite)")]
+        db[("Database<br/>(SQLite / PostgreSQL / MSSQL)")]
         engine --> db
         
-        api["REST API & Monitoring<br/>• Sync Control & Status<br/>• Prometheus Metrics<br/>• Health Checks"]
+        api["REST API & Web UI<br/>• Config Management<br/>• Sync Control & Status<br/>• Prometheus Metrics<br/>• Health Checks"]
     end
     
     style daemon fill:none,stroke:#4a9eff,stroke-width:3px
     style engine fill:none,stroke:#4a9eff,stroke-width:2px
     style vaults fill:none,stroke:#ff6b35,stroke-width:2px
-    style backends fill:none,stroke:#a64dff,stroke-width:2px
     style api fill:none,stroke:#00cc66,stroke-width:2px
 ```
 
@@ -150,9 +142,8 @@ graph TB
 
     ```bash
     docker run -d \
-      --name akv-sync \
-      -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
-      -v $(pwd)/data:/app/data \
+      --name vaults-syncer \
+      -v sync-data:/app/data \
       -p 8080:8080 \
       -p 9090:9090 \
       ghcr.io/pacorreia/vaults-syncer:latest
@@ -162,11 +153,12 @@ graph TB
 
     ```bash
     # Download latest release
-    wget https://github.com/pacorreia/vaults-syncer/releases/download/v1.0.0/sync-daemon-linux-amd64
+    wget https://github.com/pacorreia/vaults-syncer/releases/latest/download/sync-daemon-linux-amd64
     chmod +x sync-daemon-linux-amd64
     
-    # Run
-    ./sync-daemon-linux-amd64 -config config.yaml
+    # Set required env vars (key generated on first start)
+    export MASTER_ENCRYPTION_KEY=<your-key>
+    ./sync-daemon-linux-amd64
     ```
 
 === "Source"
@@ -174,68 +166,41 @@ graph TB
     ```bash
     git clone https://github.com/pacorreia/vaults-syncer
     cd vaults-syncer
-    go build -o sync-daemon .
-    ./sync-daemon -config config.yaml
+    CGO_ENABLED=1 go build -o sync-daemon .
+    export MASTER_ENCRYPTION_KEY=<your-key>
+    ./sync-daemon
     ```
 
-### Minimal Configuration
+### First-Time Setup
 
-Create `config.yaml`:
+After starting the daemon, open `http://localhost:8080` in your browser. The **Setup Wizard** will guide you through:
 
-```yaml
-vaults:
-  - id: source
-    name: Source Vault
-    type: vaultwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        token_endpoint: https://vault.example.com/identity/connect/token
-        client_id: your-client-id
-        client_secret: your-client-secret
-        scope: api
+1. Creating an admin account
+2. Adding vault backends (via **Vaults Config**)
+3. Defining sync relationships (via **Syncs Config**)
+4. Monitoring syncs from the **Dashboard**
 
-  - id: target
-    name: Target Vault
-    type: vaultwarden
-    endpoint: https://backup.example.com/api/ciphers
-    auth:
-      method: bearer
-      headers:
-        token: your-bearer-token
-
-syncs:
-  - id: backup-sync
-    source: source
-    targets:
-      - target
-    sync_type: unidirectional
-    schedule: "0 */4 * * *"  # Every 4 hours
-
-server:
-  port: 8080
-
-logging:
-  level: info
-  format: json
-```
-
-Then run:
+Alternatively, configure everything via the admin API:
 
 ```bash
-./sync-daemon -config config.yaml
-```
+# Login
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
 
-Check status:
+# Add vaults and syncs
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/config/vaults \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"my-vault","type":"vaultwarden",...}'
 
-```bash
-curl http://localhost:8080/health
+# Check health
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/health
 ```
 
 ## Development
 
-This project is written in **Go 1.22** with a modular architecture:
+This project is written in **Go 1.26** with a modular architecture:
 
 - **Zero backward compatibility compromises** - removed all legacy code paths after generalization
 - **Interface-driven design** - pluggable vault backends
@@ -246,14 +211,14 @@ This project is written in **Go 1.22** with a modular architecture:
 
 ```bash
 # Build with default version (dev)
-go build -o sync-daemon .
+CGO_ENABLED=1 go build -o sync-daemon .
 
 # Build with complete version information
 VERSION=$(git describe --tags --always --dirty)
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(git rev-parse HEAD)
 
-go build \
+CGO_ENABLED=1 go build \
   -ldflags "-X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
   -o sync-daemon .
 

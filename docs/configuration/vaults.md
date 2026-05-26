@@ -5,10 +5,13 @@ A vault is a credentials storage system where secrets are stored. This guide cov
 ## Supported Vault Types
 
 - [Azure Key Vault](#azure-key-vault) - Microsoft's cloud secrets management
-- [Bitwarden](#bitwarden) - Open-source password manager
+- [Bitwarden](#bitwarden) - Open-source password manager (Bitwarden Cloud)
+- [Vaultwarden](#vaultwarden) - Self-hosted Bitwarden-compatible server
 - [HashiCorp Vault](#hashicorp-vault) - Enterprise secrets management
-- [AWS Secrets Manager](#aws-secrets-manager) - AWS managed secrets
+- [AWS Secrets Manager](#aws-secrets-manager) - AWS managed secrets (HTTP adapter)
+- [Keeper Secrets Manager](#keeper-secrets-manager) - Keeper enterprise secrets
 - [Generic REST API](#generic-rest-api) - Custom HTTP-based vaults
+- [Tool Backend](./tool-backend.md) - CLI-backed vaults (type `tool`)
 
 ## Azure Key Vault
 
@@ -64,7 +67,7 @@ vaults:
 
 ## Bitwarden
 
-Bitwarden is an open-source, self-hosted password manager with a modern API.
+Bitwarden is a cloud-hosted password manager with a modern API. Use `type: bitwarden` for Bitwarden Cloud or self-hosted Bitwarden Server.
 
 ### Basic Configuration
 
@@ -73,7 +76,8 @@ vaults:
   - id: bitwarden-prod
     name: "Bitwarden - Production"
     type: bitwarden
-    endpoint: "https://vault.example.com/api/ciphers"
+    endpoint: "https://api.bitwarden.com/ciphers"
+    method: POST
     auth:
       method: oauth2
       oauth:
@@ -85,7 +89,36 @@ vaults:
       value_field: "login"
 ```
 
-**Bitwarden Cloud**: use `https://api.bitwarden.com/ciphers` as the endpoint. The OAuth token endpoint defaults to `https://identity.bitwarden.com/connect/token` when the API host is detected.
+**Bitwarden Cloud**: use `https://api.bitwarden.com/ciphers` as the endpoint. The OAuth token endpoint defaults to `https://identity.bitwarden.com/connect/token`.
+
+## Vaultwarden
+
+Vaultwarden is a self-hosted, Bitwarden-compatible server. Use `type: vaultwarden` for Vaultwarden instances.
+
+### Basic Configuration
+
+```yaml
+vaults:
+  - id: vaultwarden-prod
+    name: "Vaultwarden - Production"
+    type: vaultwarden
+    endpoint: "https://vault.example.com/api/ciphers"
+    method: POST
+    auth:
+      method: oauth2
+      oauth:
+        token_endpoint: "https://vault.example.com/identity/connect/token"
+        client_id: "${VW_CLIENT_ID}"
+        client_secret: "${VW_CLIENT_SECRET}"
+        scope: api
+        extra_params:
+          deviceIdentifier: "sync-daemon"
+          deviceType: "14"
+          deviceName: "Sync Daemon"
+    field_names:
+      name_field: "name"
+      value_field: "login"
+```
 
 ### Connection Options
 
@@ -93,101 +126,11 @@ vaults:
 |--------|------|----------|-------------|
 | `id` | string | Yes | Unique identifier |
 | `name` | string | No | Human-readable name |
-| `type` | string | Yes | Must be `bitwarden` |
-| `endpoint` | string | Yes | Bitwarden-compatible ciphers endpoint |
+| `type` | string | Yes | Must be `bitwarden` or `vaultwarden` |
+| `endpoint` | string | Yes | Ciphers API endpoint |
+| `method` | string | No | HTTP method for write operations (`POST` or `PUT`, default `PUT`) |
 | `auth` | object | Yes | Authentication config |
-
-### Authentication
-
-#### OAuth2 (Recommended)
-
-```yaml
-vaults:
-  - id: bitwarden
-    type: bitwarden
-    endpoint: "https://vault.example.com/api/ciphers"
-    auth:
-      method: oauth2
-      oauth:
-        client_id: "${BW_CLIENT_ID}"
-        client_secret: "${BW_CLIENT_SECRET}"
-        scope: api
-    field_names:
-      name_field: "name"
-      value_field: "login"
-```
-
-**Setup**:
-
-1. Log in to Bitwarden admin panel
-2. Go to Settings → Integrations → OAuth2 Applications
-3. Create new application
-4. Grant required scopes:
-   - `cipher:read` - Read ciphers
-   - `cipher:write` - Write ciphers
-   - `folder:read` - Read folders
-   - `folder:write` - Write folders
-5. Copy `client_id` and `client_secret`
-
-#### API Key
-
-```yaml
-vaults:
-  - id: bitwarden-api
-    type: bitwarden
-    endpoint: "https://vault.example.com/api/ciphers"
-    auth:
-      method: api_key
-      headers:
-        api_key: "${BITWARDEN_API_KEY}"
-    field_names:
-      name_field: "name"
-      value_field: "login"
-```
-
-### Advanced Options
-
-```yaml
-vaults:
-  - id: bitwarden-adv
-    type: bitwarden
-    endpoint: "https://vault.example.com/api/ciphers"
-    auth:
-      method: oauth2
-      oauth:
-        client_id: "${BW_CLIENT_ID}"
-        client_secret: "${BW_CLIENT_SECRET}"
-        scope: api
-    field_names:
-      name_field: "name"
-      value_field: "login"
-```
-
-### Bitwarden Cloud Example
-
-```yaml
-vaults:
-  - id: bitwarden-cloud
-    type: bitwarden
-    endpoint: "https://api.bitwarden.com/ciphers"
-    auth:
-      method: oauth2
-      oauth:
-        client_id: "${BITWARDEN_CLIENT_ID}"
-        client_secret: "${BITWARDEN_CLIENT_SECRET}"
-        scope: api
-    field_names:
-      name_field: "name"
-      value_field: "login"
-    operations_override:
-      list:
-        response:
-          path: "data"
-          name_field: "name"
-      get:
-        response:
-          value_path: "data"
-```
+| `field_names` | object | Yes | Maps `name_field` and `value_field` |
 
 ## Keeper Secrets Manager
 
@@ -222,7 +165,6 @@ vaults:
         endpoint: "https://keeper.example.com/api/secrets/{name}"
         method: DELETE
 ```
-```
 
 ## HashiCorp Vault
 
@@ -249,32 +191,35 @@ vaults:
 
 - The generic adapter expects Vault KV v2 semantics (list via `metadata`, read/write via `data`).
 - If you authenticate with AppRole/Kubernetes, exchange credentials for a token externally and pass it in `X-Vault-Token`.
-```
 
 ## AWS Secrets Manager
 
 AWS managed secrets service integrated with IAM.
 
-### Basic Configuration
-
-```yaml
-vaults:
-  - id: aws-prod
-    name: "AWS Secrets Manager - Production"
-    type: aws
-    endpoint: "https://secretsmanager.us-east-1.amazonaws.com"
-    auth:
-      method: custom
-      headers:
-        X-Amz-Security-Token: "${AWS_SESSION_TOKEN}"
-    field_names:
-      name_field: "Name"
-      value_field: "SecretString"
-```
-
 ### Notes
 
-- The generic adapter does not implement AWS signing. Use a proxy or pre-signed endpoints if required.
+- The generic adapter does not implement AWS Signature V4 signing, which is required for direct calls to the AWS Secrets Manager API. Use the [Tool Backend](./tool-backend.md) (type `tool`) with the AWS CLI for full AWS Secrets Manager integration, or use a pre-authenticated proxy that handles SigV4 signing.
+
+### Tool Backend (Recommended)
+
+See [Tool Backend](./tool-backend.md) for an example of using the AWS CLI as the vault backend. This is the recommended approach for AWS Secrets Manager.
+
+### Pre-authenticated Proxy
+
+If you operate a proxy that handles AWS SigV4 signing on your behalf, configure it as a generic vault:
+
+```json
+{
+  "id": "aws-prod",
+  "name": "AWS Secrets Manager (via proxy)",
+  "type": "aws",
+  "endpoint": "https://my-sigv4-proxy.internal/secretsmanager",
+  "auth": {
+    "method": "bearer",
+    "headers": {"token": "${PROXY_TOKEN}"}
+  },
+  "field_names": {"name_field": "Name", "value_field": "SecretString"}
+}
 ```
 
 ## Generic REST API
@@ -440,30 +385,9 @@ vaults:
       value_field: "value"
 ```
 
-## Vault Health Check
+## Vault Connectivity
 
-Verify vault connectivity:
-
-```bash
-# Health checks are performed on startup and periodically
-curl http://localhost:8080/vaults/health
-
-# Response:
-{
-  "vaults": {
-    "azure-prod": {
-      "status": "healthy",
-      "endpoint": "https://prod.vault.azure.net/",
-      "last_check": "2024-01-15T10:30:00Z"
-    },
-    "bitwarden": {
-      "status": "healthy",
-      "endpoint": "https://vault.example.com",
-      "last_check": "2024-01-15T10:30:00Z"
-    }
-  }
-}
-```
+The daemon lists all configured vaults via `GET /api/vaults` (authenticated). To verify connectivity, trigger a sync manually via `POST /api/syncs/{sync_id}/execute` and observe the results in the run history.
 
 ## Common Issues
 
@@ -494,7 +418,7 @@ curl http://localhost:8080/vaults/health
 **Solutions**:
 - Verify certificate is valid
 - Update system certificates
-- For development only: use `disable_ssl_verify: true`
+- For development only: use `skip_ssl_verify: true`
 
 ## Best Practices
 
@@ -508,7 +432,7 @@ curl http://localhost:8080/vaults/health
 
 ❌ **Don't**:
 - Hardcode credentials in configuration files
-- Use `disable_ssl_verify: true` in production
+- Use `skip_ssl_verify: true` in production
 - Share configuration files with secrets
 - Use overly permissive credentials
 - Forget to test backup/restore procedures

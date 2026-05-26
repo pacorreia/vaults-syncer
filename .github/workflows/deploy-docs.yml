@@ -16,6 +16,7 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'requirements.txt'
+      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:

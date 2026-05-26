@@ -18,7 +18,6 @@ A sync configuration specifies:
 ```yaml
 syncs:
   - id: my-first-sync
-    name: "My First Sync"
     source: vault-1
     targets: [vault-2]
     schedule: "0 * * * *"        # Every hour
@@ -32,21 +31,18 @@ syncs:
 | Option | Type | Required | Description | Example |
 |--------|------|----------|-------------|---------|
 | `id` | string | Yes | Unique sync identifier | `sync-prod-to-staging` |
-| `name` | string | No | Human-readable name | `Prod to Staging Sync` |
 | `source` | string | Yes | Source vault ID | `azure-prod` |
 | `targets` | array | Yes | Target vault IDs | `["bitwarden-prod"]` |
 | `schedule` | string | Yes | Cron expression | `0 * * * *` |
-| `sync_type` | string | No | `unidirectional` or `bidirectional` | `unidirectional` |
+| `sync_type` | string | Yes | `unidirectional` or `bidirectional` | `unidirectional` |
 
 ### Optional Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enabled` | boolean | `true` | Enable/disable this sync |
-| `timeout` | integer | `300` | Sync timeout in seconds |
-| `max_retries` | integer | `3` | Maximum retry attempts |
-| `description` | string | `""` | Sync description |
-| `tags` | array | `[]` | Labels for organization |
+| `concurrent_workers` | integer | `0` (sequential) | Number of secrets processed in parallel |
+| `retry_policy` | object | `{max_retries:3, initial_backoff:1000, max_backoff:60000, multiplier:2.0}` | Retry configuration for failed operations |
 
 ## Schedule (Cron Expressions)
 
@@ -135,14 +131,9 @@ syncs:
     sync_type: bidirectional
 ```
 
-**Conflict Resolution Strategies**:
+**Conflict Resolution**:
 
-| Strategy | Behavior |
-|----------|----------|
-| `source-wins` | Source takes precedence on conflict |
-| `target-wins` | Target takes precedence on conflict |
-| `manual` | Conflicts require manual intervention |
-| `newest` | Latest modified secret wins |
+When both vaults have a different value for the same secret, the daemon uses **last write wins**: whichever vault most recently wrote the secret (tracked in the sync database) is treated as the authority and its value is propagated to the other vault.
 
 **Use cases**:
 - Multi-region synchronization
@@ -203,10 +194,8 @@ filter:
     - "*"
   exclude:
     - "secret-*"
-  - source_regex: ".*-master-key$"
-    action: exclude
-  - source_regex: ".*-admin-password$"
-    action: exclude
+    - "*-master-key"
+    - "*-admin-password"
 ```
 
 ## Transformations
@@ -214,6 +203,8 @@ filter:
 Modify secret names and values during synchronization.
 
 ### Value Transformations
+
+The `field` must be `value` (transforms currently apply to the secret value field). Supported types:
 
 ```yaml
 syncs:
@@ -225,17 +216,6 @@ syncs:
     transforms:
       - field: value
         type: base64_encode
-```
-
-```yaml
-transforms:
-  - type: script
-    match: ".*connection.*"
-    script: |
-      #!/bin/bash
-      # Input passed as $1
-      # Transform connection string
-      echo "$1" | sed 's/;/\\n/g'
 ```
 
 ### Transformation Examples
@@ -282,7 +262,6 @@ syncs:
 ```yaml
 syncs:
   - id: simple-sync
-    name: "Azure to Bitwarden"
     source: azure-prod
     targets: [bitwarden]
     schedule: "0 * * * *"
@@ -315,14 +294,9 @@ syncs:
     filter:
       patterns:
         - "shared-*"
-    
     transforms:
-      - match: "^shared-"
-        replace: "synced/{source_name}"
-    
-    options:
-      timeout: 600
-      batch_size: 100
+      - field: value
+        type: base64_encode
 ```
 
 ### Example 4: Multi-Environment Cascade
@@ -359,7 +333,6 @@ syncs:
 ```yaml
 syncs:
   - id: backup-sync
-    name: "Production Backup"
     source: vault-prod
     targets: [vault-backup]
     schedule: "0 1 * * *"      # 1 AM daily
@@ -385,7 +358,7 @@ syncs:
 ### Check Sync Status
 
 ```bash
-curl http://localhost:8080/syncs/my-sync
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs/{sync_id}/status
 ```
 
 Response:
@@ -413,16 +386,16 @@ Response:
 }
 ```
 
-### View Sync History
+### View Sync Run History
 
 ```bash
-curl http://localhost:8080/syncs/my-sync/history
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs/{sync_id}/runs
 ```
 
 ### Manually Trigger Sync
 
 ```bash
-curl -X POST http://localhost:8080/syncs/my-sync/run
+curl -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs/{sync_id}/execute
 ```
 
 ## Best Practices
@@ -487,7 +460,7 @@ curl -X POST http://localhost:8080/syncs/my-sync/run
 
 ### Sync Takes Too Long
 
-1. Reduce `batch_size`
+1. Increase `concurrent_workers` for parallel processing
 2. Check network connectivity
 3. Review vault API latency
 4. Consider splitting into multiple syncs

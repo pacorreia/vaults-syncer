@@ -2,6 +2,7 @@ package sync
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -135,7 +136,7 @@ func (e *Engine) ExecuteSync(syncCfg *config.SyncConfig) error {
 }
 
 // syncSecretUnidirectional syncs a secret in one direction with retries
-func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName string, sourceBackend vault.Backend) error {
+func (e *Engine) syncSecretUnidirectional(syncCfg *config.SyncConfig, targetID, secretName string, sourceBackend vault.Backend) error {
 	targetBackend, ok := e.backends[targetID]
 	if !ok {
 		return fmt.Errorf("target vault backend not found: %s", targetID)
@@ -148,16 +149,13 @@ func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName
 	}
 
 	// Apply transforms
-	value := secret.Value
-	// Transforms can be added here based on syncCfg.Transforms
-
-	// Try to set in target with retries
-	retryPolicy := config.RetryPolicy{
-		MaxRetries:     3,
-		InitialBackoff: 1000,
-		MaxBackoff:     60000,
-		Multiplier:     2.0,
+	value, err := applyTransforms(secret.Value, syncCfg.Transforms)
+	if err != nil {
+		return fmt.Errorf("failed to apply transforms: %w", err)
 	}
+
+	// Use per-sync retry policy, falling back to defaults when not configured
+	retryPolicy := effectiveRetryPolicy(syncCfg.RetryPolicy)
 
 	err = withRetry(retryPolicy, func() error {
 		return targetBackend.SetSecret(secretName, value)
@@ -167,8 +165,8 @@ func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName
 		// Record failure
 		sourceChecksum := hashString(secret.Value)
 		obj := &config.SyncObject{
-			SyncID:         syncID,
-			SourceVaultID:  sourceID,
+			SyncID:         syncCfg.ID,
+			SourceVaultID:  syncCfg.Source,
 			TargetVaultID:  targetID,
 			SecretName:     secretName,
 			SourceChecksum: sourceChecksum,
@@ -184,8 +182,8 @@ func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName
 	// Record success
 	sourceChecksum := hashString(secret.Value)
 	obj := &config.SyncObject{
-		SyncID:         syncID,
-		SourceVaultID:  sourceID,
+		SyncID:         syncCfg.ID,
+		SourceVaultID:  syncCfg.Source,
 		TargetVaultID:  targetID,
 		SecretName:     secretName,
 		SourceChecksum: sourceChecksum,
@@ -200,7 +198,7 @@ func (e *Engine) syncSecretUnidirectional(syncID, sourceID, targetID, secretName
 }
 
 // syncSecretBidirectional syncs a secret bidirectionally
-func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName string, sourceBackend, targetBackend vault.Backend) error {
+func (e *Engine) syncSecretBidirectional(syncCfg *config.SyncConfig, targetID, secretName string, sourceBackend, targetBackend vault.Backend) error {
 	// Get from source
 	sourceSecret, err := sourceBackend.GetSecret(secretName)
 	if err != nil {
@@ -211,7 +209,7 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 	targetSecret, err := targetBackend.GetSecret(secretName)
 	if err != nil {
 		// Secret doesn't exist in target yet, sync from source
-		return e.syncSecretUnidirectional(syncID, sourceID, targetID, secretName, sourceBackend)
+		return e.syncSecretUnidirectional(syncCfg, targetID, secretName, sourceBackend)
 	}
 
 	sourceChecksum := hashString(sourceSecret.Value)
@@ -220,8 +218,8 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 	// If they're the same, no action needed
 	if sourceChecksum == targetChecksum {
 		obj := &config.SyncObject{
-			SyncID:         syncID,
-			SourceVaultID:  sourceID,
+			SyncID:         syncCfg.ID,
+			SourceVaultID:  syncCfg.Source,
 			TargetVaultID:  targetID,
 			SecretName:     secretName,
 			SourceChecksum: sourceChecksum,
@@ -235,7 +233,7 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 	}
 
 	// Get existing sync object to determine last direction
-	existingObj, err := e.store.GetSyncObject(syncID, sourceID, targetID, secretName)
+	existingObj, err := e.store.GetSyncObject(syncCfg.ID, syncCfg.Source, targetID, secretName)
 	if err != nil {
 		return fmt.Errorf("failed to get sync object: %w", err)
 	}
@@ -254,20 +252,17 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 		}
 	}
 
+	retryPolicy := effectiveRetryPolicy(syncCfg.RetryPolicy)
+
 	// Apply the sync
 	if direction == "source_to_target" {
-		err = withRetry(config.RetryPolicy{
-			MaxRetries:     3,
-			InitialBackoff: 1000,
-			MaxBackoff:     60000,
-			Multiplier:     2.0,
-		}, func() error {
+		err = withRetry(retryPolicy, func() error {
 			return targetBackend.SetSecret(secretName, sourceSecret.Value)
 		})
 		if err != nil {
 			obj := &config.SyncObject{
-				SyncID:         syncID,
-				SourceVaultID:  sourceID,
+				SyncID:         syncCfg.ID,
+				SourceVaultID:  syncCfg.Source,
 				TargetVaultID:  targetID,
 				SecretName:     secretName,
 				SourceChecksum: sourceChecksum,
@@ -282,18 +277,13 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 		}
 		targetChecksum = sourceChecksum
 	} else {
-		err = withRetry(config.RetryPolicy{
-			MaxRetries:     3,
-			InitialBackoff: 1000,
-			MaxBackoff:     60000,
-			Multiplier:     2.0,
-		}, func() error {
+		err = withRetry(retryPolicy, func() error {
 			return sourceBackend.SetSecret(secretName, targetSecret.Value)
 		})
 		if err != nil {
 			obj := &config.SyncObject{
-				SyncID:         syncID,
-				SourceVaultID:  sourceID,
+				SyncID:         syncCfg.ID,
+				SourceVaultID:  syncCfg.Source,
 				TargetVaultID:  targetID,
 				SecretName:     secretName,
 				SourceChecksum: sourceChecksum,
@@ -311,8 +301,8 @@ func (e *Engine) syncSecretBidirectional(syncID, sourceID, targetID, secretName 
 
 	// Record success
 	obj := &config.SyncObject{
-		SyncID:         syncID,
-		SourceVaultID:  sourceID,
+		SyncID:         syncCfg.ID,
+		SourceVaultID:  syncCfg.Source,
 		TargetVaultID:  targetID,
 		SecretName:     secretName,
 		SourceChecksum: sourceChecksum,
@@ -422,6 +412,43 @@ func withRetry(policy config.RetryPolicy, fn func() error) error {
 	return fmt.Errorf("max retries exceeded: %w", lastErr)
 }
 
+// effectiveRetryPolicy returns the given policy if it is configured, or a
+// sensible default when the policy fields are all zero-valued.
+func effectiveRetryPolicy(p config.RetryPolicy) config.RetryPolicy {
+	if p.MaxRetries > 0 || p.InitialBackoff > 0 {
+		return p
+	}
+	return config.RetryPolicy{
+		MaxRetries:     3,
+		InitialBackoff: 1000,
+		MaxBackoff:     60000,
+		Multiplier:     2.0,
+	}
+}
+
+// applyTransforms applies a sequence of value transformations and returns the
+// result. Only the "value" field target is currently supported.
+func applyTransforms(value string, transforms []config.Transform) (string, error) {
+	for _, t := range transforms {
+		if t.Field != "value" {
+			continue
+		}
+		switch t.Type {
+		case "base64_encode":
+			value = base64.StdEncoding.EncodeToString([]byte(value))
+		case "base64_decode":
+			decoded, err := base64.StdEncoding.DecodeString(value)
+			if err != nil {
+				return "", fmt.Errorf("base64_decode transform failed: %w", err)
+			}
+			value = string(decoded)
+		default:
+			return "", fmt.Errorf("unsupported transform type: %s", t.Type)
+		}
+	}
+	return value, nil
+}
+
 // SyncResult holds the results of a sync operation
 type SyncResult struct {
 	Success int
@@ -454,7 +481,7 @@ func (e *Engine) executeSyncUnidirectionalConcurrent(syncCfg *config.SyncConfig,
 				semaphore <- struct{}{}        // Acquire
 				defer func() { <-semaphore }() // Release
 
-				err := e.syncSecretUnidirectional(syncCfg.ID, syncCfg.Source, target, secret, sourceBackend)
+				err := e.syncSecretUnidirectional(syncCfg, target, secret, sourceBackend)
 				if err != nil {
 					e.logger.Error("failed to sync secret",
 						slog.String("sync_id", syncCfg.ID),
@@ -515,7 +542,7 @@ func (e *Engine) executeSyncBidirectionalConcurrent(syncCfg *config.SyncConfig, 
 			semaphore <- struct{}{}        // Acquire
 			defer func() { <-semaphore }() // Release
 
-			err := e.syncSecretBidirectional(syncCfg.ID, syncCfg.Source, syncCfg.Targets[0], secret, sourceBackend, targetBackend)
+			err := e.syncSecretBidirectional(syncCfg, syncCfg.Targets[0], secret, sourceBackend, targetBackend)
 			if err != nil {
 				e.logger.Error("failed to sync secret",
 					slog.String("sync_id", syncCfg.ID),

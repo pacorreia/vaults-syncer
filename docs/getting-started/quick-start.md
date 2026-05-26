@@ -2,279 +2,206 @@
 
 Get vaults-syncer up and running in 5 minutes.
 
-## 1. Basic Setup
-
-### Step 1: Create Configuration
-
-Create `config.yaml` in your working directory:
-
-```yaml
-vaults:
-  - id: akv-prod
-    name: Azure Key Vault (Production)
-    type: azure
-    endpoint: https://myvault.vault.azure.net/secrets
-    auth:
-      method: bearer
-      headers:
-        token: ${AZURE_ACCESS_TOKEN}
-    field_names:
-      name_field: name
-      value_field: value
-  
-  - id: bitwarden-prod
-    name: Bitwarden Production
-    type: bitwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: your-client-id
-        client_secret: your-client-secret
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-
-syncs:
-  - id: akv-to-bitwarden
-    name: AKV to Bitwarden Sync
-    source: akv-prod
-    targets: [bitwarden-prod]
-    schedule: "0 * * * *"  # Hourly
-    sync_type: unidirectional
-```
-
-### Step 2: Run with Docker
+## 1. Run with Docker
 
 ```bash
 docker run -d \
-  --name akv-sync \
-  -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
+  --name vaults-syncer \
+  -v sync-data:/app/data \
   -p 8080:8080 \
+  -p 9090:9090 \
   ghcr.io/pacorreia/vaults-syncer:latest
 ```
 
-### Step 3: Verify It's Running
+Or with Docker Compose (see `docker-compose.yml` in the repository):
 
 ```bash
-curl http://localhost:8080/health
+docker compose up -d
 ```
 
-You should see:
-```json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00Z"
-}
-```
+## 2. Save the Encryption Key
 
-## 2. Set Up Your First Sync
-
-### Create Azure Key Vault Source
-
-1. In your `config.yaml`, ensure Azure Key Vault is configured
-2. Obtain an Azure AD access token and provide it as a bearer token
-
-### Create Bitwarden Target
-
-1. Create an OAuth2 application in Bitwarden
-2. Get your `client_id` and `client_secret`
-3. Add to config:
-
-```yaml
-vaults:
-  - id: bitwarden
-    type: bitwarden
-    endpoint: https://vault.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${BITWARDEN_CLIENT_ID}
-        client_secret: ${BITWARDEN_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-```
-
-### Configure Sync Rule
-
-Add a new sync configuration:
-
-```yaml
-syncs:
-  - id: my-first-sync
-    source: akv-prod
-    targets: [bitwarden]
-    schedule: "0 */4 * * *"  # Every 4 hours
-    sync_type: unidirectional
-    filter:
-      patterns:
-        - "app-*"
-```
-
-## 3. Monitor Your Sync
-
-### View Sync Status
+On the **first start**, if `MASTER_ENCRYPTION_KEY` is not set, a key is generated and printed to the container logs:
 
 ```bash
-curl http://localhost:8080/syncs/my-first-sync
+docker logs vaults-syncer
 ```
 
-Response:
-```json
-{
-  "id": "my-first-sync",
-  "name": "My First Sync",
-  "source": "akv-prod",
-  "target": "bitwarden",
-  "status": "running",
-  "last_run": "2024-01-15T10:30:00Z",
-  "next_run": "2024-01-15T14:30:00Z",
-  "stats": {
-    "total_items": 42,
-    "synced": 40,
-    "failed": 0,
-    "skipped": 2
-  }
-}
+Look for the printed key:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║              MASTER ENCRYPTION KEY – SAVE THIS NOW          ║
+╠══════════════════════════════════════════════════════════════╣
+║  <your-generated-key>                                        ║
+╚══════════════════════════════════════════════════════════════╝
 ```
 
-### View Metrics
+Set it as an environment variable before the next restart:
 
 ```bash
+export MASTER_ENCRYPTION_KEY=<printed-value>
+```
+
+Losing this key means losing access to the encrypted vault credentials stored in the database.
+
+## 3. Complete the Setup Wizard
+
+Open `http://localhost:8080` in your browser. The **Setup Wizard** will prompt you to create an admin username and password. After setup, log in with those credentials.
+
+## 4. Add Vaults and Syncs
+
+Use the Web UI or the admin API to configure vaults and syncs.
+
+### Via Web UI
+
+1. Navigate to **Vaults Config** and add your source and target vaults.
+2. Navigate to **Syncs Config** to define a sync between them.
+3. Return to the **Dashboard** to trigger syncs and view run history.
+
+### Via API
+
+Get an auth token first:
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+```
+
+Create vaults:
+
+```bash
+# Source vault — Azure Key Vault
+curl -s -X POST http://localhost:8080/api/config/vaults \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "azure-prod",
+    "type": "azure",
+    "endpoint": "https://myvault.vault.azure.net/secrets",
+    "auth": {
+      "method": "bearer",
+      "headers": {"token": "'"${AZURE_ACCESS_TOKEN}"'"}
+    },
+    "field_names": {"name_field": "name", "value_field": "value"}
+  }'
+
+# Target vault — Vaultwarden
+curl -s -X POST http://localhost:8080/api/config/vaults \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "vaultwarden-prod",
+    "type": "vaultwarden",
+    "endpoint": "https://vault.example.com/api/ciphers",
+    "method": "POST",
+    "auth": {
+      "method": "oauth2",
+      "oauth": {
+        "client_id": "'"${VW_CLIENT_ID}"'",
+        "client_secret": "'"${VW_CLIENT_SECRET}"'",
+        "scope": "api"
+      }
+    },
+    "field_names": {"name_field": "name", "value_field": "login"}
+  }'
+```
+
+Create a sync:
+
+```bash
+curl -s -X POST http://localhost:8080/api/config/syncs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "my-first-sync",
+    "source": "azure-prod",
+    "targets": ["vaultwarden-prod"],
+    "schedule": "0 * * * *",
+    "sync_type": "unidirectional",
+    "enabled": true
+  }'
+```
+
+## 5. Monitor Your Sync
+
+```bash
+# Check sync status
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/my-first-sync/status
+
+# Trigger an immediate sync
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/my-first-sync/execute
+
+# View run history
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/my-first-sync/runs
+
+# View Prometheus metrics (no auth, port 9090)
 curl http://localhost:9090/metrics | grep sync
 ```
 
-### Check Logs
+## 6. Check Logs
 
 ```bash
 # Docker
-docker logs akv-sync
+docker logs vaults-syncer -f
 
 # Docker Compose
 docker compose logs -f sync-daemon
-
-# Systemd
-sudo journalctl -u akv-sync -f
 ```
 
-## 4. Common Tasks
-
-### Change Sync Interval
-
-Edit `config.yaml` and update the sync schedule:
-
-```yaml
-syncs:
-  - id: my-sync
-    schedule: "0 */2 * * *"  # Every 2 hours instead
-```
-
-Restart the service:
-```bash
-docker restart akv-sync
-```
-
-### Add More Vaults
-
-Simply add additional vault configurations:
-
-```yaml
-vaults:
-  - id: secondary-vault
-    type: bitwarden
-    endpoint: https://vault2.example.com/api/ciphers
-    auth:
-      method: oauth2
-      oauth:
-        client_id: ${SECOND_CLIENT_ID}
-        client_secret: ${SECOND_CLIENT_SECRET}
-        scope: api
-    field_names:
-      name_field: name
-      value_field: login
-```
-
-### Enable Bidirectional Sync
-
-Change sync mode:
-
-```yaml
-syncs:
-  - id: my-sync
-    sync_type: bidirectional
-```
-
-### Add Filtering
-
-Sync only specific items:
-
-```yaml
-syncs:
-  - id: filtered-sync
-    filter:
-      patterns:
-        - "prod-*"
-```
-
-## 5. Best Practices
+## Best Practices
 
 ### Security
 
-1. ✅ Use managed identities or service principals, never store credentials in config
-2. ✅ Restrict file permissions: `chmod 600 config.yaml`
-3. ✅ Use read-only credentials for source vaults when possible
-4. ✅ Enable audit logging
-5. ✅ Use TLS for all vault endpoints
+1. ✅ Use managed identities or service principals; never hardcode credentials
+2. ✅ Use read-only credentials for source vaults when possible
+3. ✅ Enable TLS for all vault endpoints
+4. ✅ Rotate credentials regularly
 
 ### Reliability
 
 1. ✅ Test syncs in non-production first
-2. ✅ Start with one-way syncs, move to bidirectional carefully
+2. ✅ Start with unidirectional syncs before using bidirectional
 3. ✅ Monitor and alert on sync failures
-4. ✅ Keep backups of critical secrets
-5. ✅ Set appropriate sync intervals (don't sync too frequently)
+4. ✅ Set appropriate sync intervals (avoid syncing too frequently)
 
 ### Operations
 
 1. ✅ Use containerization (Docker/Kubernetes)
-2. ✅ Implement health checks
+2. ✅ Implement health checks in your orchestrator
 3. ✅ Monitor metrics and logs
-4. ✅ Set up alerting on failures
-5. ✅ Document your sync topology
+4. ✅ Document your sync topology
 
 ## Troubleshooting
 
 ### Sync not running
 
-1. Check logs: `docker logs akv-sync`
-2. Verify schedule syntax: `0 */4 * * *` (cron format)
-3. Ensure vaults are accessible: `curl https://vault.example.com`
-4. Check credentials and authentication
+1. Check logs: `docker logs vaults-syncer`
+2. Verify schedule syntax is valid cron format: `0 */4 * * *`
+3. Ensure vaults are reachable from the daemon host
+4. Verify credentials and authentication
 
 ### Authentication failures
 
+Test your vault credentials directly from the daemon host:
+
 ```bash
-# Test Azure authentication
-az account show
+# Test Azure bearer token
+curl -H "Authorization: Bearer $AZURE_ACCESS_TOKEN" \
+  "https://myvault.vault.azure.net/secrets?api-version=7.4"
 
-# Test Bitwarden authentication
+# Test Vaultwarden OAuth
 curl -X POST https://vault.example.com/identity/connect/token \
-  -d "grant_type=client_credentials&client_id=..." \
-  -d "client_secret=..."
+  -d "grant_type=client_credentials&client_id=...&client_secret=...&scope=api"
 ```
-
-### Performance issues
-
-1. Increase sync timeout in config
-2. Reduce number of items per sync
-3. Use filters to limit scope
-4. Check vault API rate limits
 
 ## Next Steps
 
 - [Full Configuration Guide](../configuration/README.md)
 - [Vault Configuration](../configuration/vaults.md)
 - [Authentication Setup](../configuration/authentication.md)
+- [Tool Backend](../configuration/tool-backend.md)

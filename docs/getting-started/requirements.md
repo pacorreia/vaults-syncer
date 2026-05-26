@@ -31,7 +31,7 @@ Ensure your environment meets these requirements before installing vaults-syncer
 
 ### Runtime
 
-- **Go 1.22+** (if building from source)
+- **Go 1.26+** (if building from source; `CGO_ENABLED=1` required for the sqlite3 driver)
 - **Docker 20.10+** (for containerized deployment)
 - **Docker Compose 2.0+** (for Compose deployments)
 - **Kubernetes 1.24+** (for Kubernetes deployment)
@@ -127,13 +127,13 @@ Configure OAuth2 application:
 - **Logs**: 10-100 MB (depends on log retention)
 - **Total**: Minimum 50 MB free space
 
-### Database (Optional)
+### Database
 
-For advanced deployments:
+The daemon supports three database backends (configured via `DB_TYPE`):
 
-- **PostgreSQL 12+**
-- **MySQL 5.7+**
-- **SQLite** (embedded, no setup needed)
+- **SQLite** (embedded, default — no extra setup needed; file path via `DB_PATH`)
+- **PostgreSQL 12+** (`DB_TYPE=postgres`, connection string via `DB_DSN`)
+- **Microsoft SQL Server 2019+** (`DB_TYPE=mssql`, connection string via `DB_DSN`)
 
 ## Monitoring & Observability Requirements
 
@@ -201,9 +201,8 @@ Default ports (configurable):
 
 | Service | Port | Protocol | Purpose |
 |---------|------|----------|---------|
-| API Server | 8080 | HTTP | REST endpoints |
-| Metrics | 9090 | HTTP | Prometheus metrics |
-| Webhook | 8081 | HTTP | Event webhooks (optional) |
+| API Server + Web UI | 8080 | HTTP | REST API endpoints and Web UI |
+| Metrics | 9090 | HTTP | Prometheus metrics (separate server) |
 
 ### Firewall Rules
 
@@ -216,14 +215,6 @@ Default ports (configurable):
 - 443/TCP (HTTPS to vaults)
 - 53/UDP (DNS)
 ```
-
-## Python Integration (Optional)
-
-If using Python SDK:
-
-- **Python 3.8+**
-- **pip** or **poetry**
-- **Dependencies**: requests, pydantic, pyyaml
 
 ## Telemetry & Analytics
 
