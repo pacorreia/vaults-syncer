@@ -14,25 +14,19 @@ linters:
     - godot
     - noctx
   settings:
-    goimports:
-      local-prefixes: github.com/pacorreia/vaults-syncer
     errcheck:
       check-type-assertions: true
       check-blank: false
-    govet:
-      enable-all: true
-      disable:
-        - fieldalignment
     misspell:
       locale: US
 
-issues:
-  exclude-dirs:
-    - vendor
-    - testdata
-    - site
-  exclude-rules:
-    # Allow fmt.Errorf without %w in test files
-    - path: "_test\\.go"
-      linters:
-        - godot
+output:
+  exclusions:
+    paths:
+      - vendor
+      - testdata
+      - site
+    rules:
+      - path: "_test\\.go"
+        linters:
+          - godot

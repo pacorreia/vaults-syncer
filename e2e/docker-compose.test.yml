@@ -31,30 +31,25 @@ services:
     networks:
       - sync-network
     environment:
-      - CONFIG_PATH=/etc/sync/config.yaml
-      - DATABASE_PATH=/app/data/sync.db
-      - VAULTWARDEN_SOURCE_TOKEN=source_admin_token_12345
-      - VAULTWARDEN_TARGET_TOKEN=target_admin_token_12345
+      - MASTER_ENCRYPTION_KEY=aW50ZWdyYXRpb24tdGVzdC0zMmJ5dGUta2V5LW9rISE=
+      - DB_TYPE=sqlite
+      - DB_PATH=/app/data/sync.db
+      - SERVER_PORT=8080
+      - METRICS_PORT=9090
     ports:
       - "8080:8080"
       - "9090:9090"
     volumes:
-      - ./config.test.yaml:/etc/sync/config.yaml:ro
       - sync_daemon_data:/app/data
     depends_on:
       mock-vaults:
         condition: service_healthy
-    command:
-      - "-config"
-      - "/etc/sync/config.yaml"
-      - "-db"
-      - "/app/data/sync.db"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/setup"]
       interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 5s
+      retries: 6
+      start_period: 10s
 
 volumes:
   sync_daemon_data:

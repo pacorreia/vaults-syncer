@@ -52,7 +52,7 @@ jobs:
 
       - uses: actions/setup-go@v6
         with:
-          go-version: '1.26.1'
+          go-version: '1.26.3'
 
       - name: Install Linux ARM64 cross-compiler
         if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
