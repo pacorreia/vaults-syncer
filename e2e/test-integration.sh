@@ -123,7 +123,7 @@ setup_daemon_config() {
   "ID": "vaultwarden_source",
   "Name": "Source Mock Vault",
   "Type": "vaultwarden",
-  "Endpoint": "http://mock-vaults:8000",
+  "Endpoint": "http://mock-vaults:8000/api/ciphers",
   "Method": "POST",
   "Auth": {
     "Method": "bearer",
@@ -156,7 +156,7 @@ EOF
   "ID": "vaultwarden_target",
   "Name": "Target Mock Vault",
   "Type": "vaultwarden",
-  "Endpoint": "http://mock-vaults:8001",
+  "Endpoint": "http://mock-vaults:8001/api/ciphers",
   "Method": "POST",
   "Auth": {
     "Method": "bearer",

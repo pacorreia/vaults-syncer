@@ -20,13 +20,12 @@ linters:
     misspell:
       locale: US
 
-output:
-  exclusions:
-    paths:
-      - vendor
-      - testdata
-      - site
-    rules:
-      - path: "_test\\.go"
-        linters:
-          - godot
+issues:
+  exclude-dirs:
+    - vendor
+    - testdata
+    - site
+  exclude-rules:
+    - path: "_test\\.go"
+      linters:
+        - godot
