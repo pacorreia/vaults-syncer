@@ -40,7 +40,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.26.3'
+          go-version: '1.26.4'
 
       - name: Install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
@@ -56,6 +56,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Install Trivy
+        run: |
+          TRIVY_VERSION="v0.70.0"
+          curl -sfL "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz" \
+            | tar xz -C /tmp trivy
+          sudo install -m 755 /tmp/trivy /usr/local/bin/trivy
+
       - name: Run Trivy vulnerability scanner (filesystem)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -65,6 +72,7 @@ jobs:
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          skip-setup-trivy: true
 
       - name: Upload Trivy SARIF results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
