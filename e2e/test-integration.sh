@@ -120,19 +120,19 @@ setup_daemon_config() {
     local source_vault_json
     source_vault_json=$(cat <<EOF
 {
-  "ID": "vaultwarden_source",
-  "Name": "Source Mock Vault",
-  "Type": "vaultwarden",
-  "Endpoint": "http://mock-vaults:8000/api/ciphers",
-  "Method": "POST",
-  "Auth": {
-    "Method": "bearer",
-    "Headers": {"token": "$SOURCE_TOKEN"}
+  "id": "vaultwarden_source",
+  "name": "Source Mock Vault",
+  "type": "vaultwarden",
+  "endpoint": "http://mock-vaults:8000/api/ciphers",
+  "method": "POST",
+  "auth": {
+    "method": "bearer",
+    "headers": {"token": "$SOURCE_TOKEN"}
   },
-  "FieldNames": {"NameField": "name", "ValueField": "login"},
-  "Headers": {"Accept": "application/json", "Content-Type": "application/json"},
-  "Timeout": 30,
-  "SkipSSLVerify": true
+  "field_names": {"name_field": "name", "value_field": "login"},
+  "headers": {"Accept": "application/json", "Content-Type": "application/json"},
+  "timeout": 30,
+  "skip_ssl_verify": true
 }
 EOF
 )
@@ -153,19 +153,19 @@ EOF
     local target_vault_json
     target_vault_json=$(cat <<EOF
 {
-  "ID": "vaultwarden_target",
-  "Name": "Target Mock Vault",
-  "Type": "vaultwarden",
-  "Endpoint": "http://mock-vaults:8001/api/ciphers",
-  "Method": "POST",
-  "Auth": {
-    "Method": "bearer",
-    "Headers": {"token": "$TARGET_TOKEN"}
+  "id": "vaultwarden_target",
+  "name": "Target Mock Vault",
+  "type": "vaultwarden",
+  "endpoint": "http://mock-vaults:8001/api/ciphers",
+  "method": "POST",
+  "auth": {
+    "method": "bearer",
+    "headers": {"token": "$TARGET_TOKEN"}
   },
-  "FieldNames": {"NameField": "name", "ValueField": "login"},
-  "Headers": {"Accept": "application/json", "Content-Type": "application/json"},
-  "Timeout": 30,
-  "SkipSSLVerify": true
+  "field_names": {"name_field": "name", "value_field": "login"},
+  "headers": {"Accept": "application/json", "Content-Type": "application/json"},
+  "timeout": 30,
+  "skip_ssl_verify": true
 }
 EOF
 )
@@ -185,14 +185,14 @@ EOF
     local sync_json
     sync_json=$(cat <<EOF
 {
-  "ID": "vaultwarden_sync",
-  "Source": "vaultwarden_source",
-  "Targets": ["vaultwarden_target"],
-  "SyncType": "unidirectional",
-  "Enabled": $enabled,
-  "Schedule": "*/5 * * * *",
-  "Filter": {"Patterns": ["*"], "Exclude": []},
-  "RetryPolicy": {"MaxRetries": 3, "InitialBackoff": 1000, "MaxBackoff": 30000, "Multiplier": 2.0}
+  "id": "vaultwarden_sync",
+  "source": "vaultwarden_source",
+  "targets": ["vaultwarden_target"],
+  "sync_type": "unidirectional",
+  "enabled": $enabled,
+  "schedule": "*/5 * * * *",
+  "filter": {"patterns": ["*"], "exclude": []},
+  "retry_policy": {"max_retries": 3, "initial_backoff": 1000, "max_backoff": 30000, "multiplier": 2.0}
 }
 EOF
 )
