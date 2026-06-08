@@ -697,37 +697,41 @@
 <li><strong><a href="configuration/authentication/">Authentication</a></strong> - Set up secure access</li>
 </ul>
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">¶</a></h2>
+<blockquote>
+<p><strong>Note:</strong> All configuration is managed via the Web UI or the admin API (<code>POST /api/config/syncs</code>). The JSON examples below show the request body format.</p>
+</blockquote>
 <h3 id="backup-replication">Backup &amp; Replication<a class="headerlink" href="#backup-replication" title="Permanent link">¶</a></h3>
 <p>Synchronize secrets from your production vault to a backup vault for disaster recovery.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-0-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod_to_backup</span>
-</span><span id="__span-0-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
-</span><span id="__span-0-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-0-5"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup</span>
-</span><span id="__span-0-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unidirectional</span>
-</span><span id="__span-0-7"><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">"0</span><span class="nv"> </span><span class="s">*/4</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span><span class="w">  </span><span class="c1"># Every 4 hours</span>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="p">{</span>
+</span><span id="__span-0-2"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"prod_to_backup"</span><span class="p">,</span>
+</span><span id="__span-0-3"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"production"</span><span class="p">,</span>
+</span><span id="__span-0-4"><span class="w">  </span><span class="nt">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"backup"</span><span class="p">],</span>
+</span><span id="__span-0-5"><span class="w">  </span><span class="nt">"sync_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unidirectional"</span><span class="p">,</span>
+</span><span id="__span-0-6"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 */4 * * *"</span><span class="p">,</span>
+</span><span id="__span-0-7"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-0-8"><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="multi-cloud-deployment">Multi-Cloud Deployment<a class="headerlink" href="#multi-cloud-deployment" title="Permanent link">¶</a></h3>
 <p>Keep secrets in sync across different cloud providers.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-1-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws_to_azure</span>
-</span><span id="__span-1-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws-vault</span>
-</span><span id="__span-1-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-1-5"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-vault</span>
-</span><span id="__span-1-6"><span class="w">    </span><span class="nt">sync_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><span class="p">{</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aws_to_azure"</span><span class="p">,</span>
+</span><span id="__span-1-3"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aws-vault"</span><span class="p">,</span>
+</span><span id="__span-1-4"><span class="w">  </span><span class="nt">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"azure-vault"</span><span class="p">],</span>
+</span><span id="__span-1-5"><span class="w">  </span><span class="nt">"sync_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bidirectional"</span><span class="p">,</span>
+</span><span id="__span-1-6"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-1-7"><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="development-environment-sync">Development Environment Sync<a class="headerlink" href="#development-environment-sync" title="Permanent link">¶</a></h3>
 <p>Maintain synchronized secrets across dev, staging, and production.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="nt">syncs</span><span class="p">:</span>
-</span><span id="__span-2-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">to_development</span>
-</span><span id="__span-2-3"><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
-</span><span id="__span-2-4"><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-</span><span id="__span-2-5"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
-</span><span id="__span-2-6"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
-</span><span id="__span-2-7"><span class="w">    </span><span class="nt">filter</span><span class="p">:</span>
-</span><span id="__span-2-8"><span class="w">      </span><span class="nt">patterns</span><span class="p">:</span>
-</span><span id="__span-2-9"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"non-prod-*"</span>
-</span><span id="__span-2-10"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"shared-*"</span>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="p">{</span>
+</span><span id="__span-2-2"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"to_development"</span><span class="p">,</span>
+</span><span id="__span-2-3"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"production"</span><span class="p">,</span>
+</span><span id="__span-2-4"><span class="w">  </span><span class="nt">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"development"</span><span class="p">,</span><span class="w"> </span><span class="s2">"staging"</span><span class="p">],</span>
+</span><span id="__span-2-5"><span class="w">  </span><span class="nt">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-6"><span class="w">    </span><span class="nt">"patterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"non-prod-*"</span><span class="p">,</span><span class="w"> </span><span class="s2">"shared-*"</span><span class="p">]</span>
+</span><span id="__span-2-7"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-2-8"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-2-9"><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">¶</a></h2>
 <pre class="mermaid"><code>graph TB
@@ -757,7 +761,7 @@
     style api fill:none,stroke:#00cc66,stroke-width:2px</code></pre>
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">¶</a></h2>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">¶</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio"><input id="__tabbed_1_2" name="__tabbed_1" type="radio"><input id="__tabbed_1_3" name="__tabbed_1" type="radio"><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Binary</label><label for="__tabbed_1_3">Source</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio"/><input id="__tabbed_1_2" name="__tabbed_1" type="radio"/><input id="__tabbed_1_3" name="__tabbed_1" type="radio"/><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Binary</label><label for="__tabbed_1_3">Source</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span id="__span-3-1">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
@@ -787,7 +791,7 @@
 </span></code></pre></div>
 </div>
 </div>
-</input></input></input></div>
+</div>
 <h3 id="first-time-setup">First-Time Setup<a class="headerlink" href="#first-time-setup" title="Permanent link">¶</a></h3>
 <p>After starting the daemon, open <code>http://localhost:8080</code> in your browser. The <strong>Setup Wizard</strong> will guide you through:</p>
 <ol>

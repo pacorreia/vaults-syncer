@@ -1567,6 +1567,9 @@
 
 <h1 id="configuring-vaults">Configuring Vaults<a class="headerlink" href="#configuring-vaults" title="Permanent link">&para;</a></h1>
 <p>A vault is a credentials storage system where secrets are stored. This guide covers how to configure different vault types.</p>
+<blockquote>
+<p><strong>Note:</strong> All vault configuration is managed via the <strong>Web UI</strong> (<code>Vaults Config</code>) or the admin API (<code>POST /api/config/vaults</code>, <code>PUT /api/config/vaults/{vault_id}</code>). The API accepts and returns JSON. The YAML-style snippets in this guide are schema reference only — the field names map 1:1 to the JSON keys used by the API.</p>
+</blockquote>
 <h2 id="supported-vault-types">Supported Vault Types<a class="headerlink" href="#supported-vault-types" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="#azure-key-vault">Azure Key Vault</a> - Microsoft's cloud secrets management</li>

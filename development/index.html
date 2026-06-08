@@ -1804,7 +1804,7 @@
 </span><span id="__span-0-22">├── auth/                      # Authentication middleware
 </span><span id="__span-0-23">│
 </span><span id="__span-0-24">├── config/                    # Configuration management
-</span><span id="__span-0-25">│   ├── loader.go             # YAML config loading &amp; validation
+</span><span id="__span-0-25">│   ├── loader.go             # YAML config loading (legacy format; not used at runtime)
 </span><span id="__span-0-26">│   ├── defaults.go           # Default value application
 </span><span id="__span-0-27">│   ├── types.go              # Configuration data structures
 </span><span id="__span-0-28">│   └── validate.go           # Configuration validation
@@ -1846,7 +1846,7 @@
 </span><span id="__span-1-14"><span class="w">  </span>-o<span class="w"> </span>bin/sync-daemon<span class="w"> </span>.
 </span><span id="__span-1-15">
 </span><span id="__span-1-16"><span class="c1"># Verify binary</span>
-</span><span id="__span-1-17">./bin/sync-daemon<span class="w"> </span>--version
+</span><span id="__span-1-17">./bin/sync-daemon<span class="w"> </span>-version
 </span><span id="__span-1-18">./bin/sync-daemon<span class="w"> </span>-h
 </span></code></pre></div>
 <h3 id="docker-build">Docker Build<a class="headerlink" href="#docker-build" title="Permanent link">&para;</a></h3>
@@ -1858,7 +1858,8 @@
 </span></code></pre></div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
 <h3 id="example-vault-definitions">Example Vault Definitions<a class="headerlink" href="#example-vault-definitions" title="Permanent link">&para;</a></h3>
-<p>The <code>examples/config.example.yaml</code> includes examples for:</p>
+<p>The <code>examples/config.example.yaml</code> shows the YAML schema for reference only. Since v4.2.0, all vault and sync configuration is stored in the database and managed via the Web UI or the admin API (<code>POST /api/config/vaults</code>, <code>POST /api/config/syncs</code>). The YAML file is not loaded at runtime.</p>
+<p>The examples cover:</p>
 <ol>
 <li><strong>Azure Key Vault</strong> (type <code>azure</code>)</li>
 <li>Bearer token authentication</li>

@@ -1535,7 +1535,7 @@
 </span></code></pre></div>
 <h2 id="useful-commands">🔍 Useful Commands<a class="headerlink" href="#useful-commands" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Check version</span>
-</span><span id="__span-5-2">./sync-daemon<span class="w"> </span>--version
+</span><span id="__span-5-2">./sync-daemon<span class="w"> </span>-version
 </span><span id="__span-5-3">
 </span><span id="__span-5-4"><span class="c1"># Validate database connection only</span>
 </span><span id="__span-5-5">./sync-daemon<span class="w"> </span>-dry-run
@@ -1568,14 +1568,15 @@
 </span><span id="__span-5-32">
 </span><span id="__span-5-33"><span class="c1"># Check logs</span>
 </span><span id="__span-5-34">docker<span class="w"> </span>logs<span class="w"> </span>vaults-syncer
-</span><span id="__span-5-35">docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sync-daemon
+</span><span id="__span-5-35">docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>vaults-syncer
 </span></code></pre></div>
 <h2 id="quick-start-steps">🚀 Quick Start Steps<a class="headerlink" href="#quick-start-steps" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Create config file</strong> → <code>config.yaml</code></li>
-<li><strong>Run with Docker</strong> → <code>docker run ...</code></li>
+<li><strong>Run the daemon</strong> → <code>docker run ...</code> (see Installation docs)</li>
+<li><strong>Open the Setup Wizard</strong> → <code>http://localhost:8080</code> and create your admin account</li>
 <li><strong>Verify</strong> → <code>curl http://localhost:8080/api/setup</code> (public, no auth)</li>
-<li><strong>Check status</strong> → <code>curl http://localhost:8080/syncs</code></li>
+<li><strong>Add vaults &amp; syncs</strong> → use the Web UI or admin API</li>
+<li><strong>Check status</strong> → <code>curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs</code></li>
 </ol>
 <h2 id="documentation-map">📚 Documentation Map<a class="headerlink" href="#documentation-map" title="Permanent link">&para;</a></h2>
 <table>
