@@ -237,6 +237,7 @@ func run(args []string, deps appDeps) error {
 	adminMux := http.NewServeMux()
 	configHandler := api.NewConfigHandler(store, logger, reloadConfig)
 	adminMux.HandleFunc("GET /api/config/vaults", configHandler.ListVaultsConfig)
+	adminMux.HandleFunc("POST /api/config/vaults/test", configHandler.TestVaultConnection)
 	adminMux.HandleFunc("POST /api/config/vaults", configHandler.CreateVault)
 	adminMux.HandleFunc("GET /api/config/vaults/{vault_id}", configHandler.GetVaultConfig)
 	adminMux.HandleFunc("PUT /api/config/vaults/{vault_id}", configHandler.UpdateVault)

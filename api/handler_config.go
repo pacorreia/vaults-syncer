@@ -7,6 +7,7 @@ import (
 
 	"github.com/pacorreia/vaults-syncer/config"
 	"github.com/pacorreia/vaults-syncer/storage"
+	"github.com/pacorreia/vaults-syncer/vault"
 )
 
 // ConfigHandler handles CRUD operations for vaults and sync configurations.
@@ -272,6 +273,35 @@ func (h *ConfigHandler) DeleteSyncConfig(w http.ResponseWriter, r *http.Request)
 	h.logger.Info("sync deleted", slog.String("sync_id", id))
 	h.notifyConfigChanged()
 	jsonOK(w, map[string]string{"status": "deleted"})
+}
+
+// TestVaultConnection accepts a transient VaultConfig in the request body and
+// verifies connectivity without persisting the configuration.
+func (h *ConfigHandler) TestVaultConnection(w http.ResponseWriter, r *http.Request) {
+	var v config.VaultConfig
+	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+		jsonError(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if v.Endpoint == "" {
+		jsonError(w, "endpoint is required", http.StatusBadRequest)
+		return
+	}
+
+	backend, err := vault.NewBackend(&v)
+	if err != nil {
+		jsonOK(w, map[string]interface{}{"ok": false, "message": err.Error()})
+		return
+	}
+
+	if err := backend.TestConnection(); err != nil {
+		h.logger.Info("vault test connection failed", slog.String("endpoint", v.Endpoint), slog.String("error", err.Error()))
+		jsonOK(w, map[string]interface{}{"ok": false, "message": err.Error()})
+		return
+	}
+
+	h.logger.Info("vault test connection succeeded", slog.String("endpoint", v.Endpoint))
+	jsonOK(w, map[string]interface{}{"ok": true, "message": "Connection successful"})
 }
 
 // ---------------------------------------------------------------------------

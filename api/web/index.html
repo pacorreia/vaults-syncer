@@ -10,22 +10,22 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
   <style>
     :root {
-      --md-primary:              #6750A4;
+      --md-primary:              #1565C0;
       --md-on-primary:           #FFFFFF;
-      --md-primary-container:    #EADDFF;
-      --md-on-primary-container: #21005D;
-      --md-secondary:            #625B71;
+      --md-primary-container:    #D6E4FF;
+      --md-on-primary-container: #001945;
+      --md-secondary:            #535F70;
       --md-on-secondary:         #FFFFFF;
-      --md-secondary-container:  #E8DEF8;
-      --md-on-secondary-container: #1D192B;
-      --md-surface:              #FFFBFE;
-      --md-surface-variant:      #E7E0EC;
-      --md-surface-container:    #F3EDF7;
-      --md-surface-container-low:#F7F2FA;
-      --md-on-surface:           #1C1B1F;
-      --md-on-surface-variant:   #49454F;
-      --md-outline:              #79747E;
-      --md-outline-variant:      #CAC4D0;
+      --md-secondary-container:  #D7E3F7;
+      --md-on-secondary-container: #101C2B;
+      --md-surface:              #FAFCFF;
+      --md-surface-variant:      #DFE2EB;
+      --md-surface-container:    #EEF1F6;
+      --md-surface-container-low:#F4F7FC;
+      --md-on-surface:           #1A1C1E;
+      --md-on-surface-variant:   #43474E;
+      --md-outline:              #73777F;
+      --md-outline-variant:      #C3C7CF;
       --md-error:                #B3261E;
       --md-error-container:      #F9DEDC;
       --md-on-error-container:   #410E0B;
@@ -35,10 +35,10 @@
       --md-info-container:       #CEE5FF;
       --md-warning:              #7A5900;
       --md-warning-container:    #FFDFA0;
-      --el1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
-      --el2: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
-      --el3: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
-      --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:28px;
+      --el1: 0 1px 4px rgba(21,101,192,.13), 0 1px 2px rgba(0,0,0,.05);
+      --el2: 0 2px 10px rgba(21,101,192,.18), 0 1px 4px rgba(0,0,0,.06);
+      --el3: 0 8px 28px rgba(21,101,192,.22), 0 2px 8px rgba(0,0,0,.08);
+      --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px;
       --nav-w: 88px;
     }
 
@@ -59,10 +59,10 @@
     /* Auth views */
     .auth-shell,.setup-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
       padding:24px;background:
-      radial-gradient(circle at top right, rgba(103,80,164,.08), transparent 28%),
-      radial-gradient(circle at bottom left, rgba(98,91,113,.08), transparent 32%),
+      radial-gradient(circle at top right, rgba(21,101,192,.08), transparent 28%),
+      radial-gradient(circle at bottom left, rgba(83,95,112,.08), transparent 32%),
       var(--md-surface-container-low);z-index:500}
-    .setup-overlay{background:rgba(28,27,31,.48);backdrop-filter:blur(4px);padding:16px}
+    .setup-overlay{background:rgba(26,28,30,.48);backdrop-filter:blur(4px);padding:16px}
     .setup-panel,.auth-card{width:100%;max-width:460px;background:var(--md-surface);border-radius:var(--r-xl);
       box-shadow:var(--el3);overflow:hidden}
     .setup-panel{max-width:640px;min-height:min(720px,100%);display:flex;flex-direction:column}
@@ -73,7 +73,7 @@
       display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .hero-icon .material-icons-round,.brand-icon .material-icons-round{font-size:28px}
     .hero h1{font-size:28px;font-weight:400;line-height:1.15;margin-bottom:6px}
-    .hero p{font-size:14px;line-height:1.5;color:rgba(33,0,93,.82)}
+    .hero p{font-size:14px;line-height:1.5;color:rgba(0,25,69,.82)}
     .auth-card .hero{padding-bottom:22px}
     .auth-content,.setup-content{padding:24px 28px 28px}
     .setup-content{flex:1;display:flex;flex-direction:column;justify-content:center}
@@ -87,22 +87,100 @@
     /* Fields */
     .field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
     .text-field,.select-field,.checkbox-field{display:flex;flex-direction:column;gap:8px}
-    .text-field label,.select-field label{font-size:12px;font-weight:500;letter-spacing:.03em;color:var(--md-on-surface-variant)}
+    .text-field label,.select-field label{font-size:12px;font-weight:500;letter-spacing:.03em;color:var(--md-on-surface)}
     .text-field input,.select-field select,.kv-input{
-      width:100%;border:1px solid var(--md-outline);border-radius:var(--r-md);background:var(--md-surface);
-      color:var(--md-on-surface);padding:14px 16px;outline:none;transition:border-color .15s, box-shadow .15s, background .15s
+      width:100%;border:1.5px solid var(--md-outline-variant);border-radius:var(--r-md);
+      background:var(--md-surface-container-low);
+      color:var(--md-on-surface);padding:12px 16px;outline:none;
+      transition:border-color .2s,box-shadow .2s,background-color .2s
+    }
+    .text-field input:hover,.select-field select:hover,.kv-input:hover{
+      border-color:var(--md-outline)
     }
     .text-field input:focus,.select-field select:focus,.kv-input:focus{
-      border-color:var(--md-primary);box-shadow:0 0 0 3px rgba(103,80,164,.12)
+      border-color:var(--md-primary);box-shadow:0 0 0 4px rgba(21,101,192,.15);background-color:var(--md-surface)
     }
-    .text-field input::placeholder,.kv-input::placeholder{color:#7d7587}
-    .checkbox-field{flex-direction:row;align-items:center;gap:10px;padding-top:26px}
-    .checkbox-field input{width:18px;height:18px;accent-color:var(--md-primary)}
-    .checkbox-field label{font-size:13px;color:var(--md-on-surface)}
+    .text-field input:disabled,.select-field select:disabled{
+      background:var(--md-surface-variant);color:var(--md-on-surface-variant);
+      border-color:var(--md-outline-variant);cursor:not-allowed;opacity:.7
+    }
+    .text-field input::placeholder,.kv-input::placeholder{color:var(--md-on-surface-variant);opacity:.6}
+    /* Custom select — native widget is hidden; fully styleable div dropdown replaces it */
+    .select-field select{display:none}
+    .cs-wrap{position:relative;width:100%}
+    .cs-trigger{
+      width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+      border:1.5px solid var(--md-outline-variant);border-radius:var(--r-md);
+      background:var(--md-surface-container-low);color:var(--md-on-surface);
+      padding:12px 16px;outline:none;cursor:pointer;text-align:left;font:inherit;
+      transition:border-color .2s,box-shadow .2s,background-color .2s}
+    .cs-trigger:hover{border-color:var(--md-outline)}
+    .cs-trigger[aria-expanded=true]{
+      border-color:var(--md-primary);box-shadow:0 0 0 4px rgba(21,101,192,.15);background:var(--md-surface)}
+    .cs-chevron{font-size:20px!important;transition:transform .2s;flex-shrink:0;color:var(--md-on-surface-variant)}
+    .cs-trigger[aria-expanded=true] .cs-chevron{transform:rotate(180deg);color:var(--md-primary)}
+    .cs-panel{
+      position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:1000;
+      background:var(--md-surface);border:1px solid var(--md-outline-variant);
+      border-radius:var(--r-md);box-shadow:var(--el3);padding:4px 0;max-height:240px;overflow-y:auto;
+      opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;
+      transition:opacity .15s ease,transform .15s ease}
+    .cs-panel.cs-open{opacity:1;transform:none;pointer-events:auto}
+    .cs-option{
+      padding:10px 16px;cursor:pointer;font-size:14px;color:var(--md-on-surface);
+      transition:background .1s;display:flex;align-items:center;justify-content:space-between}
+    .cs-option:hover{background:rgba(21,101,192,.07)}
+    .cs-option[aria-selected=true]{
+      background:var(--md-primary-container);color:var(--md-on-primary-container);font-weight:500}
+    .cs-option[aria-selected=true]::after{content:'check';font-family:'Material Icons Round';font-size:16px}
+    /* Multi-select */
+    .ms-trigger{
+      width:100%;display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:46px;
+      padding:8px 44px 8px 12px;position:relative;
+      border:1.5px solid var(--md-outline-variant);border-radius:var(--r-md);
+      background:var(--md-surface-container-low);color:var(--md-on-surface);
+      cursor:pointer;text-align:left;font:inherit;outline:none;
+      transition:border-color .2s,box-shadow .2s,background-color .2s}
+    .ms-trigger:hover{border-color:var(--md-outline)}
+    .ms-trigger[aria-expanded=true]{
+      border-color:var(--md-primary);box-shadow:0 0 0 4px rgba(21,101,192,.15);background:var(--md-surface)}
+    .ms-chevron{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      font-size:20px!important;transition:transform .2s,color .2s;color:var(--md-on-surface-variant)}
+    .ms-trigger[aria-expanded=true] .ms-chevron{transform:translateY(-50%) rotate(180deg);color:var(--md-primary)}
+    .ms-chip{
+      display:inline-flex;align-items:center;gap:4px;
+      background:var(--md-secondary-container);color:var(--md-on-secondary-container);
+      border-radius:var(--r-xl);padding:2px 6px 2px 10px;font-size:12px;font-weight:500;white-space:nowrap}
+    .ms-chip-remove{
+      font-family:'Material Icons Round';font-size:14px;line-height:1;cursor:pointer;
+      border-radius:50%;padding:2px;transition:background .1s}
+    .ms-chip-remove:hover{background:rgba(0,0,0,.12)}
+    .ms-placeholder{font-size:14px;color:var(--md-on-surface-variant);opacity:.6;user-select:none;align-self:center}
+    .ms-panel{
+      position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:1000;
+      background:var(--md-surface);border:1px solid var(--md-outline-variant);
+      border-radius:var(--r-md);box-shadow:var(--el3);padding:4px 0;max-height:240px;overflow-y:auto;
+      opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;
+      transition:opacity .15s ease,transform .15s ease}
+    .ms-panel.ms-open{opacity:1;transform:none;pointer-events:auto}
+    .ms-option{
+      padding:10px 16px;cursor:pointer;font-size:14px;color:var(--md-on-surface);
+      transition:background .1s;display:flex;align-items:center;gap:12px}
+    .ms-option:hover{background:rgba(21,101,192,.07)}
+    .ms-check{
+      width:18px;height:18px;flex-shrink:0;border:2px solid var(--md-outline);border-radius:4px;
+      display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+    .ms-option[aria-selected=true] .ms-check{
+      background:var(--md-primary);border-color:var(--md-primary);color:#fff}
+    .ms-option[aria-selected=true] .ms-check::after{content:'check';font-family:'Material Icons Round';font-size:13px}
+    .checkbox-field{flex-direction:row;align-items:center;gap:10px;padding-top:26px;cursor:pointer}
+    .checkbox-field input{width:18px;height:18px;accent-color:var(--md-primary);cursor:pointer;flex-shrink:0}
+    .checkbox-field label{font-size:13px;color:var(--md-on-surface);cursor:pointer}
 
     /* App Bar */
-    .app-bar{grid-area:bar;background:var(--md-surface);box-shadow:var(--el2);
-      display:flex;align-items:center;padding:0 16px;gap:16px;z-index:100}
+    .app-bar{grid-area:bar;background:var(--md-surface);border-bottom:1px solid var(--md-outline-variant);
+      display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100}
     .app-bar-brand{display:flex;align-items:center;gap:12px;width:calc(var(--nav-w) - 16px)}
     .brand-icon{width:36px;height:36px;background:var(--md-primary-container);color:var(--md-on-primary-container)}
     .brand-icon .material-icons-round{font-size:20px}
@@ -111,7 +189,9 @@
     .app-bar-actions{display:flex;align-items:center;gap:8px;min-width:0}
     .status-chip,.user-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
       border-radius:var(--r-xl);font-size:12px;font-weight:500;
-      border:1px solid var(--md-outline-variant);background:var(--md-surface);color:var(--md-on-surface-variant)}
+      border:1px solid var(--md-outline-variant);background:var(--md-surface-container-low);
+      color:var(--md-on-surface-variant);cursor:default;transition:background .15s}
+    .status-chip:hover{background:var(--md-surface-variant)}
     .user-chip{max-width:220px}
     .user-chip .material-icons-round{font-size:16px}
     .user-chip-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -122,15 +202,15 @@
     .refresh-label{font-size:12px;color:var(--md-on-surface-variant);white-space:nowrap}
 
     /* Nav Rail */
-    .nav-rail{grid-area:nav;background:var(--md-surface);border-right:1px solid var(--md-outline-variant);
-      display:flex;flex-direction:column;align-items:center;padding:12px 0 24px;gap:4px;overflow-y:auto}
+    .nav-rail{grid-area:nav;background:var(--md-surface-container-low);border-right:1px solid var(--md-outline-variant);
+      display:flex;flex-direction:column;align-items:center;padding:16px 0 24px;gap:4px;overflow-y:auto}
     .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;
       padding:12px 0;width:72px;border-radius:var(--r-lg);transition:background .15s;
       user-select:none;position:relative}
-    .nav-item:hover{background:rgba(103,80,164,.06)}
-    .nav-indicator{width:56px;height:32px;border-radius:var(--r-lg);
-      display:flex;align-items:center;justify-content:center;transition:background .2s}
-    .nav-item.active .nav-indicator{background:var(--md-secondary-container)}
+    .nav-item:hover{background:rgba(21,101,192,.06)}
+    .nav-indicator{width:56px;height:32px;border-radius:var(--r-xl);
+      display:flex;align-items:center;justify-content:center;transition:background .2s,box-shadow .2s}
+    .nav-item.active .nav-indicator{background:var(--md-secondary-container);box-shadow:0 1px 6px rgba(21,101,192,.2)}
     .nav-item .material-icons-round{font-size:22px;color:var(--md-on-surface-variant);transition:color .15s}
     .nav-item.active .material-icons-round{color:var(--md-on-secondary-container)}
     .nav-label{font-size:11px;font-weight:500;color:var(--md-on-surface-variant);letter-spacing:.03em;text-align:center}
@@ -143,15 +223,19 @@
     .main{grid-area:main;overflow-y:auto;padding:28px 28px 48px}
     .page{display:none}
     .page.active{display:block}
-    .page-header{margin-bottom:24px}
-    .page-title{font-size:24px;font-weight:400;margin-bottom:4px}
+    .page-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--md-outline-variant)}
+    .page-title{font-size:26px;font-weight:400;margin-bottom:6px}
     .page-subtitle{font-size:13px;color:var(--md-on-surface-variant)}
     .section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;
-      color:var(--md-on-surface-variant);margin-bottom:12px}
+      color:var(--md-on-surface-variant);margin-bottom:16px;margin-top:4px;
+      display:flex;align-items:center;gap:10px}
+    .section-label::after{content:'';flex:1;height:1px;background:var(--md-outline-variant)}
 
     /* Stats */
     .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px}
-    .stat-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);padding:20px 20px 22px}
+    .stat-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);padding:20px 20px 22px;
+      transition:box-shadow .2s,transform .15s}
+    .stat-card:hover{box-shadow:var(--el2);transform:translateY(-2px)}
     .stat-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
       margin-bottom:14px;font-size:20px}
     .stat-icon.primary  {background:var(--md-primary-container);  color:var(--md-on-primary-container)}
@@ -165,17 +249,22 @@
     /* Cards / tables */
     .activity-card,.config-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);overflow:hidden;margin-bottom:32px}
     .card-header{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--md-outline-variant)}
-    .card-header-icon{font-size:20px;color:var(--md-primary)}
+    .card-header-icon{font-size:18px;width:34px;height:34px;border-radius:50%;
+      background:var(--md-primary-container);color:var(--md-on-primary-container);
+      display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
     .card-header-title{font-size:14px;font-weight:500;flex:1}
     .card-header-subtitle{font-size:12px;color:var(--md-on-surface-variant)}
     .card-body{padding:16px 20px 20px}
     .table-wrap{overflow:auto}
     .data-table{width:100%;border-collapse:collapse}
-    .data-table th{text-align:left;padding:10px 16px;font-size:12px;font-weight:500;
-      color:var(--md-on-surface-variant);border-bottom:1px solid var(--md-outline-variant);white-space:nowrap}
+    .data-table th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;
+      letter-spacing:.05em;text-transform:uppercase;
+      color:var(--md-on-surface-variant);border-bottom:1px solid var(--md-outline-variant);
+      white-space:nowrap;background:var(--md-surface-container-low);position:sticky;top:0;z-index:1}
     .data-table td{padding:12px 16px;border-bottom:1px solid var(--md-outline-variant);vertical-align:middle;font-size:13px}
+    .data-table tbody tr{transition:background .15s}
     .data-table tbody tr:last-child td{border-bottom:none}
-    .data-table tbody tr:hover{background:rgba(103,80,164,.04)}
+    .data-table tbody tr:hover{background:rgba(21,101,192,.07)}
     .mono-pill{font-family:'Roboto Mono',monospace;font-size:11px;background:var(--md-surface-variant);
       padding:2px 8px;border-radius:var(--r-xl);display:inline-flex;align-items:center}
     .table-actions{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
@@ -186,7 +275,7 @@
     .sync-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);
       overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;display:flex;flex-direction:column}
     .sync-card:hover{box-shadow:var(--el3);transform:translateY(-1px)}
-    .sync-card-stripe{height:4px;width:100%}
+    .sync-card-stripe{height:6px;width:100%}
     .stripe-ok {background:var(--md-success)}
     .stripe-err{background:var(--md-error)}
     .stripe-off,.stripe-neutral{background:var(--md-outline-variant)}
@@ -222,7 +311,8 @@
     /* Vault cards */
     .vaults-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px}
     .vault-card{background:var(--md-surface);border-radius:var(--r-md);box-shadow:var(--el1);
-      padding:20px;display:flex;flex-direction:column;gap:14px}
+      padding:20px;display:flex;flex-direction:column;gap:14px;transition:box-shadow .2s,transform .15s}
+    .vault-card:hover{box-shadow:var(--el2);transform:translateY(-1px)}
     .vault-card-header{display:flex;align-items:center;gap:14px}
     .vault-avatar{width:44px;height:44px;border-radius:50%;background:var(--md-primary-container);
       color:var(--md-on-primary-container);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -238,37 +328,43 @@
       letter-spacing:.04em;text-transform:uppercase;align-self:flex-start}
 
     /* Buttons */
-    .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:var(--r-xl);
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--r-xl);
       font-family:'Roboto',sans-serif;font-size:13px;font-weight:500;letter-spacing:.03em;
-      cursor:pointer;padding:8px 18px;transition:box-shadow .2s,background .15s,color .15s;outline:none;text-decoration:none}
+      cursor:pointer;padding:8px 20px;min-height:40px;
+      transition:box-shadow .2s,background .15s,color .15s,transform .1s;
+      outline:none;text-decoration:none;user-select:none}
     .btn .material-icons-round{font-size:16px}
     .btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
+    .btn:active:not(:disabled){transform:scale(.97)}
+    .btn:focus-visible{outline:2px solid var(--md-primary);outline-offset:2px}
     .btn-filled{background:var(--md-primary);color:var(--md-on-primary);box-shadow:var(--el1)}
     .btn-filled:hover{box-shadow:var(--el2);background:#7965AF}
     .btn-tonal{background:var(--md-secondary-container);color:var(--md-on-secondary-container)}
-    .btn-tonal:hover{background:#ddd1f0}
+    .btn-tonal:hover{background:#ddd1f0;box-shadow:var(--el1)}
     .btn-text{background:transparent;color:var(--md-primary)}
-    .btn-text:hover{background:rgba(103,80,164,.08)}
+    .btn-text:hover{background:rgba(21,101,192,.08)}
     .btn-danger{background:var(--md-error-container);color:var(--md-on-error-container)}
-    .btn-danger:hover{background:#f4c9c6}
+    .btn-danger:hover{background:#f4c9c6;box-shadow:var(--el1)}
     .icon-btn{width:40px;height:40px;border-radius:50%;border:none;background:transparent;
       color:var(--md-on-surface-variant);display:flex;align-items:center;justify-content:center;
-      cursor:pointer;transition:background .15s;font-size:22px}
-    .icon-btn:hover{background:rgba(73,69,79,.08)}
+      cursor:pointer;transition:background .15s,transform .1s;font-size:22px;user-select:none}
+    .icon-btn:hover{background:rgba(67,71,78,.1)}
+    .icon-btn:active{transform:scale(.9);background:rgba(67,71,78,.16)}
+    .icon-btn:focus-visible{outline:2px solid var(--md-primary);outline-offset:2px}
 
     /* Dialog */
     .dialog-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:200;
       align-items:center;justify-content:center;padding:24px}
     .dialog-scrim.open{display:flex}
     .dialog{background:var(--md-surface);border-radius:var(--r-xl);box-shadow:var(--el3);
-      width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+      width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;overflow:clip}
     .dialog.wide{max-width:880px}
     .dialog-header{display:flex;align-items:center;gap:12px;padding:20px 24px 16px}
     .dialog-icon{width:40px;height:40px;border-radius:50%;background:var(--md-primary-container);
       color:var(--md-on-primary-container);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .dialog-title{font-size:20px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .dialog-divider{height:1px;background:var(--md-outline-variant)}
-    .dialog-content{overflow-y:auto;padding:16px 24px 24px;flex:1}
+    .dialog-content{overflow-y:auto;padding:16px 24px 24px;flex:1;min-height:0}
     .dialog-actions{justify-content:flex-end;margin-top:24px}
     .run-status{display:inline-flex;align-items:center;gap:4px;font-weight:500}
     .run-status .material-icons-round{font-size:14px}
@@ -276,8 +372,10 @@
     .run-status.failed {color:var(--md-error)}
     .run-status.running{color:var(--md-info)}
     .run-error-text{font-size:11px;color:var(--md-error);font-family:'Roboto Mono',monospace;margin-top:2px;word-break:break-word}
-    .supporting-panel{background:var(--md-surface-container);border-radius:var(--r-md);padding:12px 14px;color:var(--md-on-surface-variant);font-size:12px;line-height:1.45}
-    .warning-panel{background:var(--md-warning-container);color:var(--md-warning)}
+    .supporting-panel{background:var(--md-surface-container);border-radius:var(--r-md);padding:12px 16px;
+      color:var(--md-on-surface-variant);font-size:12px;line-height:1.55;
+      border-left:3px solid var(--md-primary)}
+    .warning-panel{background:var(--md-warning-container);color:var(--md-warning);border-left-color:var(--md-warning)}
 
     /* Header editor */
     .kv-editor{display:flex;flex-direction:column;gap:10px}
@@ -304,8 +402,9 @@
       box-shadow:var(--el3);display:flex;align-items:center;gap:12px;min-width:240px;max-width:480px;
       animation:snack-in .2s cubic-bezier(.4,0,.2,1);pointer-events:all}
     .snackbar .material-icons-round{font-size:18px;flex-shrink:0}
-    .snackbar .ok {color:#A8F5A8}
-    .snackbar .err{color:#F2B8B5}
+    .snackbar .ok  {color:#A8F5A8}
+    .snackbar .err {color:#F2B8B5}
+    .snackbar .warn{color:#FFD280}
     @keyframes snack-in{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
     @media (max-width: 960px) {
@@ -617,6 +716,39 @@
   <script>
     const REFRESH_MS = 30_000;
     const TOKEN_KEY = 'vaults-syncer-token';
+    const AUTO_LOCK_MS = 30 * 60 * 1000;     // 30 min of inactivity
+    const AUTO_LOCK_WARN_MS = 29 * 60 * 1000; // 1 min warning before lock
+
+    const autoLock = {
+      _timer: null, _warnTimer: null, _lastReset: 0,
+      start() {
+        clearTimeout(this._timer); clearTimeout(this._warnTimer);
+        this._lastReset = Date.now();
+        this._warnTimer = setTimeout(() => {
+          snack('Session will lock in 1 minute due to inactivity.', 'warning');
+        }, AUTO_LOCK_WARN_MS);
+        this._timer = setTimeout(() => {
+          handleSessionExpired('Session locked due to inactivity.');
+        }, AUTO_LOCK_MS);
+      },
+      reset() {
+        if (!this._timer && !this._warnTimer) return; // not active, do nothing
+        const now = Date.now();
+        if (now - this._lastReset < 5000) return; // throttle to once every 5s
+        this._lastReset = now;
+        clearTimeout(this._timer); clearTimeout(this._warnTimer);
+        this._warnTimer = setTimeout(() => {
+          snack('Session will lock in 1 minute due to inactivity.', 'warning');
+        }, AUTO_LOCK_WARN_MS);
+        this._timer = setTimeout(() => {
+          handleSessionExpired('Session locked due to inactivity.');
+        }, AUTO_LOCK_MS);
+      },
+      stop() {
+        clearTimeout(this._timer); clearTimeout(this._warnTimer);
+        this._timer = null; this._warnTimer = null; this._lastReset = 0;
+      }
+    };
 
     const state = {
       setupComplete: false,
@@ -641,12 +773,176 @@
       .replace(/\r/g, '\\r')
       .replace(/</g, '\\x3C');
 
+    class CustomSelect {
+      constructor(selectEl) {
+        this.select = selectEl;
+        this._build();
+        this._bind();
+      }
+      _build() {
+        const sel = this.select;
+        const wrap = document.createElement('div');
+        wrap.className = 'cs-wrap';
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'cs-trigger';
+        trigger.setAttribute('aria-haspopup', 'listbox');
+        trigger.setAttribute('aria-expanded', 'false');
+        const label = document.createElement('span');
+        label.className = 'cs-label';
+        label.textContent = sel.options[sel.selectedIndex]?.text ?? '';
+        const chevron = document.createElement('span');
+        chevron.className = 'material-icons-round cs-chevron';
+        chevron.textContent = 'expand_more';
+        trigger.append(label, chevron);
+        const panel = document.createElement('div');
+        panel.className = 'cs-panel';
+        panel.setAttribute('role', 'listbox');
+        Array.from(sel.options).forEach((opt) => {
+          const item = document.createElement('div');
+          item.className = 'cs-option';
+          item.setAttribute('role', 'option');
+          item.dataset.value = opt.value;
+          item.setAttribute('aria-selected', sel.value === opt.value ? 'true' : 'false');
+          item.textContent = opt.text;
+          item.addEventListener('click', () => this._pick(opt.value, opt.text));
+          panel.appendChild(item);
+        });
+        sel.parentNode.insertBefore(wrap, sel);
+        wrap.append(trigger, panel, sel);
+        this.trigger = trigger; this.panel = panel; this.label = label; this.wrap = wrap;
+      }
+      _bind() {
+        this.trigger.addEventListener('click', (e) => { e.stopPropagation(); this._toggle(); });
+        document.addEventListener('click', (e) => { if (!this.wrap.contains(e.target)) this._close(); });
+        this.trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); this._open(); }
+          if (e.key === 'Escape') this._close();
+        });
+      }
+      _pick(value, text) {
+        this.select.value = value;
+        this.select.dispatchEvent(new Event('change', { bubbles: true }));
+        this.label.textContent = text;
+        this.panel.querySelectorAll('[role=option]').forEach((el) => {
+          el.setAttribute('aria-selected', el.dataset.value === value ? 'true' : 'false');
+        });
+        this._close();
+      }
+      _open()   { this.trigger.setAttribute('aria-expanded', 'true');  this.panel.classList.add('cs-open'); }
+      _close()  { this.trigger.setAttribute('aria-expanded', 'false'); this.panel.classList.remove('cs-open'); }
+      _toggle() { this.panel.classList.contains('cs-open') ? this._close() : this._open(); }
+      static init(root = document) {
+        root.querySelectorAll('.select-field select:not([multiple]):not([data-cs])').forEach((sel) => {
+          sel.dataset.cs = '1';
+          new CustomSelect(sel);
+        });
+      }
+    }
+
+    class MultiSelect {
+      constructor(selectEl) {
+        this.select = selectEl;
+        this._sel = new Set(Array.from(selectEl.selectedOptions).map((o) => o.value));
+        this._build();
+        this._bind();
+      }
+      _build() {
+        const sel = this.select;
+        const wrap = document.createElement('div');
+        wrap.className = 'cs-wrap';
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'ms-trigger';
+        trigger.setAttribute('aria-haspopup', 'listbox');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.setAttribute('aria-multiselectable', 'true');
+        const chevron = document.createElement('span');
+        chevron.className = 'material-icons-round ms-chevron';
+        chevron.textContent = 'expand_more';
+        trigger.appendChild(chevron);
+        const panel = document.createElement('div');
+        panel.className = 'ms-panel';
+        panel.setAttribute('role', 'listbox');
+        panel.setAttribute('aria-multiselectable', 'true');
+        Array.from(sel.options).forEach((opt) => {
+          const item = document.createElement('div');
+          item.className = 'ms-option';
+          item.setAttribute('role', 'option');
+          item.dataset.value = opt.value;
+          item.setAttribute('aria-selected', this._sel.has(opt.value) ? 'true' : 'false');
+          const check = document.createElement('span');
+          check.className = 'ms-check';
+          item.append(check, document.createTextNode(opt.text));
+          item.addEventListener('click', (e) => { e.stopPropagation(); this._toggle(opt.value, opt.text); });
+          panel.appendChild(item);
+        });
+        sel.parentNode.insertBefore(wrap, sel);
+        wrap.append(trigger, panel, sel);
+        this.trigger = trigger; this.panel = panel; this.wrap = wrap;
+        this._renderChips();
+      }
+      _renderChips() {
+        Array.from(this.trigger.querySelectorAll('.ms-chip,.ms-placeholder')).forEach((el) => el.remove());
+        const chevron = this.trigger.querySelector('.ms-chevron');
+        if (this._sel.size === 0) {
+          const ph = document.createElement('span');
+          ph.className = 'ms-placeholder';
+          ph.textContent = 'Select target vaults…';
+          this.trigger.insertBefore(ph, chevron);
+        } else {
+          this._sel.forEach((value) => {
+            const opt = Array.from(this.select.options).find((o) => o.value === value);
+            const chip = document.createElement('span');
+            chip.className = 'ms-chip';
+            chip.appendChild(document.createTextNode(opt?.text ?? value));
+            const rm = document.createElement('span');
+            rm.className = 'material-icons-round ms-chip-remove';
+            rm.textContent = 'close';
+            rm.addEventListener('click', (e) => { e.stopPropagation(); this._toggle(value); });
+            chip.appendChild(rm);
+            this.trigger.insertBefore(chip, chevron);
+          });
+        }
+        this._syncNative();
+      }
+      _syncNative() {
+        Array.from(this.select.options).forEach((opt) => { opt.selected = this._sel.has(opt.value); });
+      }
+      _toggle(value) {
+        this._sel.has(value) ? this._sel.delete(value) : this._sel.add(value);
+        this.panel.querySelectorAll('[role=option]').forEach((el) => {
+          el.setAttribute('aria-selected', this._sel.has(el.dataset.value) ? 'true' : 'false');
+        });
+        this._renderChips();
+      }
+      _open()   { this.trigger.setAttribute('aria-expanded', 'true');  this.panel.classList.add('ms-open'); }
+      _close()  { this.trigger.setAttribute('aria-expanded', 'false'); this.panel.classList.remove('ms-open'); }
+      _bind() {
+        this.trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.panel.classList.contains('ms-open') ? this._close() : this._open();
+        });
+        document.addEventListener('click', (e) => { if (!this.wrap.contains(e.target)) this._close(); });
+        this.trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); this._open(); }
+          if (e.key === 'Escape') this._close();
+        });
+      }
+      static init(root = document) {
+        root.querySelectorAll('select[multiple]:not([data-ms])').forEach((sel) => {
+          sel.dataset.ms = '1';
+          new MultiSelect(sel);
+        });
+      }
+    }
+
     function snack(msg, type = 'success') {
       const c = document.getElementById('snackbar-container');
       const el = document.createElement('div');
       el.className = 'snackbar';
-      const icon = type === 'success' ? 'check_circle' : 'error';
-      const cls  = type === 'success' ? 'ok' : 'err';
+      const icon = type === 'success' ? 'check_circle' : type === 'warning' ? 'schedule' : 'error';
+      const cls  = type === 'success' ? 'ok'  : type === 'warning' ? 'warn' : 'err';
       el.innerHTML = `<span class="material-icons-round ${cls}">${icon}</span><span>${escHtml(msg)}</span>`;
       c.appendChild(el);
       setTimeout(() => el.remove(), 4000);
@@ -766,6 +1062,7 @@
     }
 
     function showLogin() {
+      autoLock.stop();
       closeDialog();
       document.getElementById('setup-overlay').classList.add('hidden');
       document.getElementById('setup-overlay').setAttribute('aria-hidden', 'true');
@@ -780,6 +1077,7 @@
       document.getElementById('auth-shell').classList.add('hidden');
       document.getElementById('app-shell').classList.remove('hidden');
       document.getElementById('current-user-label').textContent = pick(state.currentUser, 'username', 'Username') || 'Unknown user';
+      autoLock.start();
       renderNav();
       navigate(state.currentPage || 'dashboard');
     }
@@ -836,6 +1134,8 @@
       els.content.innerHTML = content;
       els.dialog.classList.toggle('wide', wide);
       els.scrim.classList.add('open');
+      CustomSelect.init(els.content);
+      MultiSelect.init(els.content);
     }
 
     function closeDialog() {
@@ -941,7 +1241,7 @@
       const dot = document.getElementById('runner-dot');
       const lbl = document.getElementById('runner-label');
       try {
-        const data = await apiFetch('/health');
+        const data = await apiFetch('/api/health');
         const running = Boolean(pick(data, 'running', 'Running'));
         dot.className = `dot ${running ? 'dot-ok' : 'dot-err'}`;
         lbl.textContent = running ? 'Runner active' : 'Runner stopped';
@@ -953,7 +1253,7 @@
 
     async function loadDashboardVaults() {
       try {
-        const data = await apiFetch('/vaults');
+        const data = await apiFetch('/api/vaults');
         const vaults = pick(data, 'vaults', 'Vaults') || [];
         document.getElementById('stat-vaults').textContent = vaults.length;
         const grid = document.getElementById('vaults-grid');
@@ -992,7 +1292,7 @@
 
     async function loadDashboardSyncs() {
       try {
-        const data = await apiFetch('/syncs');
+        const data = await apiFetch('/api/syncs');
         state.cachedSyncs = pick(data, 'syncs', 'Syncs') || [];
         document.getElementById('stat-total').textContent = state.cachedSyncs.length;
         document.getElementById('stat-enabled').textContent = state.cachedSyncs.filter((sync) => isSyncEnabled(sync)).length;
@@ -1004,7 +1304,7 @@
         badge.style.display = paused > 0 ? 'flex' : 'none';
 
         const statuses = await Promise.allSettled(
-          state.cachedSyncs.map((sync) => apiFetch(`/syncs/${encodeURIComponent(dashboardSyncId(sync))}/status`))
+          state.cachedSyncs.map((sync) => apiFetch(`/api/syncs/${encodeURIComponent(dashboardSyncId(sync))}/status`))
         );
         state.cachedStatuses = {};
         statuses.forEach((result, index) => {
@@ -1075,7 +1375,7 @@
     async function triggerSync(syncId, button) {
       setFormBusy(button, 'Running…', true);
       try {
-        await apiFetch(`/syncs/${encodeURIComponent(syncId)}/execute`, { method: 'POST' });
+        await apiFetch(`/api/syncs/${encodeURIComponent(syncId)}/execute`, { method: 'POST' });
         snack(`Sync "${syncId}" triggered`, 'success');
         setTimeout(refreshCurrentPage, 2500);
       } catch (error) {
@@ -1092,7 +1392,7 @@
         content: `<div class="empty-state"><span class="material-icons-round spinning" style="font-size:32px;opacity:.5">sync</span></div>`
       });
       try {
-        const data = await apiFetch(`/syncs/${encodeURIComponent(syncId)}/runs?limit=25`);
+        const data = await apiFetch(`/api/syncs/${encodeURIComponent(syncId)}/runs?limit=25`);
         const runs = pick(data, 'runs', 'Runs') || [];
         const content = document.getElementById('dialog-content');
         if (!runs.length) {
@@ -1320,8 +1620,10 @@
               </div>
             </div>
             <p class="inline-error" id="vault-form-error"></p>
+            <div id="vault-test-result" style="display:none"></div>
             <div class="dialog-actions">
               <button type="button" class="btn btn-text" id="vault-cancel-btn">Cancel</button>
+              <button type="button" class="btn btn-tonal" id="vault-test-btn"><span class="material-icons-round">wifi_tethering</span>Test connection</button>
               <button type="submit" class="btn btn-filled" id="vault-save-btn"><span class="material-icons-round">save</span>${editing ? 'Save changes' : 'Create vault'}</button>
             </div>
           </form>`
@@ -1346,6 +1648,48 @@
         if (showHeaders && !headerEditor.children.length) appendHeaderRow(headerEditor);
       });
       document.getElementById('vault-cancel-btn').addEventListener('click', closeDialog);
+
+      document.getElementById('vault-test-btn').addEventListener('click', async () => {
+        const testBtn = document.getElementById('vault-test-btn');
+        const resultEl = document.getElementById('vault-test-result');
+        const endpoint = trimToNull(form.querySelector('#vault-endpoint').value);
+        if (!endpoint) {
+          resultEl.className = 'supporting-panel warning-panel';
+          resultEl.style.display = '';
+          resultEl.textContent = 'Enter an endpoint URL before testing.';
+          return;
+        }
+        const authMethod = form.querySelector('#vault-auth-method').value;
+        let headers = null;
+        if (authMethod === 'custom') {
+          headers = {};
+          for (const row of headerEditor.querySelectorAll('.kv-row')) {
+            const key = trimToNull(row.querySelector('.header-key').value);
+            const value = row.querySelector('.header-value').value;
+            if (key && value && value !== '***') headers[key] = value;
+          }
+        }
+        const payload = {
+          id: trimToNull(form.querySelector('#vault-id').value) || '__test__',
+          type: form.querySelector('#vault-type').value,
+          endpoint,
+          auth: authMethod !== 'none' ? { method: authMethod, headers: headers || {} } : null
+        };
+        setFormBusy(testBtn, 'Testing…', true);
+        resultEl.style.display = 'none';
+        try {
+          const result = await apiFetch('/api/config/vaults/test', { method: 'POST', body: JSON.stringify(payload) });
+          resultEl.className = result.ok ? 'supporting-panel' : 'supporting-panel warning-panel';
+          resultEl.style.cssText = `display:;border-left-color:${result.ok ? 'var(--md-success)' : 'var(--md-error)'}`;
+          resultEl.innerHTML = `<span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-right:6px">${result.ok ? 'check_circle' : 'error'}</span>${escHtml(result.message)}`;
+        } catch (err) {
+          resultEl.className = 'supporting-panel warning-panel';
+          resultEl.style.cssText = 'display:;border-left-color:var(--md-error)';
+          resultEl.innerHTML = `<span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-right:6px">error</span>${escHtml(err.message)}`;
+        } finally {
+          setFormBusy(testBtn, '', false);
+        }
+      });
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -1536,9 +1880,11 @@
                   ${vaultOptions.map((vault) => `<option value="${escHtml(vault.id)}" ${sync.source === vault.id ? 'selected' : ''}>${escHtml(vault.id)}${vault.name ? ` — ${escHtml(vault.name)}` : ''}</option>`).join('')}
                 </select>
               </div>
-              <div class="text-field">
-                <label for="sync-targets">Targets</label>
-                <input id="sync-targets" name="targets" type="text" value="${escHtml(sync.targets.join(', '))}" placeholder="vault-b, vault-c" required />
+              <div class="select-field">
+                <label>Targets</label>
+                <select id="sync-targets" name="targets" multiple>
+                  ${vaultOptions.map((vault) => `<option value="${escHtml(vault.id)}" ${sync.targets.includes(vault.id) ? 'selected' : ''}>${escHtml(vault.id)}${vault.name ? ` — ${escHtml(vault.name)}` : ''}</option>`).join('')}
+                </select>
               </div>
               <div class="select-field">
                 <label for="sync-type">Sync type</label>
@@ -1559,7 +1905,7 @@
                 <label for="sync-enabled">Enabled</label>
               </div>
             </div>
-            <div class="supporting-panel">Targets are entered as a comma-separated list of configured vault IDs. Bidirectional syncs should use exactly one target.</div>
+            <div class="supporting-panel">Select one or more target vaults. Bidirectional syncs should use exactly one target.</div>
             <p class="inline-error" id="sync-form-error"></p>
             <div class="dialog-actions">
               <button type="button" class="btn btn-text" id="sync-cancel-btn">Cancel</button>
@@ -1577,10 +1923,7 @@
         try {
           const id = trimToNull(document.getElementById('sync-id').value) || syncId;
           const source = trimToNull(document.getElementById('sync-source').value);
-          const targets = String(document.getElementById('sync-targets').value || '')
-            .split(',')
-            .map((part) => part.trim())
-            .filter(Boolean);
+          const targets = Array.from(document.getElementById('sync-targets').selectedOptions).map((o) => o.value);
           const syncType = document.getElementById('sync-type').value;
           const schedule = trimToNull(document.getElementById('sync-schedule').value);
           const concurrentWorkers = Number(document.getElementById('sync-workers').value);
@@ -1797,6 +2140,11 @@
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') closeDialog();
+    });
+
+    // Reset the auto-lock timer on any user interaction.
+    ['mousemove', 'keydown', 'click', 'touchstart'].forEach((evt) => {
+      document.addEventListener(evt, () => autoLock.reset(), { passive: true });
     });
 
     document.getElementById('refresh-button').addEventListener('click', refreshCurrentPage);

@@ -27,10 +27,8 @@ ARG TARGETARCH
 # Build the application with version information
 # CGO_LDFLAGS=-static produces a fully static binary so the Alpine final
 # stage doesn't need libgcc_s or sqlite-libs at runtime.
-RUN CGO_ENABLED=1 CGO_LDFLAGS="-static" GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build \
-    -a -installsuffix cgo \
-    -ldflags "-extldflags '-static' -X main.Version=${VERSION} -X main.BuildDate=${BUILD_DATE} -X main.GitCommit=${GIT_COMMIT}" \
-    -o ./bin/sync-daemon .
+RUN --mount=type=bind,source=scripts/docker/build-stage/app-static-build.sh,target=/tmp/app-static-build.sh,readonly \
+  sh /tmp/app-static-build.sh
 
 # Final stage — no apk installs needed:
 #  • binary is statically linked (no libgcc_s / sqlite-libs required)
@@ -63,7 +61,7 @@ EXPOSE 8080 9090
 
 # Health check — wget is part of busybox, no extra package needed
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget -qO- http://localhost:8080/health || exit 1
+  CMD wget -qO- http://localhost:8080/health || exit 1
 
 # All configuration is provided via environment variables (DB_TYPE, DB_PATH, MASTER_ENCRYPTION_KEY, etc.)
 ENTRYPOINT ["/app/sync-daemon"]

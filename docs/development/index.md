@@ -31,7 +31,7 @@ vaults-syncer/
 ├── auth/                      # Authentication middleware
 │
 ├── config/                    # Configuration management
-│   ├── loader.go             # YAML config loading & validation
+│   ├── loader.go             # YAML config loading (legacy format; not used at runtime)
 │   ├── defaults.go           # Default value application
 │   ├── types.go              # Configuration data structures
 │   └── validate.go           # Configuration validation
@@ -77,7 +77,7 @@ CGO_ENABLED=1 go build \
   -o bin/sync-daemon .
 
 # Verify binary
-./bin/sync-daemon --version
+./bin/sync-daemon -version
 ./bin/sync-daemon -h
 ```
 
@@ -95,7 +95,9 @@ docker build -t myregistry.azurecr.io/secrets-sync:v1.0.0 .
 
 ### Example Vault Definitions
 
-The `examples/config.example.yaml` includes examples for:
+The `examples/config.example.yaml` shows the YAML schema for reference only. Since v4.2.0, all vault and sync configuration is stored in the database and managed via the Web UI or the admin API (`POST /api/config/vaults`, `POST /api/config/syncs`). The YAML file is not loaded at runtime.
+
+The examples cover:
 
 1. **Azure Key Vault** (type `azure`)
    - Bearer token authentication

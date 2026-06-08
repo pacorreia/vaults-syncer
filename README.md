@@ -253,81 +253,92 @@ The daemon supports multiple vault types with smart defaults:
 
 ### Authentication Methods
 
+The `auth` block is part of the vault configuration JSON sent to `POST /api/config/vaults` or `PUT /api/config/vaults/{vault_id}`.
+
 #### Bearer Token
 
-```yaml
-auth:
-  method: bearer
-  headers:
-    token: "${VAULT_TOKEN}"
+```json
+"auth": {
+  "method": "bearer",
+  "headers": { "token": "${VAULT_TOKEN}" }
+}
 ```
 
 #### OAuth 2.0 (Vaultwarden, Custom)
 
-```yaml
-auth:
-  method: oauth2
-  oauth:
-    client_id: "${CLIENT_ID}"
-    client_secret: "${CLIENT_SECRET}"
-    scope: "api"
-    token_endpoint: "https://vault.example.com/identity/connect/token"  # Optional
-    extra_params:                  # Optional device identity
-      device_identifier: "sync-daemon"
-      device_type: "14"
-      device_name: "Sync Daemon"
+```json
+"auth": {
+  "method": "oauth2",
+  "oauth": {
+    "client_id": "${CLIENT_ID}",
+    "client_secret": "${CLIENT_SECRET}",
+    "scope": "api",
+    "token_endpoint": "https://vault.example.com/identity/connect/token",
+    "extra_params": {
+      "device_identifier": "sync-daemon",
+      "device_type": "14",
+      "device_name": "Sync Daemon"
+    }
+  }
+}
 ```
 
 #### Basic Auth
 
-```yaml
-auth:
-  method: basic
-  headers:
-    username: "user"
-    password: "${PASSWORD}"
+```json
+"auth": {
+  "method": "basic",
+  "headers": { "username": "user", "password": "${PASSWORD}" }
+}
 ```
 
 #### API Key
-```yaml
-auth:
-  method: api_key
-  headers:
-    api_key: "${API_KEY}"
+
+```json
+"auth": {
+  "method": "api_key",
+  "headers": { "api_key": "${API_KEY}" }
+}
 ```
 
 #### Custom Headers
-```yaml
-auth:
-  method: custom
-  headers:
-    X-Custom-Auth: "${CUSTOM_TOKEN}"
-    X-Another-Header: "value"
+
+```json
+"auth": {
+  "method": "custom",
+  "headers": {
+    "X-Custom-Auth": "${CUSTOM_TOKEN}",
+    "X-Another-Header": "value"
+  }
+}
 ```
 
 ### Response Parsing Customization
 
-For vaults with non-standard response formats, use `operations_override`:
+For vaults with non-standard response formats, use `operations_override` in `POST /api/config/vaults`:
 
-```yaml
-vaults:
-  - id: custom_vault
-    type: generic
-    endpoint: "https://custom.vault.com/api"
-    method: POST
-    auth:
-      method: bearer
-      headers:
-        token: "${TOKEN}"
-    operations_override:
-      list:                        # Customize list secrets response parsing
-        response:
-          path: "results.secrets"  # JSONPath to secret array
-          name_field: "id"         # Field containing secret identifier
-      get:                         # Customize get secret response parsing
-        response:
-          path: "result.data"      # JSONPath to secret data
-          value_field: "secret"    # Field containing secret value
+```json
+{
+  "id": "custom_vault",
+  "type": "generic",
+  "endpoint": "https://custom.vault.com/api",
+  "method": "POST",
+  "auth": { "method": "bearer", "headers": { "token": "${TOKEN}" } },
+  "operations_override": {
+    "list": {
+      "response": {
+        "path": "results.secrets",
+        "name_field": "id"
+      }
+    },
+    "get": {
+      "response": {
+        "path": "result.data",
+        "value_field": "secret"
+      }
+    }
+  }
+}
 ```
 
 **JSONPath Examples**:
@@ -338,14 +349,15 @@ vaults:
 
 ### Concurrent Processing
 
-For faster syncs, use the `concurrent_workers` setting:
+For faster syncs, set `concurrent_workers` in `POST /api/config/syncs`:
 
-```yaml
-syncs:
-  - id: fast_sync
-    source: vault_a
-    targets: [vault_b]
-    concurrent_workers: 10         # Process 10 secrets in parallel
+```json
+{
+  "id": "fast_sync",
+  "source": "vault_a",
+  "targets": ["vault_b"],
+  "concurrent_workers": 10
+}
 ```
 
 **Performance**:
@@ -383,6 +395,7 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET/POST` | `/api/config/vaults` | List or create vaults |
+| `POST` | `/api/config/vaults/test` | Test a vault connection without saving |
 | `GET/PUT/DELETE` | `/api/config/vaults/{vault_id}` | Read, update, or delete a vault |
 | `GET/POST` | `/api/config/syncs` | List or create syncs |
 | `GET/PUT/DELETE` | `/api/config/syncs/{sync_id}` | Read, update, or delete a sync |
@@ -520,7 +533,7 @@ CGO_ENABLED=1 go build -o bin/sync-daemon .
 
 ### Flags
 ```
-  --version
+  -version
         Print version information and exit
   -dry-run
         Validate database connection and exit (no scheduler is started)
@@ -556,7 +569,7 @@ CGO_ENABLED=1 go build -ldflags "\
 CGO_ENABLED=1 go build -ldflags "-X main.Version=1.2.3" -o sync-daemon .
 
 # Check version
-./sync-daemon --version
+./sync-daemon -version
 # Output:
 # vaults-syncer version v1.2.3
 # Build date: 2026-02-23T22:00:00Z
@@ -570,7 +583,7 @@ CGO_ENABLED=1 go build -ldflags "-X main.Version=1.2.3" -o sync-daemon .
 ./bin/sync-daemon -dry-run
 
 # Watch logs
-docker compose logs -f sync-daemon
+docker compose logs -f vaults-syncer
 ```
 
 ## Docker
@@ -583,19 +596,20 @@ docker build -t vaults-syncer:latest .
 ### Run Container
 ```bash
 docker run -d \
-  -v $(pwd)/config.yaml:/etc/sync/config.yaml:ro \
   -v sync-data:/app/data \
   -p 8080:8080 \
   -p 9090:9090 \
-  -e VAULT_TOKEN=your_token \
+  -e MASTER_ENCRYPTION_KEY=your_key \
   ghcr.io/pacorreia/vaults-syncer:latest
 ```
+
+Then open `http://localhost:8080` and complete the Setup Wizard.
 
 ### Image Details
 - **Base**: Alpine Linux 3.23 (~20MB)
 - **User**: Non-root `daemon:daemon` (uid 1001)
-- **Health Check**: Built-in via `/health` endpoint (uses `wget`, curl not required)
-- **Volumes**: `/etc/sync` for config, `/app/data` for database
+- **Health Check**: `GET /api/setup` (public endpoint; uses `wget`, curl not required)
+- **Volumes**: `/app/data` for database
 
 ## Versioning and Releases
 
@@ -641,7 +655,7 @@ BREAKING CHANGE: vault.url is now vault.endpoint"
 ```bash
 ./bin/sync-daemon -version
 # Output:
-# vaults-syncer version v4.1.0
+# vaults-syncer version v4.2.0
 # Build date: 2026-05-22T10:30:00Z
 # Git commit: abc123def456...
 ```
@@ -656,14 +670,14 @@ BREAKING CHANGE: vault.url is now vault.endpoint"
 
 ## Security Best Practices
 
-1. **Use environment variables** for sensitive values (auth tokens)
-2. **Never commit** actual `config.yaml` with secrets
-3. **Use read-only** volume for config file
+1. **Use environment variables** for sensitive values such as `MASTER_ENCRYPTION_KEY`
+2. **Back up the database** and protect it with OS-level file permissions
+3. **Never lose `MASTER_ENCRYPTION_KEY`** — encrypted vault credentials cannot be recovered without it
 4. **Enable SSL verification** in production (`skip_ssl_verify: false`)
-5. **Rotate tokens** regularly
-6. **Use network policies** to restrict access to vaults
+5. **Rotate vault tokens** regularly and update them via the Web UI or admin API
+6. **Use network policies** to restrict which services can reach the daemon
 7. **Monitor logs** for unauthorized access attempts
-8. **Encrypt database** with SQLite encryption for sensitive deployments
+8. **Use PostgreSQL or MSSQL** with encrypted storage for high-security deployments
 
 ## Troubleshooting
 
@@ -673,25 +687,31 @@ BREAKING CHANGE: vault.url is now vault.endpoint"
 ./bin/sync-daemon -dry-run
 
 # Check logs for specific vault errors
-docker compose logs sync-daemon | grep -i error
+docker compose logs vaults-syncer | grep -i error
 ```
 
 ### Sync Status Check
 ```bash
-curl http://localhost:8080/syncs/sync_id/status | jq
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/syncs/sync_id/status | jq
 
 # View database directly
 sqlite3 sync.db "SELECT * FROM sync_objects WHERE sync_id='sync_id';"
 ```
 
 ### Backoff/Retry Delays
-Increase max_retries and adjust backoff multiplier in config:
-```yaml
-retry_policy:
-  max_retries: 5
-  initial_backoff: 2000
-  max_backoff: 120000
-  multiplier: 1.5
+Update the sync's `retry_policy` via `PUT /api/config/syncs/{sync_id}`:
+```json
+"retry_policy": {
+  "max_retries": 5,
+  "initial_backoff": 2000,
+  "max_backoff": 120000,
+  "multiplier": 1.5
+}
 ```
 
 ## Monitoring & Observability
@@ -750,5 +770,5 @@ MIT
 
 For issues and questions:
 1. Check the [troubleshooting section](#troubleshooting)
-2. Review logs: `docker-compose logs sync-daemon`
-3. Open an issue with configuration and logs
+2. Review logs: `docker compose logs vaults-syncer`
+3. Open an issue with logs: `docker compose logs vaults-syncer`

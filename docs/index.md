@@ -63,45 +63,48 @@ A versatile, multi-vault secret synchronization daemon with OAuth 2.0 support fo
 
 ## Common Use Cases
 
+> **Note:** All configuration is managed via the Web UI or the admin API (`POST /api/config/syncs`). The JSON examples below show the request body format.
+
 ### Backup & Replication
 Synchronize secrets from your production vault to a backup vault for disaster recovery.
 
-```yaml
-syncs:
-  - id: prod_to_backup
-    source: production
-    targets:
-      - backup
-    sync_type: unidirectional
-    schedule: "0 */4 * * *"  # Every 4 hours
+```json
+{
+  "id": "prod_to_backup",
+  "source": "production",
+  "targets": ["backup"],
+  "sync_type": "unidirectional",
+  "schedule": "0 */4 * * *",
+  "enabled": true
+}
 ```
 
 ### Multi-Cloud Deployment
 Keep secrets in sync across different cloud providers.
 
-```yaml
-syncs:
-  - id: aws_to_azure
-    source: aws-vault
-    targets:
-      - azure-vault
-    sync_type: bidirectional
+```json
+{
+  "id": "aws_to_azure",
+  "source": "aws-vault",
+  "targets": ["azure-vault"],
+  "sync_type": "bidirectional",
+  "enabled": true
+}
 ```
 
 ### Development Environment Sync
 Maintain synchronized secrets across dev, staging, and production.
 
-```yaml
-syncs:
-  - id: to_development
-    source: production
-    targets:
-      - development
-      - staging
-    filter:
-      patterns:
-        - "non-prod-*"
-        - "shared-*"
+```json
+{
+  "id": "to_development",
+  "source": "production",
+  "targets": ["development", "staging"],
+  "filter": {
+    "patterns": ["non-prod-*", "shared-*"]
+  },
+  "enabled": true
+}
 ```
 
 ## Architecture Overview

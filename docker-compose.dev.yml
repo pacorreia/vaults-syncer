@@ -63,9 +63,13 @@ services:
     ports:
       - "8080:8080"  # Web UI + API
       - "9090:9090"  # Metrics
+    environment:
+      - DB_PATH=/app/data/sync.db
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY:-}
     volumes:
-      - ./config.dev.yaml:/etc/sync/config.yaml:ro
       - dev-data:/app/data
+    # After first start, open http://localhost:8080 and use the Setup Wizard
+    # to create your admin account, then add vault configs via the Web UI.
     depends_on:
       mock-vault:
         condition: service_healthy
@@ -73,11 +77,11 @@ services:
       - vault-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/setup"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
+      start_period: 10s
 
 networks:
   vault-net:

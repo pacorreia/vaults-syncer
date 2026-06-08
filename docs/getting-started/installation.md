@@ -24,7 +24,7 @@ For production deployments:
 
 ```yaml
 services:
-  sync-daemon:
+  vaults-syncer:
     image: ghcr.io/pacorreia/vaults-syncer:latest
     container_name: vaults-syncer
     restart: unless-stopped

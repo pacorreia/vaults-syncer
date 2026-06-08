@@ -92,7 +92,7 @@ schedule: "*/30 * * * *"
 
 ```bash
 # Check version
-./sync-daemon --version
+./sync-daemon -version
 
 # Validate database connection only
 ./sync-daemon -dry-run
@@ -125,15 +125,16 @@ curl http://localhost:9090/metrics | grep sync
 
 # Check logs
 docker logs vaults-syncer
-docker compose logs -f sync-daemon
+docker compose logs -f vaults-syncer
 ```
 
 ## 🚀 Quick Start Steps
 
-1. **Create config file** → `config.yaml`
-2. **Run with Docker** → `docker run ...`
+1. **Run the daemon** → `docker run ...` (see Installation docs)
+2. **Open the Setup Wizard** → `http://localhost:8080` and create your admin account
 3. **Verify** → `curl http://localhost:8080/api/setup` (public, no auth)
-4. **Check status** → `curl http://localhost:8080/syncs`
+4. **Add vaults & syncs** → use the Web UI or admin API
+5. **Check status** → `curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/syncs`
 
 ## 📚 Documentation Map
 

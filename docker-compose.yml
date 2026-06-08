@@ -1,19 +1,15 @@
-version: '3.8'
-
 services:
-  sync-daemon:
+  vaults-syncer:
     build: .
-    container_name: secrets-sync-daemon
+    container_name: vaults-syncer
     ports:
-      - "8080:8080"     # Main API
-      - "9090:9090"     # Metrics
+      - "8080:8080"   # HTTP API + Web UI
+      - "9090:9090"   # Prometheus metrics
     environment:
-      - AZURE_ACCESS_TOKEN=${AZURE_ACCESS_TOKEN}
-      - VAULTWARDEN_TOKEN=${VAULTWARDEN_TOKEN}
-      - VAULT_TOKEN=${VAULT_TOKEN}
-      - API_KEY=${API_KEY}
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
+      # Optional: set DB_TYPE=postgres or DB_TYPE=mssql and provide DB_DSN.
+      # Defaults to SQLite stored at /app/data/sync.db.
     volumes:
-      - ./config.yaml:/etc/sync/config.yaml:ro
       - sync-data:/app/data
     restart: unless-stopped
     logging:
@@ -22,11 +18,11 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/setup"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
+      start_period: 10s
 
 volumes:
   sync-data:

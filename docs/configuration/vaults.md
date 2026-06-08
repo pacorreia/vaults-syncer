@@ -2,6 +2,8 @@
 
 A vault is a credentials storage system where secrets are stored. This guide covers how to configure different vault types.
 
+> **Note:** All vault configuration is managed via the **Web UI** (`Vaults Config`) or the admin API (`POST /api/config/vaults`, `PUT /api/config/vaults/{vault_id}`). The API accepts and returns JSON. The YAML-style snippets in this guide are schema reference only — the field names map 1:1 to the JSON keys used by the API.
+
 ## Supported Vault Types
 
 - [Azure Key Vault](#azure-key-vault) - Microsoft's cloud secrets management
