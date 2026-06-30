@@ -34,7 +34,7 @@ RUN --mount=type=bind,source=scripts/docker/build-stage/app-static-build.sh,targ
 #  • binary is statically linked (no libgcc_s / sqlite-libs required)
 #  • CA certs copied from builder (no network call)
 #  • healthcheck uses busybox wget (built into Alpine)
-FROM alpine:3.23
+FROM alpine:3.24
 
 WORKDIR /app
 
