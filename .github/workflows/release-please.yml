@@ -64,9 +64,20 @@ jobs:
       - name: Ensure release_created for forced dispatch
         if: github.event_name == 'workflow_dispatch' && inputs.release_as != ''
         id: forced-flag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ steps.release-forced.outcome }}" = "failure" ]; then
-            echo "::warning::release-please step failed (release likely already exists) — proceeding to build/publish artifacts for v${{ inputs.release_as }}"
+            TAG="v${{ inputs.release_as }}"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              -u "x-access-token:${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG}")
+            if [ "${STATUS}" != "200" ]; then
+              echo "::error::release-please failed and release ${TAG} was not found (status ${STATUS})"
+              exit 1
+            fi
+            echo "::warning::release-please step failed but release ${TAG} already exists — proceeding to publish artifacts"
           fi
           echo "release_created=true" >> "$GITHUB_OUTPUT"
 
