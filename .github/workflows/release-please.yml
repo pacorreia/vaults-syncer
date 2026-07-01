@@ -2,8 +2,12 @@ name: Release Please
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_as:
+        description: 'Force a specific version (e.g. 1.2.3). Leave empty for normal release-please flow.'
+        required: false
 
 permissions:
   contents: write
@@ -11,25 +15,99 @@ permissions:
   packages: write
 
 jobs:
-  # ── Step 1: release-please manages CHANGELOG and version bump PR ────────────
-  release-please:
-    name: Release Please
+  check-commit:
+    name: Check Commit Prefix
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
+      should_run: ${{ steps.check.outputs.should_run }}
     steps:
-      - uses: googleapis/release-please-action@v5
+      - name: Evaluate commit message
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s\n' "${{ github.event.head_commit.message }}" | head -n 1 | grep -qE '^(feat|fix|perf)(\([^)]*\))?!?:|^chore(\(deps(-dev)?\))?(!)?: |^chore(\([^)]*\))?: release|^Merge pull request #[0-9]+ from .*/release-please--branches--'; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  release-please:
+    name: Release Please
+    needs: check-commit
+    if: needs.check-commit.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created == 'true' || steps.release-forced.outputs.release_created == 'true' || steps.forced-flag.outputs.release_created == 'true' }}
+      tag_name: ${{ steps.release.outputs.tag_name || steps.release-forced.outputs.tag_name }}
+    steps:
+      - name: Run release-please
+        uses: googleapis/release-please-action@v5
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.release_as == '')
         id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-  # ── Step 2: build binaries for all targets (runs only when a release is cut) ─
+      - name: Run release-please (on-demand with forced version)
+        uses: googleapis/release-please-action@v5
+        if: github.event_name == 'workflow_dispatch' && inputs.release_as != ''
+        id: release-forced
+        continue-on-error: true
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          release-as: ${{ inputs.release_as }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ensure release_created for forced dispatch
+        if: github.event_name == 'workflow_dispatch' && inputs.release_as != ''
+        id: forced-flag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ steps.release-forced.outcome }}" = "failure" ]; then
+            TAG="v${{ inputs.release_as }}"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              -u "x-access-token:${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG}")
+            if [ "${STATUS}" != "200" ]; then
+              echo "::error::release-please failed and release ${TAG} was not found (status ${STATUS})"
+              exit 1
+            fi
+            echo "::warning::release-please step failed but release ${TAG} already exists — proceeding to publish artifacts"
+            echo "release_created=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.release-forced.outputs.release_created }}" = "true" ]; then
+            echo "release_created=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_created=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  get-tag:
+    name: Resolve Release Tag
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.tag.outputs.tag_name }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_as }}" ]; then
+            TAG="v${{ inputs.release_as }}"
+          else
+            TAG="${{ needs.release-please.outputs.tag_name }}"
+          fi
+          echo "tag_name=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
   build-binaries:
     name: Build (${{ matrix.target }})
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+    needs: get-tag
     strategy:
       fail-fast: false
       matrix:
@@ -63,7 +141,7 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          VERSION: ${{ needs.release-please.outputs.tag_name }}
+          VERSION: ${{ needs.get-tag.outputs.tag_name }}
         run: |
           export CGO_ENABLED=1
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -78,10 +156,8 @@ jobs:
               -ldflags "-extldflags '-static' ${LDFLAGS}" \
               -o "${BINARY}" .
 
-            # ── tar.gz ─────────────────────────────────────────────────────────
             tar czf "sync-daemon-${VERSION}-${{ matrix.target }}.tar.gz" "${BINARY}"
 
-            # ── .deb package ───────────────────────────────────────────────────
             VERSION_CLEAN="${VERSION#v}"
             DEB_ARCH="${{ matrix.goarch }}"
             PKG_DIR="pkg_${DEB_ARCH}"
@@ -117,12 +193,10 @@ jobs:
           if-no-files-found: error
           retention-days: 5
 
-  # ── Step 3a: attach binaries to the GitHub Release ──────────────────────────
   attach-release-assets:
     name: Attach Assets to Release
     runs-on: ubuntu-latest
-    needs: [release-please, build-binaries]
-    if: ${{ needs.release-please.outputs.release_created }}
+    needs: [get-tag, build-binaries]
     steps:
       - uses: actions/download-artifact@v8.0.1
         with:
@@ -132,16 +206,16 @@ jobs:
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.release-please.outputs.tag_name }}
+          tag_name: ${{ needs.get-tag.outputs.tag_name }}
           files: dist/*
 
-  # ── Step 3b: build and push Docker image to GHCR (parallel with step 3a) ───
   build-and-push-docker:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: [release-please, build-binaries]
-    if: ${{ needs.release-please.outputs.release_created }}
+    needs: [get-tag, build-binaries]
     steps:
       - uses: actions/checkout@v7
 
@@ -155,12 +229,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get version tag (without v prefix)
-        id: tag
-        run: |
-          TAG="${{ needs.release-please.outputs.tag_name }}"
-          echo "version_tag=${TAG#v}" >> $GITHUB_OUTPUT
-
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -168,21 +236,19 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            VERSION=${{ needs.release-please.outputs.tag_name }}
+            VERSION=${{ needs.get-tag.outputs.tag_name }}
             BUILD_DATE=${{ github.run_started_at }}
             GIT_COMMIT=${{ github.sha }}
           tags: |
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.version_tag }}
+            ghcr.io/${{ github.repository }}:${{ needs.get-tag.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ── Step 3c: package and push Helm chart to GHCR OCI (parallel) ─────────────
   publish-helm-chart:
     name: Publish Helm Chart
+    needs: get-tag
     runs-on: ubuntu-latest
-    needs: [release-please]
-    if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - uses: actions/checkout@v7
 
@@ -196,16 +262,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set chart version from release tag
-        id: chart_ver
-        run: |
-          TAG="${{ needs.release-please.outputs.tag_name }}"
-          VERSION="${TAG#v}"
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
       - name: Update Chart.yaml versions
         run: |
-          VERSION="${{ steps.chart_ver.outputs.version }}"
+          VERSION="${{ needs.get-tag.outputs.version }}"
           sed -i "s/^version:.*/version: ${VERSION}/" helm/vaults-syncer/Chart.yaml
           sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" helm/vaults-syncer/Chart.yaml
 
@@ -214,5 +273,13 @@ jobs:
 
       - name: Push Helm chart to GHCR OCI registry
         run: |
-          helm push dist/vaults-syncer-${{ steps.chart_ver.outputs.version }}.tgz \
+          helm push dist/vaults-syncer-${{ needs.get-tag.outputs.version }}.tgz \
             oci://ghcr.io/${{ github.repository_owner }}/charts
+
+      - name: Upload chart to release
+        uses: softprops/action-gh-release@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.get-tag.outputs.tag_name }}
+          files: dist/vaults-syncer-${{ needs.get-tag.outputs.version }}.tgz
