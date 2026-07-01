@@ -1,21 +1,37 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "release-type": "simple",
+  "release-type": "go",
   "bump-minor-pre-major": false,
   "bump-patch-for-minor-pre-major": false,
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "changelog-sections": [
-    {"type": "feat",     "section": "Features",           "hidden": false},
-    {"type": "fix",      "section": "Bug Fixes",           "hidden": false},
-    {"type": "perf",     "section": "Performance",         "hidden": false},
-    {"type": "refactor", "section": "Code Refactoring",    "hidden": true},
-    {"type": "docs",     "section": "Documentation",       "hidden": true},
-    {"type": "chore",    "section": "Miscellaneous",       "hidden": true},
-    {"type": "ci",       "section": "CI/CD",               "hidden": true},
-    {"type": "test",     "section": "Tests",               "hidden": true}
+    { "type": "feat",  "section": "Features" },
+    { "type": "fix",   "section": "Bug Fixes" },
+    { "type": "perf",  "section": "Performance Improvements" },
+    { "type": "chore", "section": "Miscellaneous", "hidden": true },
+    { "type": "docs",  "section": "Documentation", "hidden": true },
+    { "type": "deps",  "section": "Dependencies", "hidden": true }
+  ],
+  "extra-files": [
+    {
+      "type": "yaml",
+      "path": "helm/vaults-syncer/Chart.yaml",
+      "jsonpath": "$.version"
+    },
+    {
+      "type": "yaml",
+      "path": "helm/vaults-syncer/Chart.yaml",
+      "jsonpath": "$.appVersion"
+    }
   ],
   "packages": {
-    ".": {}
+    ".": {
+      "exclude-paths": [
+        ".github/**",
+        "docs/**",
+        "README.md"
+      ]
+    }
   }
 }
