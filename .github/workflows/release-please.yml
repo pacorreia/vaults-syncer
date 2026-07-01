@@ -68,7 +68,7 @@ jobs:
           if [ "${{ steps.release-forced.outcome }}" = "failure" ]; then
             echo "::warning::release-please step failed (release likely already exists) — proceeding to build/publish artifacts for v${{ inputs.release_as }}"
           fi
-          echo "release_created=true" >> "$GITHUB_OUTPUT"
+          echo "release_created=${{ steps.release-forced.outputs.release_created || 'false' }}" >> "$GITHUB_OUTPUT"
 
   get-tag:
     name: Resolve Release Tag
@@ -224,8 +224,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}},value=${{ needs.get-tag.outputs.tag_name }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.get-tag.outputs.tag_name }}
+            type=semver,pattern={{version}},value=${{ needs.get-tag.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.get-tag.outputs.version }}
             type=raw,value=latest
 
       - name: Build and push
