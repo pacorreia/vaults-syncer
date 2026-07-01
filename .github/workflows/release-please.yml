@@ -38,57 +38,44 @@ jobs:
     if: needs.check-commit.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created == 'true' || steps.release-forced.outputs.release_created == 'true' || steps.forced-flag.outputs.release_created == 'true' }}
-      tag_name: ${{ steps.release.outputs.tag_name || steps.release-forced.outputs.tag_name }}
+      release_created: ${{ steps.release.outputs.release_created || steps.release-forced.outputs.release_created || steps.forced-flag.outputs.release_created }}
+      tag_name:        ${{ steps.release.outputs.tag_name || steps.release-forced.outputs.tag_name }}
     steps:
       - name: Run release-please
-        uses: googleapis/release-please-action@v5
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.release_as == '')
         id: release
         with:
-          config-file: release-please-config.json
+          config-file:   release-please-config.json
           manifest-file: .release-please-manifest.json
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token:         ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run release-please (on-demand with forced version)
-        uses: googleapis/release-please-action@v5
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         if: github.event_name == 'workflow_dispatch' && inputs.release_as != ''
         id: release-forced
-        continue-on-error: true
+        continue-on-error: true  # release already exists if re-running for same version
         with:
-          config-file: release-please-config.json
+          config-file:   release-please-config.json
           manifest-file: .release-please-manifest.json
-          release-as: ${{ inputs.release_as }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          release-as:    ${{ inputs.release_as }}
+          token:         ${{ secrets.GITHUB_TOKEN }}
 
       - name: Ensure release_created for forced dispatch
         if: github.event_name == 'workflow_dispatch' && inputs.release_as != ''
         id: forced-flag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ steps.release-forced.outcome }}" = "failure" ]; then
-            TAG="v${{ inputs.release_as }}"
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-              -u "x-access-token:${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG}")
-            if [ "${STATUS}" != "200" ]; then
-              echo "::error::release-please failed and release ${TAG} was not found (status ${STATUS})"
-              exit 1
-            fi
-            echo "::warning::release-please step failed but release ${TAG} already exists — proceeding to publish artifacts"
-            echo "release_created=true" >> "$GITHUB_OUTPUT"
-          elif [ "${{ steps.release-forced.outputs.release_created }}" = "true" ]; then
-            echo "release_created=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "release_created=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::release-please step failed (release likely already exists) — proceeding to build/publish artifacts for v${{ inputs.release_as }}"
           fi
+          echo "release_created=true" >> "$GITHUB_OUTPUT"
 
   get-tag:
     name: Resolve Release Tag
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
+    if: |
+      needs.release-please.outputs.release_created == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.release_as != '')
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.tag.outputs.tag_name }}
@@ -219,6 +206,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: docker/setup-qemu-action@v4
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -228,6 +217,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.get-tag.outputs.tag_name }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.get-tag.outputs.tag_name }}
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v7
@@ -239,9 +238,8 @@ jobs:
             VERSION=${{ needs.get-tag.outputs.tag_name }}
             BUILD_DATE=${{ github.run_started_at }}
             GIT_COMMIT=${{ github.sha }}
-          tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ needs.get-tag.outputs.version }}
+          tags:      ${{ steps.meta.outputs.tags }}
+          labels:    ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -255,12 +253,11 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GHCR (Helm OCI)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            --username "${{ github.actor }}" \
+            --password-stdin
 
       - name: Update Chart.yaml versions
         run: |
@@ -269,7 +266,11 @@ jobs:
           sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" helm/vaults-syncer/Chart.yaml
 
       - name: Package Helm chart
-        run: helm package helm/vaults-syncer --destination dist/
+        run: |
+          helm package helm/vaults-syncer \
+            --version "${{ needs.get-tag.outputs.version }}" \
+            --app-version "${{ needs.get-tag.outputs.version }}" \
+            --destination dist/
 
       - name: Push Helm chart to GHCR OCI registry
         run: |
