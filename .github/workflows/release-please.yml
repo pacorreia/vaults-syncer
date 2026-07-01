@@ -26,7 +26,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
-          elif printf '%s\n' "${{ github.event.head_commit.message }}" | head -n 1 | grep -qE '^(feat|fix)(\([^)]*\))?!?:|^chore(\([^)]*\))?: release|^Merge pull request #[0-9]+ from .*/release-please--branches--'; then
+          elif printf '%s\n' "${{ github.event.head_commit.message }}" | head -n 1 | grep -qE '^(feat|fix|perf)(\([^)]*\))?!?:|^chore(\(deps(-dev)?\))?(!)?: |^chore(\([^)]*\))?: release|^Merge pull request #[0-9]+ from .*/release-please--branches--'; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=false" >> "$GITHUB_OUTPUT"
@@ -38,7 +38,7 @@ jobs:
     if: needs.check-commit.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created || steps.release-forced.outputs.release_created || steps.forced-flag.outputs.release_created }}
+      release_created: ${{ steps.release.outputs.release_created == 'true' || steps.release-forced.outputs.release_created == 'true' || steps.forced-flag.outputs.release_created == 'true' }}
       tag_name: ${{ steps.release.outputs.tag_name || steps.release-forced.outputs.tag_name }}
     steps:
       - name: Run release-please
@@ -78,15 +78,17 @@ jobs:
               exit 1
             fi
             echo "::warning::release-please step failed but release ${TAG} already exists — proceeding to publish artifacts"
+            echo "release_created=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.release-forced.outputs.release_created }}" = "true" ]; then
+            echo "release_created=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_created=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "release_created=true" >> "$GITHUB_OUTPUT"
 
   get-tag:
     name: Resolve Release Tag
     needs: release-please
-    if: |
-      needs.release-please.outputs.release_created == 'true' ||
-      (github.event_name == 'workflow_dispatch' && inputs.release_as != '')
+    if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.tag.outputs.tag_name }}
@@ -204,6 +206,8 @@ jobs:
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.get-tag.outputs.tag_name }}
           files: dist/*
@@ -274,6 +278,8 @@ jobs:
 
       - name: Upload chart to release
         uses: softprops/action-gh-release@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.get-tag.outputs.tag_name }}
           files: dist/vaults-syncer-${{ needs.get-tag.outputs.version }}.tgz
