@@ -7,7 +7,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.47
 	github.com/microsoft/go-mssqldb v1.10.0
 	github.com/robfig/cron/v3 v3.0.1
-	golang.org/x/crypto v0.53.0
+	golang.org/x/crypto v0.54.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -16,5 +16,5 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
 )
