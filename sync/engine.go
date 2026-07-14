@@ -1,7 +1,7 @@
 package sync
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"log/slog"
@@ -381,9 +381,9 @@ func matchPattern(pattern, name string) bool {
 	return false
 }
 
-// hashString creates an MD5 hash of a string
+// hashString creates a SHA-256 hash of a string
 func hashString(s string) string {
-	hash := md5.Sum([]byte(s))
+	hash := sha256.Sum256([]byte(s))
 	return fmt.Sprintf("%x", hash)
 }
 
