@@ -441,8 +441,8 @@ Tracks managed secrets and their sync status.
 | source_vault_id | TEXT | Source vault ID |
 | target_vault_id | TEXT | Target vault ID |
 | secret_name | TEXT | Secret name |
-| source_checksum | TEXT | MD5 hash of source value |
-| target_checksum | TEXT | MD5 hash of target value |
+| source_checksum | TEXT | SHA-256 hash of source value |
+| target_checksum | TEXT | SHA-256 hash of target value |
 | last_sync_time | INTEGER | Unix timestamp |
 | last_sync_status | TEXT | success, failed, in_sync |
 | last_sync_error | TEXT | Error message if failed |
