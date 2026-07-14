@@ -1,5 +1,5 @@
 mkdocs>=1.6.1
 mkdocs-material>=9.7.6
 mkdocs-mermaid2-plugin>=1.2.3
-Pillow>=12.2.0
+Pillow>=12.3.0
 cairosvg>=2.9.0
