@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1838,11 +1838,11 @@
 </span><span id="__span-1-6">
 </span><span id="__span-1-7"><span class="c1"># Build with complete version information</span>
 </span><span id="__span-1-8"><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>describe<span class="w"> </span>--tags<span class="w"> </span>--always<span class="w"> </span>--dirty<span class="k">)</span>
-</span><span id="__span-1-9"><span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-u<span class="w"> </span>+<span class="s1">&#39;%Y-%m-%dT%H:%M:%SZ&#39;</span><span class="k">)</span>
+</span><span id="__span-1-9"><span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-u<span class="w"> </span>+<span class="s1">'%Y-%m-%dT%H:%M:%SZ'</span><span class="k">)</span>
 </span><span id="__span-1-10"><span class="nv">GIT_COMMIT</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD<span class="k">)</span>
 </span><span id="__span-1-11">
 </span><span id="__span-1-12"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>go<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-13"><span class="w">  </span>-ldflags<span class="w"> </span><span class="s2">&quot;-X main.Version=</span><span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span><span class="s2"> -X main.BuildDate=</span><span class="si">${</span><span class="nv">BUILD_DATE</span><span class="si">}</span><span class="s2"> -X main.GitCommit=</span><span class="si">${</span><span class="nv">GIT_COMMIT</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-13"><span class="w">  </span>-ldflags<span class="w"> </span><span class="s2">"-X main.Version=</span><span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span><span class="s2"> -X main.BuildDate=</span><span class="si">${</span><span class="nv">BUILD_DATE</span><span class="si">}</span><span class="s2"> -X main.GitCommit=</span><span class="si">${</span><span class="nv">GIT_COMMIT</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-1-14"><span class="w">  </span>-o<span class="w"> </span>bin/sync-daemon<span class="w"> </span>.
 </span><span id="__span-1-15">
 </span><span id="__span-1-16"><span class="c1"># Verify binary</span>
@@ -2047,16 +2047,16 @@
 <h3 id="manual-sync-execution">Manual Sync Execution<a class="headerlink" href="#manual-sync-execution" title="Permanent link">&para;</a></h3>
 <p><div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="c1"># Requires authentication (Bearer token)</span>
 </span><span id="__span-6-2"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;pass&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
-</span><span id="__span-6-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"pass"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-6-5">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-6-6"><span class="w">  </span>http://localhost:8080/api/syncs/sync_id/execute
 </span></code></pre></div>
 - Triggers immediate sync
 - Bypasses cron schedule
 - Useful for testing changes</p>
 <h3 id="check-sync-status">Check Sync Status<a class="headerlink" href="#check-sync-status" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<p><div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-2"><span class="w">  </span>http://localhost:8080/api/syncs/sync_id/status
 </span></code></pre></div>
 - View last run results
@@ -2081,7 +2081,7 @@
 - API response times
 - Frequency of transient errors</p>
 <h3 id="schedule-optimization">Schedule Optimization<a class="headerlink" href="#schedule-optimization" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/6</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">    </span><span class="c1"># Every 6 hours</span>
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">"0</span><span class="nv"> </span><span class="s">*/6</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span><span class="w">    </span><span class="c1"># Every 6 hours</span>
 </span></code></pre></div>
 <p>Consider:
 - Frequency vs. freshness needs
@@ -2114,7 +2114,7 @@ Prometheus-compatible format:
 </span><span id="__span-12-2"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">syncs_run</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
 </span><span id="__span-12-3">
 </span><span id="__span-12-4"><span class="c1">-- Failed syncs</span>
-</span><span id="__span-12-5"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">sync_objects</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">last_sync_status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;failed&#39;</span><span class="p">;</span>
+</span><span id="__span-12-5"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">sync_objects</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">last_sync_status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'failed'</span><span class="p">;</span>
 </span><span id="__span-12-6">
 </span><span id="__span-12-7"><span class="c1">-- Sync history for a secret</span>
 </span><span id="__span-12-8"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">sync_history</span><span class="w"> </span>
@@ -2176,7 +2176,7 @@ Prometheus-compatible format:
 </span></code></pre></div></p>
 <p><strong>Error</strong>: <code>Connection to vault failed</code>
 - <strong>Solution</strong>: Check endpoint, verify token expiration, test endpoint
-  <div class="highlight"><pre><span></span><code><span id="__span-15-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="nv">$ENDPOINT</span>
+  <div class="highlight"><pre><span></span><code><span id="__span-15-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="nv">$ENDPOINT</span>
 </span></code></pre></div></p>
 <p><strong>Error</strong>: Database locked
 - <strong>Solution</strong>: Ensure only one instance running, check file permissions</p>
@@ -2268,7 +2268,7 @@ Prometheus-compatible format:
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

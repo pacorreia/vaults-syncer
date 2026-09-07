@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1381,7 +1381,7 @@ CLI commands for each operation. Ready-made examples are in
 <a href="../../examples/tools/"><code>examples/tools/</code></a>.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="c1"># tools/aws-secretsmanager.yaml</span>
 </span><span id="__span-0-2"><span class="nt">env</span><span class="p">:</span>
-</span><span id="__span-0-3"><span class="w">  </span><span class="nt">AWS_DEFAULT_REGION</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;us-east-1&quot;</span>
+</span><span id="__span-0-3"><span class="w">  </span><span class="nt">AWS_DEFAULT_REGION</span><span class="p">:</span><span class="w"> </span><span class="s">"us-east-1"</span>
 </span><span id="__span-0-4">
 </span><span id="__span-0-5"><span class="nt">operations</span><span class="p">:</span>
 </span><span id="__span-0-6"><span class="w">  </span><span class="nt">list</span><span class="p">:</span>
@@ -1394,7 +1394,7 @@ CLI commands for each operation. Ready-made examples are in
 </span><span id="__span-0-13">
 </span><span id="__span-0-14"><span class="w">  </span><span class="nt">get</span><span class="p">:</span>
 </span><span id="__span-0-15"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
-</span><span id="__span-0-16"><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secretsmanager</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">get-secret-value</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;{{.Name}}&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--output</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">json</span><span class="p p-Indicator">]</span>
+</span><span id="__span-0-16"><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secretsmanager</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">get-secret-value</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"{{.Name}}"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--output</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">json</span><span class="p p-Indicator">]</span>
 </span><span id="__span-0-17"><span class="w">    </span><span class="nt">output</span><span class="p">:</span>
 </span><span id="__span-0-18"><span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 </span><span id="__span-0-19"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SecretString</span>
@@ -1404,11 +1404,11 @@ CLI commands for each operation. Ready-made examples are in
 </span><span id="__span-0-23"><span class="w">    </span><span class="c1"># Warning: {{.Value}} is passed via argv and may be exposed by process</span>
 </span><span id="__span-0-24"><span class="w">    </span><span class="c1"># listings or logs. Prefer a wrapper script or tool-specific input method</span>
 </span><span id="__span-0-25"><span class="w">    </span><span class="c1"># that reads the secret value without putting it on the command line.</span>
-</span><span id="__span-0-26"><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secretsmanager</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">put-secret-value</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;{{.Name}}&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-string</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;{{.Value}}&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-0-26"><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secretsmanager</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">put-secret-value</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"{{.Name}}"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-string</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"{{.Value}}"</span><span class="p p-Indicator">]</span>
 </span><span id="__span-0-27">
 </span><span id="__span-0-28"><span class="w">  </span><span class="nt">delete</span><span class="p">:</span>
 </span><span id="__span-0-29"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
-</span><span id="__span-0-30"><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secretsmanager</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">delete-secret</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;{{.Name}}&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--force-delete-without-recovery</span><span class="p p-Indicator">]</span>
+</span><span id="__span-0-30"><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">secretsmanager</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">delete-secret</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--secret-id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"{{.Name}}"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--force-delete-without-recovery</span><span class="p p-Indicator">]</span>
 </span><span id="__span-0-31">
 </span><span id="__span-0-32"><span class="w">  </span><span class="nt">test</span><span class="p">:</span>
 </span><span id="__span-0-33"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
@@ -1548,7 +1548,7 @@ input method that can read the value without placing it on the command line.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1"><span class="nt">get</span><span class="p">:</span>
 </span><span id="__span-2-2"><span class="w">  </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
-</span><span id="__span-2-3"><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">kv</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">get</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-field=value</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;secret/{{.Name}}&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-2-3"><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">kv</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">get</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-field=value</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"secret/{{.Name}}"</span><span class="p p-Indicator">]</span>
 </span></code></pre></div>
 <hr />
 <h2 id="required-operations">Required operations<a class="headerlink" href="#required-operations" title="Permanent link">&para;</a></h2>
@@ -1596,8 +1596,8 @@ relevant node (dot notation). For <code>list</code>, the node must be a JSON arr
 element may be a plain string or an object with a <code>name_field</code>.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="nt">output</span><span class="p">:</span>
 </span><span id="__span-3-2"><span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
-</span><span id="__span-3-3"><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SecretList</span><span class="w">     </span><span class="c1"># navigate to {&quot;SecretList&quot;: [...]}</span>
-</span><span id="__span-3-4"><span class="w">  </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Name</span><span class="w">     </span><span class="c1"># extract item[&quot;Name&quot;]</span>
+</span><span id="__span-3-3"><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SecretList</span><span class="w">     </span><span class="c1"># navigate to {"SecretList": [...]}</span>
+</span><span id="__span-3-4"><span class="w">  </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Name</span><span class="w">     </span><span class="c1"># extract item["Name"]</span>
 </span></code></pre></div>
 <h3 id="text-get-only"><code>text</code> (get only)<a class="headerlink" href="#text-get-only" title="Permanent link">&para;</a></h3>
 <p>The raw stdout is trimmed and used as the secret value. Useful for tools like
@@ -1610,7 +1610,7 @@ output is the value (for <code>get</code>).</p>
 <p>Tool configs support two ways to pass environment variables to commands:</p>
 <h3 id="env-static-values-expanded-at-load-time"><code>env</code> — static values (expanded at load time)<a class="headerlink" href="#env-static-values-expanded-at-load-time" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-4-1"><span class="nt">env</span><span class="p">:</span>
-</span><span id="__span-4-2"><span class="w">  </span><span class="nt">VAULT_ADDR</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_ADDR}&quot;</span>
+</span><span id="__span-4-2"><span class="w">  </span><span class="nt">VAULT_ADDR</span><span class="p">:</span><span class="w"> </span><span class="s">"${VAULT_ADDR}"</span>
 </span></code></pre></div>
 <p>Values in the <code>env</code> block are expanded once when the config is loaded. Use
 this for variables whose values are known at daemon startup. If you need a
@@ -1740,7 +1740,7 @@ override or explicitly forward specific variables.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1682,14 +1682,14 @@
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-0-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv-prod</span>
 </span><span id="__span-0-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure</span>
-</span><span id="__span-0-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://myvault.vault.azure.net/secrets&quot;</span>
+</span><span id="__span-0-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://myvault.vault.azure.net/secrets"</span>
 </span><span id="__span-0-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-0-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
 </span><span id="__span-0-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-0-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AZURE_ACCESS_TOKEN}&quot;</span>
+</span><span id="__span-0-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">"${AZURE_ACCESS_TOKEN}"</span>
 </span><span id="__span-0-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-0-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-0-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-0-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-0-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <p><strong>Setup for different Azure resources</strong>:</p>
 <h4 id="azure-vm">Azure VM<a class="headerlink" href="#azure-vm" title="Permanent link">&para;</a></h4>
@@ -1723,8 +1723,8 @@
 </span><span id="__span-3-6"><span class="w">  </span>--name<span class="w"> </span>sync-federated<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-3-7"><span class="w">  </span>--identity-name<span class="w"> </span>sync-identity<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-3-8"><span class="w">  </span>--resource-group<span class="w"> </span>myResourceGroup<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-9"><span class="w">  </span>--issuer<span class="w"> </span><span class="s2">&quot;https://oidc.prod.workload.identity.azure.com/</span><span class="k">$(</span>AZ_SUBSCRIPTION_ID<span class="k">)</span><span class="s2">.dfs.core.windows.net/akv-sync/&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-10"><span class="w">  </span>--subject<span class="w"> </span><span class="s2">&quot;system:serviceaccount:akv-sync:sync-daemon&quot;</span>
+</span><span id="__span-3-9"><span class="w">  </span>--issuer<span class="w"> </span><span class="s2">"https://oidc.prod.workload.identity.azure.com/</span><span class="k">$(</span>AZ_SUBSCRIPTION_ID<span class="k">)</span><span class="s2">.dfs.core.windows.net/akv-sync/"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-10"><span class="w">  </span>--subject<span class="w"> </span><span class="s2">"system:serviceaccount:akv-sync:sync-daemon"</span>
 </span><span id="__span-3-11">
 </span><span id="__span-3-12"><span class="c1"># Configure workload identity on pod</span>
 </span><span id="__span-3-13"><span class="c1"># See Kubernetes deployment example</span>
@@ -1751,49 +1751,49 @@
 <div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-5-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv-sp</span>
 </span><span id="__span-5-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure</span>
-</span><span id="__span-5-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://myvault.vault.azure.net/secrets&quot;</span>
+</span><span id="__span-5-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://myvault.vault.azure.net/secrets"</span>
 </span><span id="__span-5-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-5-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
 </span><span id="__span-5-7"><span class="w">      </span><span class="nt">oauth</span><span class="p">:</span>
-</span><span id="__span-5-8"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/token&quot;</span>
-</span><span id="__span-5-9"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AZURE_CLIENT_ID}&quot;</span>
-</span><span id="__span-5-10"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AZURE_CLIENT_SECRET}&quot;</span>
-</span><span id="__span-5-11"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.azure.net/.default&quot;</span>
+</span><span id="__span-5-8"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/token"</span>
+</span><span id="__span-5-9"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">"${AZURE_CLIENT_ID}"</span>
+</span><span id="__span-5-10"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">"${AZURE_CLIENT_SECRET}"</span>
+</span><span id="__span-5-11"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.azure.net/.default"</span>
 </span><span id="__span-5-12"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-5-13"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-5-14"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-5-13"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-5-14"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <p><strong>Setup</strong>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="c1"># Create service principal</span>
 </span><span id="__span-6-2">az<span class="w"> </span>ad<span class="w"> </span>sp<span class="w"> </span>create-for-rbac<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-3"><span class="w">  </span>--name<span class="w"> </span><span class="s2">&quot;akv-sync-sp&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-4"><span class="w">  </span>--role<span class="w"> </span><span class="s2">&quot;Key Vault Secrets Officer&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-3"><span class="w">  </span>--name<span class="w"> </span><span class="s2">"akv-sync-sp"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-4"><span class="w">  </span>--role<span class="w"> </span><span class="s2">"Key Vault Secrets Officer"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-6-5"><span class="w">  </span>--scope<span class="w"> </span>/subscriptions/<span class="o">{</span>subscription-id<span class="o">}</span>/resourceGroups/<span class="o">{</span>rg<span class="o">}</span>/providers/Microsoft.KeyVault/vaults/<span class="o">{</span>vault-name<span class="o">}</span>
 </span><span id="__span-6-6">
 </span><span id="__span-6-7"><span class="c1"># Output:</span>
 </span><span id="__span-6-8"><span class="c1"># {</span>
-</span><span id="__span-6-9"><span class="c1">#   &quot;appId&quot;: &quot;12345678-1234-1234-1234-123456789012&quot;,</span>
-</span><span id="__span-6-10"><span class="c1">#   &quot;displayName&quot;: &quot;akv-sync-sp&quot;,</span>
-</span><span id="__span-6-11"><span class="c1">#   &quot;password&quot;: &quot;...&quot;,</span>
-</span><span id="__span-6-12"><span class="c1">#   &quot;tenant&quot;: &quot;abcdef12-1234-1234-1234-abcdef123456&quot;</span>
+</span><span id="__span-6-9"><span class="c1">#   "appId": "12345678-1234-1234-1234-123456789012",</span>
+</span><span id="__span-6-10"><span class="c1">#   "displayName": "akv-sync-sp",</span>
+</span><span id="__span-6-11"><span class="c1">#   "password": "...",</span>
+</span><span id="__span-6-12"><span class="c1">#   "tenant": "abcdef12-1234-1234-1234-abcdef123456"</span>
 </span><span id="__span-6-13"><span class="c1"># }</span>
 </span><span id="__span-6-14">
 </span><span id="__span-6-15"><span class="c1"># Set environment variables</span>
-</span><span id="__span-6-16"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_TENANT_ID</span><span class="o">=</span><span class="s2">&quot;abcdef12-...&quot;</span>
-</span><span id="__span-6-17"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span><span class="s2">&quot;12345678-...&quot;</span>
-</span><span id="__span-6-18"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-6-16"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_TENANT_ID</span><span class="o">=</span><span class="s2">"abcdef12-..."</span>
+</span><span id="__span-6-17"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span><span class="s2">"12345678-..."</span>
+</span><span id="__span-6-18"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span><span class="s2">"..."</span>
 </span></code></pre></div>
 <p><strong>RBAC Roles</strong>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="c1"># Option 1: Use built-in role (recommended)</span>
 </span><span id="__span-7-2">az<span class="w"> </span>role<span class="w"> </span>assignment<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-3"><span class="w">  </span>--assignee<span class="w"> </span><span class="o">{</span>client-id<span class="o">}</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-4"><span class="w">  </span>--role<span class="w"> </span><span class="s2">&quot;Key Vault Secrets Officer&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-4"><span class="w">  </span>--role<span class="w"> </span><span class="s2">"Key Vault Secrets Officer"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-5"><span class="w">  </span>--scope<span class="w"> </span><span class="o">{</span>key-vault-resource-id<span class="o">}</span>
 </span><span id="__span-7-6">
 </span><span id="__span-7-7"><span class="c1"># Option 2: For read-only access</span>
 </span><span id="__span-7-8">az<span class="w"> </span>role<span class="w"> </span>assignment<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-9"><span class="w">  </span>--assignee<span class="w"> </span><span class="o">{</span>client-id<span class="o">}</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-10"><span class="w">  </span>--role<span class="w"> </span><span class="s2">&quot;Key Vault Secrets User&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-10"><span class="w">  </span>--role<span class="w"> </span><span class="s2">"Key Vault Secrets User"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-11"><span class="w">  </span>--scope<span class="w"> </span><span class="o">{</span>key-vault-resource-id<span class="o">}</span>
 </span><span id="__span-7-12">
 </span><span id="__span-7-13"><span class="c1"># Option 3: Custom role - read-only</span>
@@ -1801,16 +1801,16 @@
 </span></code></pre></div>
 <p>Example custom role file:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-8-1"><span class="p">{</span>
-</span><span id="__span-8-2"><span class="w">  </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Key Vault Secrets Reader&quot;</span><span class="p">,</span>
-</span><span id="__span-8-3"><span class="w">  </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Read-only access to Key Vault secrets&quot;</span><span class="p">,</span>
-</span><span id="__span-8-4"><span class="w">  </span><span class="nt">&quot;Type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomRole&quot;</span><span class="p">,</span>
-</span><span id="__span-8-5"><span class="w">  </span><span class="nt">&quot;Actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-8-6"><span class="w">    </span><span class="s2">&quot;Microsoft.KeyVault/vaults/secrets/read&quot;</span><span class="p">,</span>
-</span><span id="__span-8-7"><span class="w">    </span><span class="s2">&quot;Microsoft.KeyVault/vaults/read&quot;</span>
+</span><span id="__span-8-2"><span class="w">  </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Key Vault Secrets Reader"</span><span class="p">,</span>
+</span><span id="__span-8-3"><span class="w">  </span><span class="nt">"Description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Read-only access to Key Vault secrets"</span><span class="p">,</span>
+</span><span id="__span-8-4"><span class="w">  </span><span class="nt">"Type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CustomRole"</span><span class="p">,</span>
+</span><span id="__span-8-5"><span class="w">  </span><span class="nt">"Actions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-8-6"><span class="w">    </span><span class="s2">"Microsoft.KeyVault/vaults/secrets/read"</span><span class="p">,</span>
+</span><span id="__span-8-7"><span class="w">    </span><span class="s2">"Microsoft.KeyVault/vaults/read"</span>
 </span><span id="__span-8-8"><span class="w">  </span><span class="p">],</span>
-</span><span id="__span-8-9"><span class="w">  </span><span class="nt">&quot;NotActions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-</span><span id="__span-8-10"><span class="w">  </span><span class="nt">&quot;AssignableScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-8-11"><span class="w">    </span><span class="s2">&quot;/subscriptions/{subscription-id}&quot;</span>
+</span><span id="__span-8-9"><span class="w">  </span><span class="nt">"NotActions"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-8-10"><span class="w">  </span><span class="nt">"AssignableScopes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-8-11"><span class="w">    </span><span class="s2">"/subscriptions/{subscription-id}"</span>
 </span><span id="__span-8-12"><span class="w">  </span><span class="p">]</span>
 </span><span id="__span-8-13"><span class="p">}</span>
 </span></code></pre></div>
@@ -1820,14 +1820,14 @@
 <div class="highlight"><pre><span></span><code><span id="__span-9-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-9-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv-cert</span>
 </span><span id="__span-9-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure</span>
-</span><span id="__span-9-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://myvault.vault.azure.net/secrets&quot;</span>
+</span><span id="__span-9-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://myvault.vault.azure.net/secrets"</span>
 </span><span id="__span-9-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-9-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
 </span><span id="__span-9-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-9-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AZURE_ACCESS_TOKEN}&quot;</span>
+</span><span id="__span-9-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">"${AZURE_ACCESS_TOKEN}"</span>
 </span><span id="__span-9-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-9-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-9-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-9-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-9-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <p><strong>Setup</strong>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># Generate certificate</span>
@@ -1847,14 +1847,14 @@
 <div class="highlight"><pre><span></span><code><span id="__span-11-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-11-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv-user</span>
 </span><span id="__span-11-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure</span>
-</span><span id="__span-11-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://myvault.vault.azure.net/secrets&quot;</span>
+</span><span id="__span-11-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://myvault.vault.azure.net/secrets"</span>
 </span><span id="__span-11-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-11-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
 </span><span id="__span-11-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-11-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AZURE_ACCESS_TOKEN}&quot;</span>
+</span><span id="__span-11-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">"${AZURE_ACCESS_TOKEN}"</span>
 </span><span id="__span-11-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-11-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-11-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-11-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-11-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <p><strong>Setup</strong>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-12-1"><span class="c1"># Login with Azure CLI</span>
@@ -1869,16 +1869,16 @@
 <div class="highlight"><pre><span></span><code><span id="__span-13-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-13-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden</span>
 </span><span id="__span-13-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden</span>
-</span><span id="__span-13-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com/api/ciphers&quot;</span>
+</span><span id="__span-13-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com/api/ciphers"</span>
 </span><span id="__span-13-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-13-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
 </span><span id="__span-13-7"><span class="w">      </span><span class="nt">oauth</span><span class="p">:</span>
-</span><span id="__span-13-8"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_CLIENT_ID}&quot;</span>
-</span><span id="__span-13-9"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_CLIENT_SECRET}&quot;</span>
-</span><span id="__span-13-10"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api&quot;</span>
+</span><span id="__span-13-8"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">"${BITWARDEN_CLIENT_ID}"</span>
+</span><span id="__span-13-9"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">"${BITWARDEN_CLIENT_SECRET}"</span>
+</span><span id="__span-13-10"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">"api"</span>
 </span><span id="__span-13-11"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-13-12"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-13-13"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;login&quot;</span>
+</span><span id="__span-13-12"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-13-13"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"login"</span>
 </span></code></pre></div>
 <p><strong>Setup</strong>:</p>
 <ol>
@@ -1943,42 +1943,42 @@
 <div class="highlight"><pre><span></span><code><span id="__span-14-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-14-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden-api</span>
 </span><span id="__span-14-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden</span>
-</span><span id="__span-14-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com/api/ciphers&quot;</span>
+</span><span id="__span-14-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com/api/ciphers"</span>
 </span><span id="__span-14-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-14-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
 </span><span id="__span-14-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-14-8"><span class="w">        </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_API_KEY}&quot;</span>
+</span><span id="__span-14-8"><span class="w">        </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="s">"${BITWARDEN_API_KEY}"</span>
 </span><span id="__span-14-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-14-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-14-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;login&quot;</span>
+</span><span id="__span-14-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-14-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"login"</span>
 </span></code></pre></div>
 <h2 id="hashicorp-vault-authentication">HashiCorp Vault Authentication<a class="headerlink" href="#hashicorp-vault-authentication" title="Permanent link">&para;</a></h2>
 <h3 id="token-authentication">Token Authentication<a class="headerlink" href="#token-authentication" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-15-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-15-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-token</span>
 </span><span id="__span-15-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
-</span><span id="__span-15-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com:8200/v1/secret/data&quot;</span>
+</span><span id="__span-15-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com:8200/v1/secret/data"</span>
 </span><span id="__span-15-5"><span class="w">    </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
 </span><span id="__span-15-6"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-15-7"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
 </span><span id="__span-15-8"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-15-9"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_TOKEN}&quot;</span>
+</span><span id="__span-15-9"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">"${VAULT_TOKEN}"</span>
 </span><span id="__span-15-10"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-15-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-15-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-15-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-15-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <h3 id="approle-authentication">AppRole Authentication<a class="headerlink" href="#approle-authentication" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-16-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-approle</span>
 </span><span id="__span-16-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
-</span><span id="__span-16-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com:8200/v1/secret/data&quot;</span>
+</span><span id="__span-16-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com:8200/v1/secret/data"</span>
 </span><span id="__span-16-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-16-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
 </span><span id="__span-16-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-16-8"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_TOKEN}&quot;</span>
+</span><span id="__span-16-8"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">"${VAULT_TOKEN}"</span>
 </span><span id="__span-16-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-16-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-16-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-16-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-16-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <p><strong>Setup</strong>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-17-1"><span class="c1"># Enable AppRole auth method</span>
@@ -1999,28 +1999,28 @@
 <div class="highlight"><pre><span></span><code><span id="__span-18-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-18-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-k8s</span>
 </span><span id="__span-18-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
-</span><span id="__span-18-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com:8200/v1/secret/data&quot;</span>
+</span><span id="__span-18-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com:8200/v1/secret/data"</span>
 </span><span id="__span-18-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-18-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
 </span><span id="__span-18-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-18-8"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${VAULT_TOKEN}&quot;</span>
+</span><span id="__span-18-8"><span class="w">        </span><span class="nt">X-Vault-Token</span><span class="p">:</span><span class="w"> </span><span class="s">"${VAULT_TOKEN}"</span>
 </span><span id="__span-18-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-18-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-18-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-18-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-18-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <h2 id="aws-secrets-manager-authentication">AWS Secrets Manager Authentication<a class="headerlink" href="#aws-secrets-manager-authentication" title="Permanent link">&para;</a></h2>
 <h3 id="iam-role-recommended">IAM Role (Recommended)<a class="headerlink" href="#iam-role-recommended" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-19-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-19-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws-sm</span>
 </span><span id="__span-19-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
-</span><span id="__span-19-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://secretsmanager.us-east-1.amazonaws.com&quot;</span>
+</span><span id="__span-19-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://secretsmanager.us-east-1.amazonaws.com"</span>
 </span><span id="__span-19-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-19-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
 </span><span id="__span-19-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-19-8"><span class="w">        </span><span class="nt">X-Amz-Security-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AWS_SESSION_TOKEN}&quot;</span>
+</span><span id="__span-19-8"><span class="w">        </span><span class="nt">X-Amz-Security-Token</span><span class="p">:</span><span class="w"> </span><span class="s">"${AWS_SESSION_TOKEN}"</span>
 </span><span id="__span-19-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-19-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Name&quot;</span>
-</span><span id="__span-19-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SecretString&quot;</span>
+</span><span id="__span-19-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"Name"</span>
+</span><span id="__span-19-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"SecretString"</span>
 </span></code></pre></div>
 <p>Works with:
 - EC2 instance roles
@@ -2030,71 +2030,71 @@
 <div class="highlight"><pre><span></span><code><span id="__span-20-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-20-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws-sm-keys</span>
 </span><span id="__span-20-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
-</span><span id="__span-20-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://secretsmanager.us-east-1.amazonaws.com&quot;</span>
+</span><span id="__span-20-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://secretsmanager.us-east-1.amazonaws.com"</span>
 </span><span id="__span-20-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-20-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span>
 </span><span id="__span-20-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-20-8"><span class="w">        </span><span class="nt">X-Amz-Security-Token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${AWS_SESSION_TOKEN}&quot;</span>
+</span><span id="__span-20-8"><span class="w">        </span><span class="nt">X-Amz-Security-Token</span><span class="p">:</span><span class="w"> </span><span class="s">"${AWS_SESSION_TOKEN}"</span>
 </span><span id="__span-20-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-20-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Name&quot;</span>
-</span><span id="__span-20-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SecretString&quot;</span>
+</span><span id="__span-20-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"Name"</span>
+</span><span id="__span-20-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"SecretString"</span>
 </span></code></pre></div>
 <h2 id="generic-rest-api-authentication">Generic REST API Authentication<a class="headerlink" href="#generic-rest-api-authentication" title="Permanent link">&para;</a></h2>
 <h3 id="bearer-token">Bearer Token<a class="headerlink" href="#bearer-token" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-21-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-21-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rest-bearer</span>
 </span><span id="__span-21-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic</span>
-</span><span id="__span-21-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com&quot;</span>
+</span><span id="__span-21-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://api.example.com"</span>
 </span><span id="__span-21-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-21-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bearer</span>
 </span><span id="__span-21-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-21-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${API_TOKEN}&quot;</span>
+</span><span id="__span-21-8"><span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">"${API_TOKEN}"</span>
 </span><span id="__span-21-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-21-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-21-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-21-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-21-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <h3 id="basic-authentication">Basic Authentication<a class="headerlink" href="#basic-authentication" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-22-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-22-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rest-basic</span>
 </span><span id="__span-22-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic</span>
-</span><span id="__span-22-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com&quot;</span>
+</span><span id="__span-22-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://api.example.com"</span>
 </span><span id="__span-22-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-22-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic</span>
 </span><span id="__span-22-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-22-8"><span class="w">        </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${API_USER}&quot;</span>
-</span><span id="__span-22-9"><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${API_PASSWORD}&quot;</span>
+</span><span id="__span-22-8"><span class="w">        </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">"${API_USER}"</span>
+</span><span id="__span-22-9"><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">"${API_PASSWORD}"</span>
 </span><span id="__span-22-10"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-22-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-22-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-22-11"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-22-12"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <h3 id="api-key">API Key<a class="headerlink" href="#api-key" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-23-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-23-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rest-apikey</span>
 </span><span id="__span-23-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic</span>
-</span><span id="__span-23-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com&quot;</span>
+</span><span id="__span-23-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://api.example.com"</span>
 </span><span id="__span-23-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-23-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
 </span><span id="__span-23-7"><span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
-</span><span id="__span-23-8"><span class="w">        </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${API_KEY}&quot;</span>
+</span><span id="__span-23-8"><span class="w">        </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="s">"${API_KEY}"</span>
 </span><span id="__span-23-9"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-23-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-23-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-23-10"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-23-11"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <h3 id="oauth2_1">OAuth2<a class="headerlink" href="#oauth2_1" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-24-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-24-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rest-oauth2</span>
 </span><span id="__span-24-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic</span>
-</span><span id="__span-24-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com&quot;</span>
+</span><span id="__span-24-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://api.example.com"</span>
 </span><span id="__span-24-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-24-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
 </span><span id="__span-24-7"><span class="w">      </span><span class="nt">oauth</span><span class="p">:</span>
-</span><span id="__span-24-8"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com/oauth/token&quot;</span>
-</span><span id="__span-24-9"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${CLIENT_ID}&quot;</span>
-</span><span id="__span-24-10"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${CLIENT_SECRET}&quot;</span>
-</span><span id="__span-24-11"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api&quot;</span>
+</span><span id="__span-24-8"><span class="w">        </span><span class="nt">token_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://auth.example.com/oauth/token"</span>
+</span><span id="__span-24-9"><span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">"${CLIENT_ID}"</span>
+</span><span id="__span-24-10"><span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">"${CLIENT_SECRET}"</span>
+</span><span id="__span-24-11"><span class="w">        </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">"api"</span>
 </span><span id="__span-24-12"><span class="w">    </span><span class="nt">field_names</span><span class="p">:</span>
-</span><span id="__span-24-13"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name&quot;</span>
-</span><span id="__span-24-14"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+</span><span id="__span-24-13"><span class="w">      </span><span class="nt">name_field</span><span class="p">:</span><span class="w"> </span><span class="s">"name"</span>
+</span><span id="__span-24-14"><span class="w">      </span><span class="nt">value_field</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span>
 </span></code></pre></div>
 <h2 id="credential-management">Credential Management<a class="headerlink" href="#credential-management" title="Permanent link">&para;</a></h2>
 <h3 id="using-environment-variables">Using Environment Variables<a class="headerlink" href="#using-environment-variables" title="Permanent link">&para;</a></h3>
@@ -2102,7 +2102,7 @@
 <div class="highlight"><pre><span></span><code><span id="__span-25-1"><span class="nt">vaults</span><span class="p">:</span>
 </span><span id="__span-25-2"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secure-vault</span>
 </span><span id="__span-25-3"><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bitwarden</span>
-</span><span id="__span-25-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com&quot;</span>
+</span><span id="__span-25-4"><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com"</span>
 </span><span id="__span-25-5"><span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-25-6"><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
 </span><span id="__span-25-7"><span class="w">      </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${BITWARDEN_CLIENT_ID}</span>
@@ -2110,13 +2110,13 @@
 </span></code></pre></div>
 <p><strong>Setting variables</strong>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-26-1"><span class="c1"># Linux/macOS</span>
-</span><span id="__span-26-2"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_ID</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
-</span><span id="__span-26-3"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_SECRET</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-26-2"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_ID</span><span class="o">=</span><span class="s2">"..."</span>
+</span><span id="__span-26-3"><span class="nb">export</span><span class="w"> </span><span class="nv">BITWARDEN_CLIENT_SECRET</span><span class="o">=</span><span class="s2">"..."</span>
 </span><span id="__span-26-4">./sync-daemon
 </span><span id="__span-26-5">
 </span><span id="__span-26-6"><span class="c1"># Docker with env file</span>
-</span><span id="__span-26-7"><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;BITWARDEN_CLIENT_ID=...&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>.env
-</span><span id="__span-26-8"><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;BITWARDEN_CLIENT_SECRET=...&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
+</span><span id="__span-26-7"><span class="nb">echo</span><span class="w"> </span><span class="s1">'BITWARDEN_CLIENT_ID=...'</span><span class="w"> </span>&gt;<span class="w"> </span>.env
+</span><span id="__span-26-8"><span class="nb">echo</span><span class="w"> </span><span class="s1">'BITWARDEN_CLIENT_SECRET=...'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
 </span><span id="__span-26-9">docker<span class="w"> </span>run<span class="w"> </span>--env-file<span class="w"> </span>.env<span class="w"> </span>...
 </span><span id="__span-26-10">
 </span><span id="__span-26-11"><span class="c1"># Docker Compose</span>
@@ -2129,8 +2129,8 @@
 <div class="highlight"><pre><span></span><code><span id="__span-27-1"><span class="c1"># Store credential</span>
 </span><span id="__span-27-2">az<span class="w"> </span>keyvault<span class="w"> </span>secret<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-27-3"><span class="w">  </span>--vault-name<span class="w"> </span>mykeyvault<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-27-4"><span class="w">  </span>--name<span class="w"> </span><span class="s2">&quot;bitwarden-client-id&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-27-5"><span class="w">  </span>--value<span class="w"> </span><span class="s2">&quot;actual-client-id&quot;</span>
+</span><span id="__span-27-4"><span class="w">  </span>--name<span class="w"> </span><span class="s2">"bitwarden-client-id"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-27-5"><span class="w">  </span>--value<span class="w"> </span><span class="s2">"actual-client-id"</span>
 </span><span id="__span-27-6">
 </span><span id="__span-27-7"><span class="c1"># Use in configuration (requires special setup)</span>
 </span><span id="__span-27-8"><span class="c1"># See advanced documentation for details</span>
@@ -2145,18 +2145,18 @@
 <div class="highlight"><pre><span></span><code><span id="__span-29-1"><span class="nt">auth</span><span class="p">:</span>
 </span><span id="__span-29-2"><span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2</span>
 </span><span id="__span-29-3"><span class="w">  </span><span class="nt">oauth</span><span class="p">:</span>
-</span><span id="__span-29-4"><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_CLIENT_ID}&quot;</span>
-</span><span id="__span-29-5"><span class="w">    </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${BITWARDEN_CLIENT_SECRET}&quot;</span>
+</span><span id="__span-29-4"><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">"${BITWARDEN_CLIENT_ID}"</span>
+</span><span id="__span-29-5"><span class="w">    </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">"${BITWARDEN_CLIENT_SECRET}"</span>
 </span></code></pre></div>
 <h2 id="certificate-and-key-rotation">Certificate and Key Rotation<a class="headerlink" href="#certificate-and-key-rotation" title="Permanent link">&para;</a></h2>
 <h3 id="azure-service-principal">Azure Service Principal<a class="headerlink" href="#azure-service-principal" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-30-1"><span class="c1"># Replace expiring credential</span>
 </span><span id="__span-30-2">az<span class="w"> </span>ad<span class="w"> </span>sp<span class="w"> </span>credential<span class="w"> </span>reset<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-30-3"><span class="w">  </span>--name<span class="w"> </span>akv-sync-sp<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-30-4"><span class="w">  </span>--credential-description<span class="w"> </span><span class="s2">&quot;new-key&quot;</span>
+</span><span id="__span-30-4"><span class="w">  </span>--credential-description<span class="w"> </span><span class="s2">"new-key"</span>
 </span><span id="__span-30-5">
 </span><span id="__span-30-6"><span class="c1"># Update environment variables</span>
-</span><span id="__span-30-7"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span><span class="s2">&quot;new-secret&quot;</span>
+</span><span id="__span-30-7"><span class="nb">export</span><span class="w"> </span><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span><span class="s2">"new-secret"</span>
 </span></code></pre></div>
 <h3 id="api-tokens">API Tokens<a class="headerlink" href="#api-tokens" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-31-1"><span class="c1"># Generate new token</span>
@@ -2283,7 +2283,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

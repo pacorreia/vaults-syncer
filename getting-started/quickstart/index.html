@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1281,95 +1281,95 @@
 <p>Via the Web UI, navigate to <strong>Vaults Config</strong>, or use the API:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><span class="c1"># Get auth token</span>
 </span><span id="__span-3-2"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;your-password&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-3-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"your-password"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
 </span><span id="__span-3-5">
 </span><span id="__span-3-6"><span class="c1"># Add source vault (Vaultwarden)</span>
 </span><span id="__span-3-7">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/vaults<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-8"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-9"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-10"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-3-11"><span class="s1">    &quot;id&quot;: &quot;vault-prod&quot;,</span>
-</span><span id="__span-3-12"><span class="s1">    &quot;type&quot;: &quot;vaultwarden&quot;,</span>
-</span><span id="__span-3-13"><span class="s1">    &quot;endpoint&quot;: &quot;https://vault.example.com/api/ciphers&quot;,</span>
-</span><span id="__span-3-14"><span class="s1">    &quot;method&quot;: &quot;POST&quot;,</span>
-</span><span id="__span-3-15"><span class="s1">    &quot;auth&quot;: {</span>
-</span><span id="__span-3-16"><span class="s1">      &quot;method&quot;: &quot;oauth2&quot;,</span>
-</span><span id="__span-3-17"><span class="s1">      &quot;oauth&quot;: {</span>
-</span><span id="__span-3-18"><span class="s1">        &quot;token_endpoint&quot;: &quot;https://vault.example.com/identity/connect/token&quot;,</span>
-</span><span id="__span-3-19"><span class="s1">        &quot;client_id&quot;: &quot;your-client-id&quot;,</span>
-</span><span id="__span-3-20"><span class="s1">        &quot;client_secret&quot;: &quot;your-secret&quot;,</span>
-</span><span id="__span-3-21"><span class="s1">        &quot;scope&quot;: &quot;api&quot;,</span>
-</span><span id="__span-3-22"><span class="s1">        &quot;extra_params&quot;: {&quot;deviceIdentifier&quot;: &quot;sync-daemon&quot;}</span>
+</span><span id="__span-3-8"><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-9"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-10"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-3-11"><span class="s1">    "id": "vault-prod",</span>
+</span><span id="__span-3-12"><span class="s1">    "type": "vaultwarden",</span>
+</span><span id="__span-3-13"><span class="s1">    "endpoint": "https://vault.example.com/api/ciphers",</span>
+</span><span id="__span-3-14"><span class="s1">    "method": "POST",</span>
+</span><span id="__span-3-15"><span class="s1">    "auth": {</span>
+</span><span id="__span-3-16"><span class="s1">      "method": "oauth2",</span>
+</span><span id="__span-3-17"><span class="s1">      "oauth": {</span>
+</span><span id="__span-3-18"><span class="s1">        "token_endpoint": "https://vault.example.com/identity/connect/token",</span>
+</span><span id="__span-3-19"><span class="s1">        "client_id": "your-client-id",</span>
+</span><span id="__span-3-20"><span class="s1">        "client_secret": "your-secret",</span>
+</span><span id="__span-3-21"><span class="s1">        "scope": "api",</span>
+</span><span id="__span-3-22"><span class="s1">        "extra_params": {"deviceIdentifier": "sync-daemon"}</span>
 </span><span id="__span-3-23"><span class="s1">      }</span>
 </span><span id="__span-3-24"><span class="s1">    },</span>
-</span><span id="__span-3-25"><span class="s1">    &quot;field_names&quot;: {&quot;name_field&quot;: &quot;name&quot;, &quot;value_field&quot;: &quot;login&quot;}</span>
-</span><span id="__span-3-26"><span class="s1">  }&#39;</span>
+</span><span id="__span-3-25"><span class="s1">    "field_names": {"name_field": "name", "value_field": "login"}</span>
+</span><span id="__span-3-26"><span class="s1">  }'</span>
 </span><span id="__span-3-27">
 </span><span id="__span-3-28"><span class="c1"># Add target vault (backup Vaultwarden)</span>
 </span><span id="__span-3-29">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/vaults<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-30"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-31"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-32"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-3-33"><span class="s1">    &quot;id&quot;: &quot;vault-backup&quot;,</span>
-</span><span id="__span-3-34"><span class="s1">    &quot;type&quot;: &quot;vaultwarden&quot;,</span>
-</span><span id="__span-3-35"><span class="s1">    &quot;endpoint&quot;: &quot;https://backup.example.com/api/ciphers&quot;,</span>
-</span><span id="__span-3-36"><span class="s1">    &quot;method&quot;: &quot;POST&quot;,</span>
-</span><span id="__span-3-37"><span class="s1">    &quot;auth&quot;: {&quot;method&quot;: &quot;bearer&quot;, &quot;headers&quot;: {&quot;token&quot;: &quot;your-bearer-token&quot;}},</span>
-</span><span id="__span-3-38"><span class="s1">    &quot;field_names&quot;: {&quot;name_field&quot;: &quot;name&quot;, &quot;value_field&quot;: &quot;login&quot;}</span>
-</span><span id="__span-3-39"><span class="s1">  }&#39;</span>
+</span><span id="__span-3-30"><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-31"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-32"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-3-33"><span class="s1">    "id": "vault-backup",</span>
+</span><span id="__span-3-34"><span class="s1">    "type": "vaultwarden",</span>
+</span><span id="__span-3-35"><span class="s1">    "endpoint": "https://backup.example.com/api/ciphers",</span>
+</span><span id="__span-3-36"><span class="s1">    "method": "POST",</span>
+</span><span id="__span-3-37"><span class="s1">    "auth": {"method": "bearer", "headers": {"token": "your-bearer-token"}},</span>
+</span><span id="__span-3-38"><span class="s1">    "field_names": {"name_field": "name", "value_field": "login"}</span>
+</span><span id="__span-3-39"><span class="s1">  }'</span>
 </span></code></pre></div>
 <h2 id="4-create-a-sync">4. Create a Sync<a class="headerlink" href="#4-create-a-sync" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span id="__span-4-1">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/syncs<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-2"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-4-5"><span class="s1">    &quot;id&quot;: &quot;backup-sync&quot;,</span>
-</span><span id="__span-4-6"><span class="s1">    &quot;source&quot;: &quot;vault-prod&quot;,</span>
-</span><span id="__span-4-7"><span class="s1">    &quot;targets&quot;: [&quot;vault-backup&quot;],</span>
-</span><span id="__span-4-8"><span class="s1">    &quot;sync_type&quot;: &quot;unidirectional&quot;,</span>
-</span><span id="__span-4-9"><span class="s1">    &quot;schedule&quot;: &quot;0 */4 * * *&quot;,</span>
-</span><span id="__span-4-10"><span class="s1">    &quot;enabled&quot;: true</span>
-</span><span id="__span-4-11"><span class="s1">  }&#39;</span>
+</span><span id="__span-4-2"><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-4-5"><span class="s1">    "id": "backup-sync",</span>
+</span><span id="__span-4-6"><span class="s1">    "source": "vault-prod",</span>
+</span><span id="__span-4-7"><span class="s1">    "targets": ["vault-backup"],</span>
+</span><span id="__span-4-8"><span class="s1">    "sync_type": "unidirectional",</span>
+</span><span id="__span-4-9"><span class="s1">    "schedule": "0 */4 * * *",</span>
+</span><span id="__span-4-10"><span class="s1">    "enabled": true</span>
+</span><span id="__span-4-11"><span class="s1">  }'</span>
 </span></code></pre></div>
 <h2 id="5-trigger-and-monitor">5. Trigger and Monitor<a class="headerlink" href="#5-trigger-and-monitor" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="c1"># Trigger sync immediately</span>
-</span><span id="__span-5-2">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-2">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-5-3"><span class="w">  </span>http://localhost:8080/api/syncs/backup-sync/execute
 </span><span id="__span-5-4">
 </span><span id="__span-5-5"><span class="c1"># Check status</span>
-</span><span id="__span-5-6">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-6">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-5-7"><span class="w">  </span>http://localhost:8080/api/syncs/backup-sync/status
 </span><span id="__span-5-8">
 </span><span id="__span-5-9"><span class="c1"># View run history</span>
-</span><span id="__span-5-10">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-10">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-5-11"><span class="w">  </span>http://localhost:8080/api/syncs/backup-sync/runs
 </span></code></pre></div>
 <h2 id="common-configuration-patterns">Common Configuration Patterns<a class="headerlink" href="#common-configuration-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="backup-strategy">Backup Strategy<a class="headerlink" href="#backup-strategy" title="Permanent link">&para;</a></h3>
 <p>Sync all secrets from production to backup every 4 hours:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
-</span><span id="__span-6-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod-to-backup&quot;</span><span class="p">,</span>
-</span><span id="__span-6-3"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
-</span><span id="__span-6-4"><span class="w">  </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;backup&quot;</span><span class="p">],</span>
-</span><span id="__span-6-5"><span class="w">  </span><span class="nt">&quot;sync_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unidirectional&quot;</span><span class="p">,</span>
-</span><span id="__span-6-6"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 */4 * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-6-7"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-6-2"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"prod-to-backup"</span><span class="p">,</span>
+</span><span id="__span-6-3"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"production"</span><span class="p">,</span>
+</span><span id="__span-6-4"><span class="w">  </span><span class="nt">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"backup"</span><span class="p">],</span>
+</span><span id="__span-6-5"><span class="w">  </span><span class="nt">"sync_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unidirectional"</span><span class="p">,</span>
+</span><span id="__span-6-6"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 */4 * * *"</span><span class="p">,</span>
+</span><span id="__span-6-7"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 </span><span id="__span-6-8"><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="multi-environment-sync">Multi-Environment Sync<a class="headerlink" href="#multi-environment-sync" title="Permanent link">&para;</a></h3>
 <p>Keep dev and staging in sync with filtered production secrets:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="p">{</span>
-</span><span id="__span-7-2"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod-to-dev&quot;</span><span class="p">,</span>
-</span><span id="__span-7-3"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
-</span><span id="__span-7-4"><span class="w">  </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;development&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;staging&quot;</span><span class="p">],</span>
-</span><span id="__span-7-5"><span class="w">  </span><span class="nt">&quot;sync_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unidirectional&quot;</span><span class="p">,</span>
-</span><span id="__span-7-6"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 6 * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-7-7"><span class="w">  </span><span class="nt">&quot;filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-8"><span class="w">    </span><span class="nt">&quot;patterns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;dev-*&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;shared-*&quot;</span><span class="p">],</span>
-</span><span id="__span-7-9"><span class="w">    </span><span class="nt">&quot;exclude&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*-prod&quot;</span><span class="p">]</span>
+</span><span id="__span-7-2"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"prod-to-dev"</span><span class="p">,</span>
+</span><span id="__span-7-3"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"production"</span><span class="p">,</span>
+</span><span id="__span-7-4"><span class="w">  </span><span class="nt">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"development"</span><span class="p">,</span><span class="w"> </span><span class="s2">"staging"</span><span class="p">],</span>
+</span><span id="__span-7-5"><span class="w">  </span><span class="nt">"sync_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unidirectional"</span><span class="p">,</span>
+</span><span id="__span-7-6"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 6 * * *"</span><span class="p">,</span>
+</span><span id="__span-7-7"><span class="w">  </span><span class="nt">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-8"><span class="w">    </span><span class="nt">"patterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"dev-*"</span><span class="p">,</span><span class="w"> </span><span class="s2">"shared-*"</span><span class="p">],</span>
+</span><span id="__span-7-9"><span class="w">    </span><span class="nt">"exclude"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"*-prod"</span><span class="p">]</span>
 </span><span id="__span-7-10"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-7-11"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-7-11"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 </span><span id="__span-7-12"><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
@@ -1455,7 +1455,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

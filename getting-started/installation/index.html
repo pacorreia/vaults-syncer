@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1421,13 +1421,13 @@
 </span><span id="__span-1-6"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 </span><span id="__span-1-7"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sync-data:/app/data</span><span class="w">          </span><span class="c1"># use a named volume, not a host path</span>
 </span><span id="__span-1-8"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-</span><span id="__span-1-9"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span><span class="w">  </span><span class="c1"># HTTP API + Web UI</span>
-</span><span id="__span-1-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;9090:9090&quot;</span><span class="w">  </span><span class="c1"># Prometheus metrics</span>
+</span><span id="__span-1-9"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"8080:8080"</span><span class="w">  </span><span class="c1"># HTTP API + Web UI</span>
+</span><span id="__span-1-10"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"9090:9090"</span><span class="w">  </span><span class="c1"># Prometheus metrics</span>
 </span><span id="__span-1-11"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 </span><span id="__span-1-12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}</span>
 </span><span id="__span-1-13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DB_TYPE=sqlite</span><span class="w">               </span><span class="c1"># or postgres / mssql</span>
 </span><span id="__span-1-14"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
-</span><span id="__span-1-15"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;CMD&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;wget&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-qO-&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;http://localhost:8080/api/setup&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-1-15"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"wget"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"-qO-"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"http://localhost:8080/api/setup"</span><span class="p p-Indicator">]</span>
 </span><span id="__span-1-16"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
 </span><span id="__span-1-17"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
 </span><span id="__span-1-18"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
@@ -1505,10 +1505,10 @@
 </span></code></pre></div>
 <h3 id="windows-amd64">Windows (amd64)<a class="headerlink" href="#windows-amd64" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-7-1"><span class="c"># Download from releases page or use:</span>
-</span><span id="__span-7-2"><span class="nb">Invoke-WebRequest</span> <span class="n">-Uri</span> <span class="s2">&quot;https://github.com/pacorreia/vaults-syncer/releases/download/v</span><span class="p">$(</span><span class="n">VERSION</span><span class="p">)</span><span class="s2">/sync-daemon-windows-amd64.exe&quot;</span> <span class="n">-OutFile</span> <span class="nb">sync-daemon</span><span class="p">.</span><span class="n">exe</span>
+</span><span id="__span-7-2"><span class="nb">Invoke-WebRequest</span> <span class="n">-Uri</span> <span class="s2">"https://github.com/pacorreia/vaults-syncer/releases/download/v</span><span class="p">$(</span><span class="n">VERSION</span><span class="p">)</span><span class="s2">/sync-daemon-windows-amd64.exe"</span> <span class="n">-OutFile</span> <span class="nb">sync-daemon</span><span class="p">.</span><span class="n">exe</span>
 </span><span id="__span-7-3">
 </span><span id="__span-7-4"><span class="c"># Set env and run</span>
-</span><span id="__span-7-5"><span class="nv">$env:MASTER_ENCRYPTION_KEY</span> <span class="p">=</span> <span class="s2">&quot;&lt;your-key&gt;&quot;</span>
+</span><span id="__span-7-5"><span class="nv">$env:MASTER_ENCRYPTION_KEY</span> <span class="p">=</span> <span class="s2">"&lt;your-key&gt;"</span>
 </span><span id="__span-7-6"><span class="p">.\</span><span class="nb">sync-daemon</span><span class="p">.</span><span class="n">exe</span>
 </span></code></pre></div>
 <h2 id="build-from-source">Build from Source<a class="headerlink" href="#build-from-source" title="Permanent link">&para;</a></h2>
@@ -1600,13 +1600,13 @@
 </span></code></pre></div>
 <h3 id="login-and-check-health">Login and Check Health<a class="headerlink" href="#login-and-check-health" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-16-1"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-16-2"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-16-3"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;your-password&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-16-2"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-3"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"your-password"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
 </span><span id="__span-16-4">
-</span><span id="__span-16-5">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>http://localhost:8080/api/health
+</span><span id="__span-16-5">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span>http://localhost:8080/api/health
 </span></code></pre></div>
 <h3 id="list-syncs">List Syncs<a class="headerlink" href="#list-syncs" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-17-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>http://localhost:8080/api/syncs
+<div class="highlight"><pre><span></span><code><span id="__span-17-1">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span>http://localhost:8080/api/syncs
 </span></code></pre></div>
 <h3 id="view-metrics">View Metrics<a class="headerlink" href="#view-metrics" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-18-1">curl<span class="w"> </span>http://localhost:9090/metrics
@@ -1689,7 +1689,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

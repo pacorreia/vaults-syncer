@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1745,21 +1745,21 @@
 </span></code></pre></div>
 <p>Configure with Azure RBAC:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><span class="c1"># Create custom role</span>
-</span><span id="__span-1-2">az<span class="w"> </span>role<span class="w"> </span>definition<span class="w"> </span>create<span class="w"> </span>--role-definition<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-1-3"><span class="s1">  &quot;Name&quot;: &quot;AKV Sync Reader&quot;,</span>
-</span><span id="__span-1-4"><span class="s1">  &quot;Description&quot;: &quot;Role for vaults-syncer&quot;,</span>
-</span><span id="__span-1-5"><span class="s1">  &quot;Type&quot;: &quot;CustomRole&quot;,</span>
-</span><span id="__span-1-6"><span class="s1">  &quot;Actions&quot;: [</span>
-</span><span id="__span-1-7"><span class="s1">    &quot;Microsoft.KeyVault/vaults/secrets/read&quot;,</span>
-</span><span id="__span-1-8"><span class="s1">    &quot;Microsoft.KeyVault/vaults/keys/read&quot;</span>
+</span><span id="__span-1-2">az<span class="w"> </span>role<span class="w"> </span>definition<span class="w"> </span>create<span class="w"> </span>--role-definition<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-1-3"><span class="s1">  "Name": "AKV Sync Reader",</span>
+</span><span id="__span-1-4"><span class="s1">  "Description": "Role for vaults-syncer",</span>
+</span><span id="__span-1-5"><span class="s1">  "Type": "CustomRole",</span>
+</span><span id="__span-1-6"><span class="s1">  "Actions": [</span>
+</span><span id="__span-1-7"><span class="s1">    "Microsoft.KeyVault/vaults/secrets/read",</span>
+</span><span id="__span-1-8"><span class="s1">    "Microsoft.KeyVault/vaults/keys/read"</span>
 </span><span id="__span-1-9"><span class="s1">  ],</span>
-</span><span id="__span-1-10"><span class="s1">  &quot;NotActions&quot;: [],</span>
-</span><span id="__span-1-11"><span class="s1">  &quot;AssignableScopes&quot;: [&quot;/subscriptions/{subscription-id}&quot;]</span>
-</span><span id="__span-1-12"><span class="s1">}&#39;</span>
+</span><span id="__span-1-10"><span class="s1">  "NotActions": [],</span>
+</span><span id="__span-1-11"><span class="s1">  "AssignableScopes": ["/subscriptions/{subscription-id}"]</span>
+</span><span id="__span-1-12"><span class="s1">}'</span>
 </span><span id="__span-1-13">
 </span><span id="__span-1-14"><span class="c1"># Assign to Managed Identity or Service Principal</span>
 </span><span id="__span-1-15">az<span class="w"> </span>role<span class="w"> </span>assignment<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-16"><span class="w">  </span>--role<span class="w"> </span><span class="s2">&quot;AKV Sync Reader&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-16"><span class="w">  </span>--role<span class="w"> </span><span class="s2">"AKV Sync Reader"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-1-17"><span class="w">  </span>--assignee-object-id<span class="w"> </span>&lt;identity-object-id&gt;<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-1-18"><span class="w">  </span>--scope<span class="w"> </span>/subscriptions/<span class="o">{</span>sub<span class="o">}</span>/resourceGroups/<span class="o">{</span>rg<span class="o">}</span>/providers/Microsoft.KeyVault/vaults/<span class="o">{</span>vault<span class="o">}</span>
 </span></code></pre></div>
@@ -2019,7 +2019,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

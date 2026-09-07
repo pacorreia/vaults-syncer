@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1378,69 +1378,69 @@
 <h3 id="via-api">Via API<a class="headerlink" href="#via-api" title="Permanent link">&para;</a></h3>
 <p>Get an auth token first:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-5-1"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/auth/login<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-2"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-3"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;your-password&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+</span><span id="__span-5-2"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-3"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"username":"admin","password":"your-password"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
 </span></code></pre></div>
 <p>Create vaults:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-6-1"><span class="c1"># Source vault — Azure Key Vault</span>
 </span><span id="__span-6-2">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/vaults<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-3"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-4"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-5"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-6-6"><span class="s1">    &quot;id&quot;: &quot;azure-prod&quot;,</span>
-</span><span id="__span-6-7"><span class="s1">    &quot;type&quot;: &quot;azure&quot;,</span>
-</span><span id="__span-6-8"><span class="s1">    &quot;endpoint&quot;: &quot;https://myvault.vault.azure.net/secrets&quot;,</span>
-</span><span id="__span-6-9"><span class="s1">    &quot;auth&quot;: {</span>
-</span><span id="__span-6-10"><span class="s1">      &quot;method&quot;: &quot;bearer&quot;,</span>
-</span><span id="__span-6-11"><span class="s1">      &quot;headers&quot;: {&quot;token&quot;: &quot;&#39;</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_ACCESS_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="s1">&#39;&quot;}</span>
+</span><span id="__span-6-3"><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-4"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-5"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-6-6"><span class="s1">    "id": "azure-prod",</span>
+</span><span id="__span-6-7"><span class="s1">    "type": "azure",</span>
+</span><span id="__span-6-8"><span class="s1">    "endpoint": "https://myvault.vault.azure.net/secrets",</span>
+</span><span id="__span-6-9"><span class="s1">    "auth": {</span>
+</span><span id="__span-6-10"><span class="s1">      "method": "bearer",</span>
+</span><span id="__span-6-11"><span class="s1">      "headers": {"token": "'</span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_ACCESS_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="s1">'"}</span>
 </span><span id="__span-6-12"><span class="s1">    },</span>
-</span><span id="__span-6-13"><span class="s1">    &quot;field_names&quot;: {&quot;name_field&quot;: &quot;name&quot;, &quot;value_field&quot;: &quot;value&quot;}</span>
-</span><span id="__span-6-14"><span class="s1">  }&#39;</span>
+</span><span id="__span-6-13"><span class="s1">    "field_names": {"name_field": "name", "value_field": "value"}</span>
+</span><span id="__span-6-14"><span class="s1">  }'</span>
 </span><span id="__span-6-15">
 </span><span id="__span-6-16"><span class="c1"># Target vault — Vaultwarden</span>
 </span><span id="__span-6-17">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/vaults<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-18"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-19"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-20"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-6-21"><span class="s1">    &quot;id&quot;: &quot;vaultwarden-prod&quot;,</span>
-</span><span id="__span-6-22"><span class="s1">    &quot;type&quot;: &quot;vaultwarden&quot;,</span>
-</span><span id="__span-6-23"><span class="s1">    &quot;endpoint&quot;: &quot;https://vault.example.com/api/ciphers&quot;,</span>
-</span><span id="__span-6-24"><span class="s1">    &quot;method&quot;: &quot;POST&quot;,</span>
-</span><span id="__span-6-25"><span class="s1">    &quot;auth&quot;: {</span>
-</span><span id="__span-6-26"><span class="s1">      &quot;method&quot;: &quot;oauth2&quot;,</span>
-</span><span id="__span-6-27"><span class="s1">      &quot;oauth&quot;: {</span>
-</span><span id="__span-6-28"><span class="s1">        &quot;client_id&quot;: &quot;&#39;</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">VW_CLIENT_ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="s1">&#39;&quot;,</span>
-</span><span id="__span-6-29"><span class="s1">        &quot;client_secret&quot;: &quot;&#39;</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">VW_CLIENT_SECRET</span><span class="si">}</span><span class="s2">&quot;</span><span class="s1">&#39;&quot;,</span>
-</span><span id="__span-6-30"><span class="s1">        &quot;scope&quot;: &quot;api&quot;</span>
+</span><span id="__span-6-18"><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-19"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-20"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-6-21"><span class="s1">    "id": "vaultwarden-prod",</span>
+</span><span id="__span-6-22"><span class="s1">    "type": "vaultwarden",</span>
+</span><span id="__span-6-23"><span class="s1">    "endpoint": "https://vault.example.com/api/ciphers",</span>
+</span><span id="__span-6-24"><span class="s1">    "method": "POST",</span>
+</span><span id="__span-6-25"><span class="s1">    "auth": {</span>
+</span><span id="__span-6-26"><span class="s1">      "method": "oauth2",</span>
+</span><span id="__span-6-27"><span class="s1">      "oauth": {</span>
+</span><span id="__span-6-28"><span class="s1">        "client_id": "'</span><span class="s2">"</span><span class="si">${</span><span class="nv">VW_CLIENT_ID</span><span class="si">}</span><span class="s2">"</span><span class="s1">'",</span>
+</span><span id="__span-6-29"><span class="s1">        "client_secret": "'</span><span class="s2">"</span><span class="si">${</span><span class="nv">VW_CLIENT_SECRET</span><span class="si">}</span><span class="s2">"</span><span class="s1">'",</span>
+</span><span id="__span-6-30"><span class="s1">        "scope": "api"</span>
 </span><span id="__span-6-31"><span class="s1">      }</span>
 </span><span id="__span-6-32"><span class="s1">    },</span>
-</span><span id="__span-6-33"><span class="s1">    &quot;field_names&quot;: {&quot;name_field&quot;: &quot;name&quot;, &quot;value_field&quot;: &quot;login&quot;}</span>
-</span><span id="__span-6-34"><span class="s1">  }&#39;</span>
+</span><span id="__span-6-33"><span class="s1">    "field_names": {"name_field": "name", "value_field": "login"}</span>
+</span><span id="__span-6-34"><span class="s1">  }'</span>
 </span></code></pre></div>
 <p>Create a sync:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-7-1">curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/config/syncs<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-2"><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-7-5"><span class="s1">    &quot;id&quot;: &quot;my-first-sync&quot;,</span>
-</span><span id="__span-7-6"><span class="s1">    &quot;source&quot;: &quot;azure-prod&quot;,</span>
-</span><span id="__span-7-7"><span class="s1">    &quot;targets&quot;: [&quot;vaultwarden-prod&quot;],</span>
-</span><span id="__span-7-8"><span class="s1">    &quot;schedule&quot;: &quot;0 * * * *&quot;,</span>
-</span><span id="__span-7-9"><span class="s1">    &quot;sync_type&quot;: &quot;unidirectional&quot;,</span>
-</span><span id="__span-7-10"><span class="s1">    &quot;enabled&quot;: true</span>
-</span><span id="__span-7-11"><span class="s1">  }&#39;</span>
+</span><span id="__span-7-2"><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-3"><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-4"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+</span><span id="__span-7-5"><span class="s1">    "id": "my-first-sync",</span>
+</span><span id="__span-7-6"><span class="s1">    "source": "azure-prod",</span>
+</span><span id="__span-7-7"><span class="s1">    "targets": ["vaultwarden-prod"],</span>
+</span><span id="__span-7-8"><span class="s1">    "schedule": "0 * * * *",</span>
+</span><span id="__span-7-9"><span class="s1">    "sync_type": "unidirectional",</span>
+</span><span id="__span-7-10"><span class="s1">    "enabled": true</span>
+</span><span id="__span-7-11"><span class="s1">  }'</span>
 </span></code></pre></div>
 <h2 id="5-monitor-your-sync">5. Monitor Your Sync<a class="headerlink" href="#5-monitor-your-sync" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span id="__span-8-1"><span class="c1"># Check sync status</span>
-</span><span id="__span-8-2">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-2">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-8-3"><span class="w">  </span>http://localhost:8080/api/syncs/my-first-sync/status
 </span><span id="__span-8-4">
 </span><span id="__span-8-5"><span class="c1"># Trigger an immediate sync</span>
-</span><span id="__span-8-6">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-6">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-8-7"><span class="w">  </span>http://localhost:8080/api/syncs/my-first-sync/execute
 </span><span id="__span-8-8">
 </span><span id="__span-8-9"><span class="c1"># View run history</span>
-</span><span id="__span-8-10">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-10">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-8-11"><span class="w">  </span>http://localhost:8080/api/syncs/my-first-sync/runs
 </span><span id="__span-8-12">
 </span><span id="__span-8-13"><span class="c1"># View Prometheus metrics (no auth, port 9090)</span>
@@ -1486,12 +1486,12 @@
 <h3 id="authentication-failures">Authentication failures<a class="headerlink" href="#authentication-failures" title="Permanent link">&para;</a></h3>
 <p>Test your vault credentials directly from the daemon host:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># Test Azure bearer token</span>
-</span><span id="__span-10-2">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$AZURE_ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-10-3"><span class="w">  </span><span class="s2">&quot;https://myvault.vault.azure.net/secrets?api-version=7.4&quot;</span>
+</span><span id="__span-10-2">curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$AZURE_ACCESS_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-3"><span class="w">  </span><span class="s2">"https://myvault.vault.azure.net/secrets?api-version=7.4"</span>
 </span><span id="__span-10-4">
 </span><span id="__span-10-5"><span class="c1"># Test Vaultwarden OAuth</span>
 </span><span id="__span-10-6">curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://vault.example.com/identity/connect/token<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-10-7"><span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=client_credentials&amp;client_id=...&amp;client_secret=...&amp;scope=api&quot;</span>
+</span><span id="__span-10-7"><span class="w">  </span>-d<span class="w"> </span><span class="s2">"grant_type=client_credentials&amp;client_id=...&amp;client_secret=...&amp;scope=api"</span>
 </span></code></pre></div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1572,7 +1572,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "toc.integrate", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
