@@ -1,6 +1,6 @@
 module github.com/pacorreia/vaults-syncer
 
-go 1.26.4
+go 1.26.6
 
 require (
 	github.com/lib/pq v1.12.3
