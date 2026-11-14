@@ -23,10 +23,12 @@ jobs:
     steps:
       - name: Evaluate commit message
         id: check
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
-          elif printf '%s\n' "${{ github.event.head_commit.message }}" | head -n 1 | grep -qE '^(feat|fix|perf)(\([^)]*\))?!?:|^chore(\(deps(-dev)?\))?(!)?: |^chore(\([^)]*\))?: release|^Merge pull request #[0-9]+ from .*/release-please--branches--'; then
+          elif printf '%s\n' "$COMMIT_MESSAGE" | head -n 1 | grep -qE '^(feat|fix|perf)(\([^)]*\))?!?:|^chore(\(deps(-dev)?\))?(!)?: |^chore(\([^)]*\))?: release|^Merge pull request #[0-9]+ from .*/release-please--branches--'; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=false" >> "$GITHUB_OUTPUT"
@@ -64,9 +66,11 @@ jobs:
       - name: Ensure release_created for forced dispatch
         if: github.event_name == 'workflow_dispatch' && inputs.release_as != ''
         id: forced-flag
+        env:
+          RELEASE_AS: ${{ inputs.release_as }}
         run: |
           if [ "${{ steps.release-forced.outcome }}" = "failure" ]; then
-            echo "::warning::release-please step failed (release likely already exists) — proceeding to build/publish artifacts for v${{ inputs.release_as }}"
+            echo "::warning::release-please step failed (release likely already exists) — proceeding to build/publish artifacts for v$RELEASE_AS"
           fi
           echo "release_created=${{ steps.release-forced.outputs.release_created || 'false' }}" >> "$GITHUB_OUTPUT"
 
@@ -83,9 +87,11 @@ jobs:
     steps:
       - name: Resolve tag
         id: tag
+        env:
+          RELEASE_AS: ${{ inputs.release_as }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_as }}" ]; then
-            TAG="v${{ inputs.release_as }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "$RELEASE_AS" ]; then
+            TAG="v$RELEASE_AS"
           else
             TAG="${{ needs.release-please.outputs.tag_name }}"
           fi
