@@ -3,6 +3,9 @@ FROM golang:1.27.3-alpine AS builder
 
 WORKDIR /app
 
+# Upgrade system packages
+RUN apk upgrade --no-cache
+
 # Install build dependencies
 RUN apk add --no-cache git make gcc musl-dev sqlite-dev
 
@@ -34,9 +37,12 @@ RUN --mount=type=bind,source=scripts/docker/build-stage/app-static-build.sh,targ
 #  • binary is statically linked (no libgcc_s / sqlite-libs required)
 #  • CA certs copied from builder (no network call)
 #  • healthcheck uses busybox wget (built into Alpine)
-FROM alpine:3.24
+FROM alpine:3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
 
 WORKDIR /app
+
+# Upgrade system packages
+RUN apk upgrade --no-cache
 
 # Copy CA certificates from builder so HTTPS vault calls work
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
